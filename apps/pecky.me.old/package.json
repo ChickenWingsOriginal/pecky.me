@@ -1,0 +1,11 @@
+{
+  "name": "pecky.me.old",
+  "version": "1.0.0",
+  "description": "Original static Pecky dApp",
+  "private": true,
+  "scripts": {
+    "dev": "python3 -m http.server 8000 --directory .",
+    "build": "echo 'Static site - no build needed'",
+    "lint": "echo 'No linting for static site'"
+  }
+}

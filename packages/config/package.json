@@ -1,0 +1,17 @@
+{
+  "name": "@pecky/config",
+  "version": "1.0.0",
+  "description": "Shared configuration and constants for Pecky dApp",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./constants": "./src/constants.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "build": "echo 'Config package - no build needed'",
+    "lint": "echo 'No linting'"
+  }
+}
