@@ -5,14 +5,12 @@ export default function StakingPage() {
   return (
     <div className={css({ minH: "100vh", bg: "#fff3da", display: "flex", flexDir: "column", alignItems: "center", justifyContent: "center", pb: "100px" })}>
       <main className={css({ maxW: "520px", w: "90%", mt: "40px" })}>
-        {/* Staking Card */}
         <div className={css({ bg: "white", p: "30px", borderRadius: "16px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", border: "2px solid #ffae00" })}>
           <div className={css({ textAlign: "center", mb: "20px" })}>
             <div className={css({ fontSize: "48px", mb: "12px" })}>💰</div>
             <h2 className={css({ fontSize: "24px", fontWeight: "700", color: "#a06500" })}>Stake $Supra on Meridian Node</h2>
           </div>
 
-          {/* Benefits */}
           <div className={css({ bg: "#fffbe8", p: "16px", borderRadius: "12px", mb: "20px", border: "1px solid #ffae00" })}>
             <ul className={css({ fontSize: "13px", color: "#b48512", lineHeight: "1.8", pl: "20px" })}>
               <li>Stake your Supra and earn <span className={css({ fontWeight: "700" })}>8% APY</span></li>
@@ -22,7 +20,6 @@ export default function StakingPage() {
             </ul>
           </div>
 
-          {/* Balances */}
           <div className={css({ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", mb: "20px" })}>
             <div className={css({ bg: "#fffbe8", p: "12px", borderRadius: "10px", border: "1px solid #ffae00", textAlign: "center" })}>
               <div className={css({ fontSize: "11px", color: "#a06500", mb: "4px" })}>SUPRA Balance</div>
@@ -34,7 +31,6 @@ export default function StakingPage() {
             </div>
           </div>
 
-          {/* Stake Input */}
           <div className={flex({ gap: "8px", mb: "20px" })}>
             <input
               type="number"

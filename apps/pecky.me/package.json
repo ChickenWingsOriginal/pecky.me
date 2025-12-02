@@ -10,9 +10,12 @@
     "prepare": "panda codegen"
   },
   "dependencies": {
+    "@gerritsen/supra-connect": "^0.0.5",
     "next": "16.0.3",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "sonner": "^2.0.7",
+    "supra-l1-sdk": "^4.6.0"
   },
   "devDependencies": {
     "@pandacss/dev": "^1.5.1",
