@@ -10,6 +10,11 @@ import { toast } from "sonner";
 // @ts-ignore
 import { BCS, HexString } from "supra-l1-sdk";
 import Image from "next/image";
+import { formatSupraBalance } from "@/app/utils/formatSupraBalance";
+import { formatCountdownTime } from "@/app/utils/formatCountdownTime";
+import { fetchNextClaimTime as fetchNextClaim } from "@/app/utils/fetchNextClaimTime";
+import { fetchStakingData as fetchStake } from "@/app/utils/fetchStakingData";
+import { calculateMaxStakeAmount } from "@/app/utils/calculateMaxStakeAmount";
 
 const SUPRA_DECIMALS = 8;
 const MERIDIAN_POOL =
@@ -18,12 +23,6 @@ const PECKY_COIN_MODULE =
   "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 const STAKING_CLAIM_TABLE =
   "0x68ff22fd7edc5d53bb61af22aa979170286489af715fbab3d080ed57df6717a4";
-
-function formatBalance(balance: bigint | null): string {
-  if (!balance) return "0";
-  const balanceNumber = Number(balance) / Math.pow(10, SUPRA_DECIMALS);
-  return balanceNumber.toLocaleString("en-US", { maximumFractionDigits: 2 });
-}
 
 export default function StakingPage() {
   const { state, dispatch, refreshBalances } = useWallet();
@@ -48,15 +47,7 @@ export default function StakingPage() {
     const updateCountdown = () => {
       const now = Math.floor(Date.now() / 1000);
       const secondsUntilClaim = nextClaimTime - now;
-
-      if (secondsUntilClaim <= 0) {
-        setTimeUntilClaim("");
-        return;
-      }
-
-      const hours = Math.floor(secondsUntilClaim / 3600);
-      const minutes = Math.floor((secondsUntilClaim % 3600) / 60);
-      setTimeUntilClaim(`next claim in ${hours}h ${minutes}m`);
+      setTimeUntilClaim(formatCountdownTime(secondsUntilClaim));
     };
 
     updateCountdown();
@@ -67,76 +58,27 @@ export default function StakingPage() {
 
   const fetchNextClaimTime = async () => {
     if (!walletAddress) return;
-    try {
-      const response = await fetch(
-        `https://rpc-mainnet.supra.com/rpc/v1/tables/${STAKING_CLAIM_TABLE}/item`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            key_type: "address",
-            value_type: "u64",
-            key: walletAddress,
-          }),
-        },
-      );
-      const data = await response.json();
-      console.log("Next claim time response:", data);
-      if (data && !isNaN(Number(data))) {
-        const lastClaimTimeSeconds = Number(data);
-        const nextClaimTimeSeconds = lastClaimTimeSeconds + 86400;
-        console.log(
-          "Last claim time:",
-          lastClaimTimeSeconds,
-          "Next claim time:",
-          nextClaimTimeSeconds,
-        );
-        setNextClaimTime(nextClaimTimeSeconds);
-      }
-    } catch (error) {
-      console.error("Failed to fetch next claim time:", error);
+    const time = await fetchNextClaim(walletAddress, STAKING_CLAIM_TABLE);
+    if (time) {
+      setNextClaimTime(time);
     }
   };
 
   const fetchStakingData = async () => {
     if (!walletAddress) return;
-    try {
-      const response = await fetch(
-        "https://rpc-mainnet.supra.com/rpc/v1/view",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            function: "0x1::pbo_delegation_pool::get_stake",
-            type_arguments: [],
-            arguments: [MERIDIAN_POOL, walletAddress],
-          }),
-        },
-      );
-      const data = await response.json();
-      if (data.result && Array.isArray(data.result)) {
-        const stakedAmount = BigInt(data.result[0]);
-        dispatch({
-          type: "SET_STAKING_INFO",
-          payload: { stakedAmount },
-        });
-      }
-      await fetchNextClaimTime();
-    } catch (error) {
-      console.error("Failed to fetch staking data:", error);
+    const stakedAmount = await fetchStake(walletAddress, MERIDIAN_POOL);
+    if (stakedAmount) {
+      dispatch({
+        type: "SET_STAKING_INFO",
+        payload: { stakedAmount },
+      });
     }
+    await fetchNextClaimTime();
   };
 
   const handleMaxClick = () => {
-    if (state.supraBalance) {
-      // Use all balance minus 1 SUPRA for gas fees
-      const gasFeeMicroSupra = BigInt(Math.pow(10, SUPRA_DECIMALS)); // 1 SUPRA
-      const balanceAfterGas = state.supraBalance - gasFeeMicroSupra;
-      const balanceNumber =
-        Number(balanceAfterGas > BigInt(0) ? balanceAfterGas : BigInt(0)) /
-        Math.pow(10, SUPRA_DECIMALS);
-      setStakeAmount(balanceNumber.toString());
-    }
+    const amount = calculateMaxStakeAmount(state.supraBalance);
+    setStakeAmount(amount);
   };
 
   const handleStake = async () => {
@@ -160,7 +102,6 @@ export default function StakingPage() {
         Math.floor(parseFloat(stakeAmount) * Math.pow(10, SUPRA_DECIMALS)),
       );
 
-      // BCS serialize the arguments
       const poolAddressBytes = new HexString(MERIDIAN_POOL).toUint8Array();
       const amountBytes = BCS.bcsSerializeUint64(amountInMicroSupra);
 
@@ -359,7 +300,7 @@ export default function StakingPage() {
               >
                 {state.isLoadingStaking
                   ? "..."
-                  : formatBalance(state.supraBalance)}
+                  : formatSupraBalance(state.supraBalance)}
               </div>
             </div>
             <div
@@ -389,7 +330,7 @@ export default function StakingPage() {
               >
                 {state.isLoadingStaking
                   ? "..."
-                  : formatBalance(state.stakedAmount)}
+                  : formatSupraBalance(state.stakedAmount)}
               </div>
             </div>
           </div>

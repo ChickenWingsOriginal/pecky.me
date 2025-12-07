@@ -12,12 +12,13 @@ import { useWallet } from "@/app/context/WalletContext";
 import { useSupraConnect } from "@gerritsen/supra-connect";
 import { NFTGrid } from "@/app/components/NFTGrid";
 import { EXTERNAL_LINKS } from "@/app/constants/links";
-import { rarityLabel } from "@/app/lib/nodeService";
+import { rarityLabel } from "@/app/utils/nodeService";
+import { getNftsFromCache } from "@/app/utils/getNftsFromCache";
+import { saveNftsToCache } from "@/app/utils/saveNftsToCache";
+import { getTokenClaimStatus } from "@/app/utils/getTokenClaimStatus";
+import { checkAirdropStatus } from "@/app/utils/checkAirdropStatus";
 
 const NFT_POOL_TOTAL = 450_000_000_000;
-const TABLE_HANDLE =
-  "0xbf3d300e9d7444b36d9b036c45f95c092fd7b62fe5093f54b891f3916179197c";
-const CLAIM_COOLDOWN_DAYS = 30;
 
 const rarities = [
   {
@@ -25,35 +26,35 @@ const rarities = [
     count: 250,
     percent: "1%",
     color: "#0099ff",
-    monthlyReward: 18_000_000,
+    monthlyPercent: 0.00004,
   },
   {
     name: "Rare",
     count: 125,
     percent: "1%",
     color: "#25c36a",
-    monthlyReward: 36_000_000,
+    monthlyPercent: 0.00008,
   },
   {
     name: "Epic",
     count: 75,
     percent: "0.75%",
     color: "#ff53a2",
-    monthlyReward: 45_000_000,
+    monthlyPercent: 0.0001,
   },
   {
     name: "Legendary",
     count: 40,
     percent: "0.75%",
     color: "#ffe270",
-    monthlyReward: 84_375_000,
+    monthlyPercent: 0.00018,
   },
   {
     name: "Mythic",
     count: 10,
     percent: "0.5%",
     color: "#a259ff",
-    monthlyReward: 225_000_000,
+    monthlyPercent: 0.0005,
   },
 ];
 
@@ -64,54 +65,12 @@ interface OwnedNFT {
   airdropAvailable?: boolean;
 }
 
-const NFTS_CACHE_KEY = "pecky_nfts_cache";
-const CACHE_LIFESPAN_MS = 12 * 60 * 60 * 1000; // 12 hours
-
 const SPIN_ANIMATION_CSS = `
   @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
   }
 `;
-
-const getNftsFromCache = (walletAddress: string): OwnedNFT[] | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    const cache = localStorage.getItem(NFTS_CACHE_KEY);
-    if (cache) {
-      const parsed = JSON.parse(cache);
-      if (parsed.walletAddress === walletAddress && parsed.data) {
-        // Check if cache is still valid (12 hours)
-        const now = Date.now();
-        const cacheAge = now - parsed.timestamp;
-        if (cacheAge < CACHE_LIFESPAN_MS) {
-          return parsed.data;
-        }
-        // Cache expired, remove it
-        localStorage.removeItem(NFTS_CACHE_KEY);
-      }
-    }
-  } catch (error) {
-    console.error("Failed to read NFTs from cache:", error);
-  }
-  return null;
-};
-
-const saveNftsToCache = (walletAddress: string, nfts: OwnedNFT[]): void => {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(
-      NFTS_CACHE_KEY,
-      JSON.stringify({
-        walletAddress,
-        data: nfts,
-        timestamp: Date.now(),
-      }),
-    );
-  } catch (error) {
-    console.error("Failed to save NFTs to cache:", error);
-  }
-};
 
 export default function NFTPage() {
   const { nftPoolRemaining, refetch: refetchGlobalData } = useGlobalData();
@@ -235,60 +194,6 @@ export default function NFTPage() {
     }
   };
 
-  const getTokenClaimStatus = async (tokenName: string) => {
-    try {
-      const RPC_BASE = "https://rpc-mainnet.supra.com";
-      const encoder = new TextEncoder();
-      const hexKey =
-        "0x" +
-        Array.from(encoder.encode(tokenName))
-          .map((byte) => byte.toString(16).padStart(2, "0"))
-          .join("");
-
-      const url = `${RPC_BASE}/rpc/v1/tables/${TABLE_HANDLE}/item`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          key_type: "vector<u8>",
-          value_type: "u64",
-          key: hexKey,
-        }),
-      });
-
-      const data = await response.json();
-      const lastClaimTimestamp = Number(data?.result || data || 0);
-
-      if (isNaN(lastClaimTimestamp) || lastClaimTimestamp === 0) {
-        return { status: "claimable" as const, text: "Available now! ✓" };
-      }
-
-      const cooldown = CLAIM_COOLDOWN_DAYS * 24 * 60 * 60;
-      const nextClaimTime = lastClaimTimestamp + cooldown;
-      const now = Math.floor(Date.now() / 1000);
-      const secondsLeft = nextClaimTime - now;
-
-      if (secondsLeft <= 0) {
-        return { status: "claimable" as const, text: "Available now! ✓" };
-      } else {
-        const d = Math.floor(secondsLeft / 86400);
-        const h = Math.floor((secondsLeft % 86400) / 3600);
-        const m = Math.floor((secondsLeft % 3600) / 60);
-        const parts = [];
-        if (d > 0) parts.push(`${d}d`);
-        if (h > 0) parts.push(`${h}h`);
-        if (d === 0 && m > 0) parts.push(`${m}m`);
-        return {
-          status: "cooldown" as const,
-          text: `Next claim in ${parts.join(" ")}`,
-        };
-      }
-    } catch (error) {
-      console.error("Failed to fetch claim status:", error);
-      return { status: "unknown" as const, text: "" };
-    }
-  };
-
   const refreshSpecificNft = async (tokenName: string) => {
     try {
       const [claimStatus, airdropStatus] = await Promise.all([
@@ -324,7 +229,6 @@ export default function NFTPage() {
       const PECKY_COIN_MODULE =
         "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
-      // Serialize the token name as a Move String using BCS
       const serializedTokenName = BCS.bcsSerializeStr(tokenName);
 
       const result = await sendTransaction({
@@ -339,20 +243,16 @@ export default function NFTPage() {
 
       if (result.success) {
         toast.success("Reward claimed successfully!");
-        // Wait for blockchain confirmation
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        // Refresh only this specific NFT's status
         await refreshSpecificNft(tokenName);
 
-        // Refresh wallet balance and pool remaining
         try {
           await refreshBalances();
         } catch (error) {
           console.error("Failed to refresh wallet balance:", error);
         }
 
-        // Refresh global pool data
         await refetchGlobalData();
       } else {
         toast.error(
@@ -364,31 +264,6 @@ export default function NFTPage() {
       toast.error("Failed to claim reward");
     } finally {
       setClaimingNftName(null);
-    }
-  };
-
-  const checkAirdropStatus = async (tokenName: string): Promise<boolean> => {
-    try {
-      const RPC_BASE = "https://rpc-mainnet.supra.com";
-      const PECKY_COIN_MODULE =
-        "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
-
-      const response = await fetch(`${RPC_BASE}/rpc/v1/view`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          function: `${PECKY_COIN_MODULE}::Coin::has_claimed_NFT_airdrop`,
-          type_arguments: [],
-          arguments: [tokenName],
-        }),
-      });
-
-      const data = await response.json();
-      // TRUE means already claimed, so NOT available
-      return data?.result?.[0] !== true;
-    } catch (error) {
-      console.error("Failed to check airdrop status:", error);
-      return false;
     }
   };
 
@@ -474,7 +349,6 @@ export default function NFTPage() {
       const PECKY_COIN_MODULE =
         "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
-      // Serialize the token name as a Move String using BCS
       const serializedTokenName = BCS.bcsSerializeStr(tokenName);
 
       const result = await sendTransaction({
@@ -489,20 +363,16 @@ export default function NFTPage() {
 
       if (result.success) {
         toast.success("NFT airdrop claimed successfully!");
-        // Wait for blockchain confirmation
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
-        // Refresh only this specific NFT's status
         await refreshSpecificNft(tokenName);
 
-        // Refresh wallet balance and pool remaining
         try {
           await refreshBalances();
         } catch (error) {
           console.error("Failed to refresh wallet balance:", error);
         }
 
-        // Refresh global pool data
         await refetchGlobalData();
       } else {
         toast.error(
@@ -890,7 +760,14 @@ export default function NFTPage() {
                   </div>
                   <div style={{ fontSize: "11px", color: "#a06500" }}>
                     Monthly NFT reward is now{" "}
-                    {(rarity.monthlyReward / 1_000_000).toFixed(2)}M $Pecky
+                    {nftPoolRemaining !== null
+                      ? (
+                          Math.round(
+                            Number(nftPoolRemaining) * rarity.monthlyPercent,
+                          ) / 1_000_000
+                        ).toFixed(2)
+                      : "–"}
+                    M $Pecky
                   </div>
                 </div>
               ))}

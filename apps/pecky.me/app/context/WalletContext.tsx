@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useReducer, useCallback, useEffect, ReactNode } from 'react';
-import { fetchOwnedNfts, fetchOwnedNodeNfts, fetchPeckyBalance } from '@/app/lib/walletService';
-import { rarityLabel, fetchActiveNodesSorted, getAttachedMainNames } from '@/app/lib/nodeService';
+import { fetchOwnedNfts, fetchOwnedNodeNfts, fetchPeckyBalance } from '@/app/utils/walletService';
+import { rarityLabel, fetchActiveNodesSorted, getAttachedMainNames } from '@/app/utils/nodeService';
 
 // Types
 export interface NFT {
