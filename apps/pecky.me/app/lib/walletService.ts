@@ -274,15 +274,18 @@ export async function fetchOwnedNfts(walletAddress: string): Promise<Array<{ id:
     }
 
     const data = await response.json();
-    return data.nfts || [];
+    // API returns either "nfts" or "owned_tokens"
+    const nfts = data.nfts || data.owned_tokens || [];
+    console.log('Fetched NFTs from API:', { raw: data, parsed: nfts });
+    return nfts;
   } catch (error) {
     console.error('Failed to fetch NFTs:', error);
     throw error;
   }
 }
 
-// Fetch Pecky Node NFTs
-export async function fetchPeckyNodeNfts(walletAddress: string): Promise<Array<{ id: string; name: string }>> {
+// Fetch Pecky Node NFTs owned by wallet
+export async function fetchOwnedNodeNfts(walletAddress: string): Promise<string[]> {
   try {
     const response = await fetch(
       `${API_BASE_URL}/api/pecky-node-nfts?wallet=${walletAddress}`
@@ -293,10 +296,19 @@ export async function fetchPeckyNodeNfts(walletAddress: string): Promise<Array<{
     }
 
     const data = await response.json();
-    return data.nfts || [];
+    // API returns: { network: "mainnet", owned_tokens: [{ name: "TOKEN_11", ... }] }
+    const ownedTokens = data.owned_tokens || [];
+
+    // Extract token names (e.g., "TOKEN_11", "TOKEN_25")
+    const tokenNames = ownedTokens
+      .map((token: any) => token.name)
+      .filter((name: string) => /^TOKEN_\d+$/.test(name));
+
+    console.log('Fetched owned node NFTs from API:', tokenNames);
+    return tokenNames;
   } catch (error) {
-    console.error('Failed to fetch Pecky Node NFTs:', error);
-    throw error;
+    console.error('Failed to fetch owned node NFTs:', error);
+    return [];
   }
 }
 

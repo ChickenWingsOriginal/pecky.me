@@ -7,23 +7,24 @@
     "build": "panda codegen && next build",
     "start": "next start",
     "lint": "eslint",
-    "prepare": "panda codegen"
+    "prepare": "panda codegen",
+    "clean": "rm -rf .next .turbo node_modules styled-system out"
   },
   "dependencies": {
-    "@gerritsen/supra-connect": "^0.0.5",
-    "next": "16.0.3",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "@gerritsen/supra-connect": "^0.0.6",
+    "next": "16.0.7",
+    "react": "19.2.1",
+    "react-dom": "19.2.1",
     "sonner": "^2.0.7",
     "supra-l1-sdk": "^4.6.0"
   },
   "devDependencies": {
-    "@pandacss/dev": "^1.5.1",
+    "@pandacss/dev": "^1.6.1",
     "@types/node": "24.10.1",
-    "@types/react": "19.2.6",
+    "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.1",
-    "eslint-config-next": "16.0.3",
+    "eslint-config-next": "16.0.7",
     "typescript": "5.9.3"
   }
 }

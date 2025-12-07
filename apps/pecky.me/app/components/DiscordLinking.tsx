@@ -3,15 +3,17 @@
 import { css } from "@/styled-system/css";
 import { useState } from "react";
 import { useWallet } from "@/app/context/WalletContext";
+import { useSupraConnect } from "@gerritsen/supra-connect";
 import { RetroBox } from "./RetroBox";
 
 export function DiscordLinking() {
   const { state } = useWallet();
+  const { connectedWallet, sendTransaction } = useSupraConnect();
   const [discordInput, setDiscordInput] = useState("");
   const [linkingDiscord, setLinkingDiscord] = useState(false);
 
   const handleLinkDiscord = async () => {
-    if (!state.walletAddress) {
+    if (!connectedWallet?.walletAddress) {
       alert("Please connect your wallet first");
       return;
     }
@@ -23,35 +25,21 @@ export function DiscordLinking() {
 
     setLinkingDiscord(true);
     try {
-      // Get the Supra provider from the window
-      const provider = (window as any).supraProvider;
-      if (!provider) {
-        alert("Supra wallet not available");
-        setLinkingDiscord(false);
-        return;
-      }
-
-      // Call the link Discord transaction
       const PECKY_COIN_MODULE = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
-      const payload = [
-        state.walletAddress,
-        0,
-        PECKY_COIN_MODULE,
-        'Coin',
-        'link_discord',
-        [],
-        [discordInput],
-        {}
-      ];
 
-      const txData = await provider.createRawTransactionData(payload);
-      await provider.sendTransaction({
-        data: txData,
-        from: state.walletAddress,
-        to: PECKY_COIN_MODULE,
-        chainId: '8',
-        value: ''
+      const result = await sendTransaction({
+        payload: {
+          moduleAddress: PECKY_COIN_MODULE,
+          moduleName: 'Coin',
+          functionName: 'link_discord',
+          typeArguments: [],
+          arguments: [discordInput],
+        },
       });
+
+      if (!result.success) {
+        throw new Error(result.error || result.reason || "Failed to link Discord");
+      }
 
       alert("Discord linked successfully!");
       setDiscordInput("");
@@ -64,40 +52,28 @@ export function DiscordLinking() {
   };
 
   const handleUnlinkDiscord = async () => {
-    if (!state.walletAddress) {
+    if (!connectedWallet?.walletAddress) {
       alert("Please connect your wallet first");
       return;
     }
 
     setLinkingDiscord(true);
     try {
-      const provider = (window as any).supraProvider;
-      if (!provider) {
-        alert("Supra wallet not available");
-        setLinkingDiscord(false);
-        return;
-      }
-
       const PECKY_COIN_MODULE = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
-      const payload = [
-        state.walletAddress,
-        0,
-        PECKY_COIN_MODULE,
-        'Coin',
-        'unlink_discord',
-        [],
-        [],
-        {}
-      ];
 
-      const txData = await provider.createRawTransactionData(payload);
-      await provider.sendTransaction({
-        data: txData,
-        from: state.walletAddress,
-        to: PECKY_COIN_MODULE,
-        chainId: '8',
-        value: ''
+      const result = await sendTransaction({
+        payload: {
+          moduleAddress: PECKY_COIN_MODULE,
+          moduleName: 'Coin',
+          functionName: 'unlink_discord',
+          typeArguments: [],
+          arguments: [],
+        },
       });
+
+      if (!result.success) {
+        throw new Error(result.error || result.reason || "Failed to unlink Discord");
+      }
 
       alert("Discord unlinked successfully!");
     } catch (error) {

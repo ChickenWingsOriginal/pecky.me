@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { css } from "@/styled-system/css";
 import Image from "next/image";
@@ -12,17 +12,49 @@ import { useWallet } from "@/app/context/WalletContext";
 import { useSupraConnect } from "@gerritsen/supra-connect";
 import { NFTGrid } from "@/app/components/NFTGrid";
 import { EXTERNAL_LINKS } from "@/app/constants/links";
+import { rarityLabel } from "@/app/lib/nodeService";
 
 const NFT_POOL_TOTAL = 450_000_000_000;
-const TABLE_HANDLE = "0xbf3d300e9d7444b36d9b036c45f95c092fd7b62fe5093f54b891f3916179197c";
+const TABLE_HANDLE =
+  "0xbf3d300e9d7444b36d9b036c45f95c092fd7b62fe5093f54b891f3916179197c";
 const CLAIM_COOLDOWN_DAYS = 30;
 
 const rarities = [
-  { name: "Common", count: 250, percent: "1%", color: "#0099ff", monthlyReward: 18_000_000 },
-  { name: "Rare", count: 125, percent: "1%", color: "#25c36a", monthlyReward: 36_000_000 },
-  { name: "Epic", count: 75, percent: "0.75%", color: "#ff53a2", monthlyReward: 45_000_000 },
-  { name: "Legendary", count: 40, percent: "0.75%", color: "#ffe270", monthlyReward: 84_375_000 },
-  { name: "Mythic", count: 10, percent: "0.5%", color: "#a259ff", monthlyReward: 225_000_000 },
+  {
+    name: "Common",
+    count: 250,
+    percent: "1%",
+    color: "#0099ff",
+    monthlyReward: 18_000_000,
+  },
+  {
+    name: "Rare",
+    count: 125,
+    percent: "1%",
+    color: "#25c36a",
+    monthlyReward: 36_000_000,
+  },
+  {
+    name: "Epic",
+    count: 75,
+    percent: "0.75%",
+    color: "#ff53a2",
+    monthlyReward: 45_000_000,
+  },
+  {
+    name: "Legendary",
+    count: 40,
+    percent: "0.75%",
+    color: "#ffe270",
+    monthlyReward: 84_375_000,
+  },
+  {
+    name: "Mythic",
+    count: 10,
+    percent: "0.5%",
+    color: "#a259ff",
+    monthlyReward: 225_000_000,
+  },
 ];
 
 interface OwnedNFT {
@@ -33,6 +65,7 @@ interface OwnedNFT {
 }
 
 const NFTS_CACHE_KEY = "pecky_nfts_cache";
+const CACHE_LIFESPAN_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 const SPIN_ANIMATION_CSS = `
   @keyframes spin {
@@ -48,7 +81,14 @@ const getNftsFromCache = (walletAddress: string): OwnedNFT[] | null => {
     if (cache) {
       const parsed = JSON.parse(cache);
       if (parsed.walletAddress === walletAddress && parsed.data) {
-        return parsed.data;
+        // Check if cache is still valid (12 hours)
+        const now = Date.now();
+        const cacheAge = now - parsed.timestamp;
+        if (cacheAge < CACHE_LIFESPAN_MS) {
+          return parsed.data;
+        }
+        // Cache expired, remove it
+        localStorage.removeItem(NFTS_CACHE_KEY);
       }
     }
   } catch (error) {
@@ -60,32 +100,41 @@ const getNftsFromCache = (walletAddress: string): OwnedNFT[] | null => {
 const saveNftsToCache = (walletAddress: string, nfts: OwnedNFT[]): void => {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(NFTS_CACHE_KEY, JSON.stringify({
-      walletAddress,
-      data: nfts,
-      timestamp: Date.now(),
-    }));
+    localStorage.setItem(
+      NFTS_CACHE_KEY,
+      JSON.stringify({
+        walletAddress,
+        data: nfts,
+        timestamp: Date.now(),
+      }),
+    );
   } catch (error) {
     console.error("Failed to save NFTs to cache:", error);
   }
 };
 
 export default function NFTPage() {
-  const { nftPoolRemaining } = useGlobalData();
-  const { state, refreshNfts } = useWallet();
-  const { sendTransaction } = useSupraConnect();
+  const { nftPoolRemaining, refetch: refetchGlobalData } = useGlobalData();
+  const { state, dispatch, refreshBalances } = useWallet();
+  const { sendTransaction, connectedWallet } = useSupraConnect();
   const [ownedNfts, setOwnedNfts] = useState<OwnedNFT[]>([]);
   const [loadingNfts, setLoadingNfts] = useState(false);
   const [nftStatusInput, setNftStatusInput] = useState("");
   const [checkingStatus, setCheckingStatus] = useState(false);
   const [claimingAirdrop, setClaimingAirdrop] = useState(false);
   const [claimingNftName, setClaimingNftName] = useState<string | null>(null);
-  const [claimingAirdropNftName, setClaimingAirdropNftName] = useState<string | null>(null);
+  const [claimingAirdropNftName, setClaimingAirdropNftName] = useState<
+    string | null
+  >(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    if (state.isConnected && state.isRegistered && state.walletAddress) {
-      const cachedNfts = getNftsFromCache(state.walletAddress);
+    if (
+      state.isConnected &&
+      state.isRegistered &&
+      connectedWallet?.walletAddress
+    ) {
+      const cachedNfts = getNftsFromCache(connectedWallet.walletAddress);
       if (cachedNfts && cachedNfts.length > 0) {
         setOwnedNfts(cachedNfts);
         return;
@@ -98,14 +147,16 @@ export default function NFTPage() {
     } else {
       setOwnedNfts([]);
     }
-  }, [state.isConnected, state.isRegistered, state.walletAddress]);
+  }, [state.isConnected, state.isRegistered, connectedWallet?.walletAddress]);
 
   const fetchAndLoadNfts = async () => {
-    if (!state.walletAddress) return;
+    if (!connectedWallet?.walletAddress) return;
 
     setLoadingNfts(true);
     try {
-      const res = await fetch(`https://api.pecky.me/api/nfts?wallet=${state.walletAddress}`);
+      const res = await fetch(
+        `https://api.pecky.me/api/nfts?wallet=${connectedWallet.walletAddress}`,
+      );
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data.owned_tokens)) {
@@ -146,15 +197,26 @@ export default function NFTPage() {
         nfts.map(async (token: OwnedNFT) => {
           const [claimStatus, airdropStatus] = await Promise.all([
             getTokenClaimStatus(token.name),
-            checkAirdropStatus(token.name)
+            checkAirdropStatus(token.name),
           ]);
-          return { ...token, claimStatus, airdropAvailable: airdropStatus };
-        })
+          console.log({
+            ...token,
+            rarity: rarityLabel(token.name),
+            claimStatus,
+            airdropAvailable: airdropStatus,
+          });
+          return {
+            ...token,
+            rarity: rarityLabel(token.name),
+            claimStatus,
+            airdropAvailable: airdropStatus,
+          };
+        }),
       );
 
       setOwnedNfts(tokensWithStatus as any);
-      if (state.walletAddress) {
-        saveNftsToCache(state.walletAddress, tokensWithStatus as any);
+      if (connectedWallet?.walletAddress) {
+        saveNftsToCache(connectedWallet.walletAddress, tokensWithStatus as any);
       }
     } catch (error) {
       console.error("Failed to load NFTs:", error);
@@ -177,9 +239,11 @@ export default function NFTPage() {
     try {
       const RPC_BASE = "https://rpc-mainnet.supra.com";
       const encoder = new TextEncoder();
-      const hexKey = "0x" + Array.from(encoder.encode(tokenName))
-        .map(byte => byte.toString(16).padStart(2, "0"))
-        .join("");
+      const hexKey =
+        "0x" +
+        Array.from(encoder.encode(tokenName))
+          .map((byte) => byte.toString(16).padStart(2, "0"))
+          .join("");
 
       const url = `${RPC_BASE}/rpc/v1/tables/${TABLE_HANDLE}/item`;
       const response = await fetch(url, {
@@ -188,8 +252,8 @@ export default function NFTPage() {
         body: JSON.stringify({
           key_type: "vector<u8>",
           value_type: "u64",
-          key: hexKey
-        })
+          key: hexKey,
+        }),
       });
 
       const data = await response.json();
@@ -214,7 +278,10 @@ export default function NFTPage() {
         if (d > 0) parts.push(`${d}d`);
         if (h > 0) parts.push(`${h}h`);
         if (d === 0 && m > 0) parts.push(`${m}m`);
-        return { status: "cooldown" as const, text: `Next claim in ${parts.join(" ")}` };
+        return {
+          status: "cooldown" as const,
+          text: `Next claim in ${parts.join(" ")}`,
+        };
       }
     } catch (error) {
       console.error("Failed to fetch claim status:", error);
@@ -222,6 +289,29 @@ export default function NFTPage() {
     }
   };
 
+  const refreshSpecificNft = async (tokenName: string) => {
+    try {
+      const [claimStatus, airdropStatus] = await Promise.all([
+        getTokenClaimStatus(tokenName),
+        checkAirdropStatus(tokenName),
+      ]);
+
+      setOwnedNfts((prevNfts) => {
+        return prevNfts.map((nft) => {
+          if (nft.name === tokenName) {
+            return {
+              ...nft,
+              claimStatus,
+              airdropAvailable: airdropStatus,
+            };
+          }
+          return nft;
+        });
+      });
+    } catch (error) {
+      console.error("Failed to refresh NFT status:", error);
+    }
+  };
 
   const claimNftReward = async (tokenName: string) => {
     if (!state.walletAddress) {
@@ -231,7 +321,8 @@ export default function NFTPage() {
 
     setClaimingNftName(tokenName);
     try {
-      const PECKY_COIN_MODULE = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
+      const PECKY_COIN_MODULE =
+        "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
       // Serialize the token name as a Move String using BCS
       const serializedTokenName = BCS.bcsSerializeStr(tokenName);
@@ -239,17 +330,34 @@ export default function NFTPage() {
       const result = await sendTransaction({
         payload: {
           moduleAddress: PECKY_COIN_MODULE,
-          moduleName: 'Coin',
-          functionName: 'claim_nft_airdrop',
+          moduleName: "Coin",
+          functionName: "claim_nft_airdrop",
           typeArguments: [],
-          arguments: [serializedTokenName]
-        }
+          arguments: [serializedTokenName],
+        },
       });
 
       if (result.success) {
         toast.success("Reward claimed successfully!");
+        // Wait for blockchain confirmation
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Refresh only this specific NFT's status
+        await refreshSpecificNft(tokenName);
+
+        // Refresh wallet balance and pool remaining
+        try {
+          await refreshBalances();
+        } catch (error) {
+          console.error("Failed to refresh wallet balance:", error);
+        }
+
+        // Refresh global pool data
+        await refetchGlobalData();
       } else {
-        toast.error(`Failed to claim reward: ${result.reason || result.error || 'Unknown error'}`);
+        toast.error(
+          `Failed to claim reward: ${result.reason || result.error || "Unknown error"}`,
+        );
       }
     } catch (error) {
       console.error("Claim failed:", error);
@@ -259,11 +367,11 @@ export default function NFTPage() {
     }
   };
 
-
   const checkAirdropStatus = async (tokenName: string): Promise<boolean> => {
     try {
       const RPC_BASE = "https://rpc-mainnet.supra.com";
-      const PECKY_COIN_MODULE = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
+      const PECKY_COIN_MODULE =
+        "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
       const response = await fetch(`${RPC_BASE}/rpc/v1/view`, {
         method: "POST",
@@ -271,8 +379,8 @@ export default function NFTPage() {
         body: JSON.stringify({
           function: `${PECKY_COIN_MODULE}::Coin::has_claimed_NFT_airdrop`,
           type_arguments: [],
-          arguments: [tokenName]
-        })
+          arguments: [tokenName],
+        }),
       });
 
       const data = await response.json();
@@ -298,7 +406,7 @@ export default function NFTPage() {
     try {
       const [airdropAvailable, claimStatus] = await Promise.all([
         checkAirdropStatus(tokenName),
-        getTokenClaimStatus(tokenName)
+        getTokenClaimStatus(tokenName),
       ]);
 
       const airdropText = airdropAvailable
@@ -309,27 +417,43 @@ export default function NFTPage() {
         claimStatus.status === "claimable"
           ? "Available now! ✓"
           : claimStatus.status === "cooldown"
-          ? claimStatus.text
-          : "Unknown";
+            ? claimStatus.text
+            : "Unknown";
 
       toast.success(
         <div className={css({ textAlign: "left" })}>
-          <div className={css({ fontWeight: "700", mb: "8px", fontSize: "14px" })}>
+          <div
+            className={css({ fontWeight: "700", mb: "8px", fontSize: "14px" })}
+          >
             NFT {tokenId}
           </div>
           <div className={css({ mb: "8px" })}>
-            <div className={css({ fontSize: "12px", fontWeight: "600", color: "#a06500", mb: "2px" })}>
+            <div
+              className={css({
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "#a06500",
+                mb: "2px",
+              })}
+            >
               Airdrop reward claimable?
             </div>
             <div className={css({ fontSize: "13px" })}>{airdropText}</div>
           </div>
           <div>
-            <div className={css({ fontSize: "12px", fontWeight: "600", color: "#a06500", mb: "2px" })}>
+            <div
+              className={css({
+                fontSize: "12px",
+                fontWeight: "600",
+                color: "#a06500",
+                mb: "2px",
+              })}
+            >
               Next Monthly Claim:
             </div>
             <div className={css({ fontSize: "13px" })}>{claimText}</div>
           </div>
-        </div>
+        </div>,
       );
     } catch (error) {
       console.error("Failed to check NFT status:", error);
@@ -347,7 +471,8 @@ export default function NFTPage() {
 
     setClaimingAirdropNftName(tokenName);
     try {
-      const PECKY_COIN_MODULE = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
+      const PECKY_COIN_MODULE =
+        "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
       // Serialize the token name as a Move String using BCS
       const serializedTokenName = BCS.bcsSerializeStr(tokenName);
@@ -355,17 +480,34 @@ export default function NFTPage() {
       const result = await sendTransaction({
         payload: {
           moduleAddress: PECKY_COIN_MODULE,
-          moduleName: 'Coin',
-          functionName: 'claim_nft_airdrop',
+          moduleName: "Coin",
+          functionName: "claim_nft_airdrop",
           typeArguments: [],
-          arguments: [serializedTokenName]
-        }
+          arguments: [serializedTokenName],
+        },
       });
 
       if (result.success) {
         toast.success("NFT airdrop claimed successfully!");
+        // Wait for blockchain confirmation
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Refresh only this specific NFT's status
+        await refreshSpecificNft(tokenName);
+
+        // Refresh wallet balance and pool remaining
+        try {
+          await refreshBalances();
+        } catch (error) {
+          console.error("Failed to refresh wallet balance:", error);
+        }
+
+        // Refresh global pool data
+        await refetchGlobalData();
       } else {
-        toast.error(`Failed to claim NFT airdrop: ${result.reason || result.error || 'Unknown error'}`);
+        toast.error(
+          `Failed to claim NFT airdrop: ${result.reason || result.error || "Unknown error"}`,
+        );
       }
     } catch (error) {
       console.error("Airdrop claim failed:", error);
@@ -375,45 +517,104 @@ export default function NFTPage() {
     }
   };
 
-  const poolRemainingRegular = nftPoolRemaining ? Number(nftPoolRemaining) / 1_000_000 : 0;
-  const poolRemainingPercentage = NFT_POOL_TOTAL > 0 ? Math.max(0, Math.min(100, (poolRemainingRegular / NFT_POOL_TOTAL) * 100)) : 0;
+  const poolRemainingRegular = nftPoolRemaining
+    ? Number(nftPoolRemaining) / 1_000_000
+    : 0;
+  const poolRemainingPercentage =
+    NFT_POOL_TOTAL > 0
+      ? Math.max(
+          0,
+          Math.min(100, (poolRemainingRegular / NFT_POOL_TOTAL) * 100),
+        )
+      : 0;
   const poolRemainingFormatted = poolRemainingRegular.toLocaleString("en-US", {
     maximumFractionDigits: 0,
   });
 
   return (
-    <div className={css({ minH: "100vh", bg: "#fff3da", display: "flex", flexDir: "column", alignItems: "center", pb: "100px" })}>
+    <div
+      className={css({
+        minH: "100vh",
+        bg: "#fff3da",
+        display: "flex",
+        flexDir: "column",
+        alignItems: "center",
+        pb: "100px",
+      })}
+    >
       <style>{SPIN_ANIMATION_CSS}</style>
-      <div className={css({ maxW: "520px", w: "90%", mt: "40px", display: "flex", flexDir: "column", gap: "5px" })}>
+      <div
+        className={css({
+          maxW: "520px",
+          w: "90%",
+          mt: "40px",
+          display: "flex",
+          flexDir: "column",
+          gap: "5px",
+        })}
+      >
         <RetroBox>
           <div className={css({ textAlign: "center" })}>
             <Image
-              src="/images/crystara.png"
-              alt="Crystara"
-              width={271}
-              height={80}
+              src="/images/nft-icon.png"
+              alt="NFT Icon"
+              width={100}
+              height={100}
               style={{ margin: "0 auto", marginBottom: "12px" }}
             />
-            <h1 className={css({ fontSize: "24px", fontWeight: "700", color: "#4a2c00", mb: "12px" })}>
+            <h1
+              className={css({
+                fontSize: "24px",
+                fontWeight: "700",
+                color: "#4a2c00",
+                mb: "12px",
+              })}
+            >
               Own a ChickenWings NFT?
             </h1>
-            <div className={css({ fontSize: "14px", color: "#513d0a", lineHeight: "1.65" })}>
-              As an NFT holder, you're a co-owner of Pecky—think of it as holding shares!<br />
-              There are only <b>500 ChickenWings NFTs</b> in existence.<br />
-              Every month, you'll receive $Pecky based on your NFT's rarity.<br />
+            <div
+              className={css({
+                fontSize: "14px",
+                color: "#513d0a",
+                lineHeight: "1.65",
+              })}
+            >
+              As an NFT holder, you're a co-owner of Pecky—think of it as
+              holding shares!
+              <br />
+              There are only <b>500 ChickenWings NFTs</b> in existence.
+              <br />
+              Every month, you'll receive $Pecky based on your NFT's rarity.
+              <br />
               Buy or sell on <b>Crystara</b>.
             </div>
           </div>
         </RetroBox>
-
       </div>
 
       <div className={css({ w: "100%", mt: "4px", px: "5%" })}>
         <RetroBox>
-          <div className={css({ fontSize: "14px", fontWeight: "600", color: "#a06500", mb: "10px", textAlign: "center" })}>
+          <div
+            className={css({
+              fontSize: "14px",
+              fontWeight: "600",
+              color: "#a06500",
+              mb: "10px",
+              textAlign: "center",
+            })}
+          >
             NFT Rewards Vault
           </div>
-          <div className={css({ w: "100%", h: "24px", bg: "#e8e8e8", borderRadius: "10px", overflow: "hidden", mb: "8px" })}>
+          <div
+            className={css({
+              w: "100%",
+              h: "24px",
+              bg: "#e8e8e8",
+              borderRadius: "10px",
+              overflow: "hidden",
+              mb: "8px",
+            })}
+          >
             <div
               style={{
                 height: "100%",
@@ -423,22 +624,53 @@ export default function NFTPage() {
               }}
             />
           </div>
-          <div className={css({ fontSize: "12px", color: "#b48512", textAlign: "center", mb: "16px" })}>
-            {nftPoolRemaining !== null ? `${poolRemainingFormatted} $Pecky remaining` : "Loading..."}
+          <div
+            className={css({
+              fontSize: "12px",
+              color: "#b48512",
+              textAlign: "center",
+              mb: "16px",
+            })}
+          >
+            {nftPoolRemaining !== null
+              ? `${poolRemainingFormatted} $Pecky remaining`
+              : "Loading..."}
           </div>
 
-          <hr style={{ margin: "12px 0", borderTop: "1.5px dashed #ffd36e", opacity: 0.6 }} />
+          <hr
+            style={{
+              margin: "12px 0",
+              borderTop: "1.5px dashed #ffd36e",
+              opacity: 0.6,
+            }}
+          />
 
-          <div className={css({ display: "flex", justifyContent: "space-between", alignItems: "center", mb: "14px", mt: "16px" })}>
-            <div className={css({ fontSize: "15px", color: "#4a2c00", fontWeight: "700", flex: 1, textAlign: "center" })}>
+          <div
+            className={css({
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: "14px",
+              mt: "16px",
+            })}
+          >
+            <div
+              className={css({
+                fontSize: "15px",
+                color: "#4a2c00",
+                fontWeight: "700",
+                flex: 1,
+                textAlign: "center",
+              })}
+            >
               Your ChickenWings NFTs
             </div>
             <button
               onClick={handleRefreshNfts}
               disabled={isRefreshing || loadingNfts}
               className={css({
-                width: '1.5rem',
-                height: '1.5rem',
+                width: "1.5rem",
+                height: "1.5rem",
                 fontSize: "18px",
                 bg: isRefreshing || loadingNfts ? "#cccccc" : "#ff7700",
                 color: "white",
@@ -446,10 +678,16 @@ export default function NFTPage() {
                 borderRadius: "50%",
                 cursor: isRefreshing || loadingNfts ? "not-allowed" : "pointer",
                 transition: "transform 0.1s",
-                _hover: isRefreshing || loadingNfts ? {} : { transform: "scale(1.05)" },
+                _hover:
+                  isRefreshing || loadingNfts
+                    ? {}
+                    : { transform: "scale(1.05)" },
               })}
               style={{
-                animation: isRefreshing || loadingNfts ? "spin 1s linear infinite" : "none",
+                animation:
+                  isRefreshing || loadingNfts
+                    ? "spin 1s linear infinite"
+                    : "none",
               }}
             >
               ↻
@@ -457,7 +695,14 @@ export default function NFTPage() {
           </div>
           {state.isConnected && state.isRegistered ? (
             loadingNfts ? (
-              <div className={css({ fontSize: "14px", color: "#b48512", textAlign: "center", py: "20px" })}>
+              <div
+                className={css({
+                  fontSize: "14px",
+                  color: "#b48512",
+                  textAlign: "center",
+                  py: "20px",
+                })}
+              >
                 Loading NFTs...
               </div>
             ) : ownedNfts.length > 0 ? (
@@ -471,31 +716,71 @@ export default function NFTPage() {
                 walletConnected={state.isConnected}
               />
             ) : (
-              <div className={css({ fontSize: "14px", color: "#b48512", textAlign: "center", py: "20px" })}>
+              <div
+                className={css({
+                  fontSize: "14px",
+                  color: "#b48512",
+                  textAlign: "center",
+                  py: "20px",
+                })}
+              >
                 You don't have any Pecky NFTs yet, get one now on{" "}
                 <a
                   href={EXTERNAL_LINKS.crystara}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={css({ color: "#ff7700", fontWeight: "600", textDecoration: "underline", _hover: { opacity: "0.8" } })}
+                  className={css({
+                    color: "#ff7700",
+                    fontWeight: "600",
+                    textDecoration: "underline",
+                    _hover: { opacity: "0.8" },
+                  })}
                 >
                   Crystara
                 </a>
               </div>
             )
           ) : (
-            <div className={css({ fontSize: "14px", color: "#b48512", textAlign: "center", py: "20px" })}>
+            <div
+              className={css({
+                fontSize: "14px",
+                color: "#b48512",
+                textAlign: "center",
+                py: "20px",
+              })}
+            >
               Please connect your wallet
             </div>
           )}
 
-          <hr style={{ margin: "16px 0", borderTop: "1.5px dashed #ffd36e", opacity: 0.6 }} />
+          <hr
+            style={{
+              margin: "16px 0",
+              borderTop: "1.5px dashed #ffd36e",
+              opacity: 0.6,
+            }}
+          />
 
           <div className={css({ mt: "16px" })}>
-            <div className={css({ fontSize: "15px", color: "#4a2c00", fontWeight: "700", mb: "12px", textAlign: "center" })}>
+            <div
+              className={css({
+                fontSize: "15px",
+                color: "#4a2c00",
+                fontWeight: "700",
+                mb: "12px",
+                textAlign: "center",
+              })}
+            >
               Check NFT Status
             </div>
-            <div className={css({ display: "flex", gap: "10px", justifyContent: "center", alignItems: "stretch" })}>
+            <div
+              className={css({
+                display: "flex",
+                gap: "10px",
+                justifyContent: "center",
+                alignItems: "stretch",
+              })}
+            >
               <input
                 type="text"
                 maxLength={3}
@@ -523,15 +808,24 @@ export default function NFTPage() {
                   flex: 1,
                   p: "0 15px",
                   height: "40px",
-                  bg: checkingStatus || !nftStatusInput ? "#cccccc" : "linear-gradient(to right, #ffaa00, #ff7700)",
+                  bg:
+                    checkingStatus || !nftStatusInput
+                      ? "#cccccc"
+                      : "linear-gradient(to right, #ffaa00, #ff7700)",
                   color: "white",
                   border: "none",
                   borderRadius: "12px",
                   fontSize: "14px",
                   fontWeight: "600",
-                  cursor: checkingStatus || !nftStatusInput ? "not-allowed" : "pointer",
+                  cursor:
+                    checkingStatus || !nftStatusInput
+                      ? "not-allowed"
+                      : "pointer",
                   transition: "transform 0.1s",
-                  _hover: checkingStatus || !nftStatusInput ? {} : { transform: "scale(1.02)" },
+                  _hover:
+                    checkingStatus || !nftStatusInput
+                      ? {}
+                      : { transform: "scale(1.02)" },
                 })}
               >
                 {checkingStatus ? "Checking..." : "Check"}
@@ -544,10 +838,23 @@ export default function NFTPage() {
       <div className={css({ w: "100%", mt: "4px", px: "5%", mb: "100px" })}>
         <RetroBox>
           <div className={css({ textAlign: "center" })}>
-            <h3 className={css({ color: "#ff7700", margin: "0 0 8px 0", fontSize: "15px", fontWeight: "700" })}>
+            <h3
+              className={css({
+                color: "#ff7700",
+                margin: "0 0 8px 0",
+                fontSize: "15px",
+                fontWeight: "700",
+              })}
+            >
               Monthly Rewards by Rarity
             </h3>
-            <div className={css({ fontSize: "12px", mb: "12px", color: "#b48512" })}>
+            <div
+              className={css({
+                fontSize: "12px",
+                mb: "12px",
+                color: "#b48512",
+              })}
+            >
               From a <b>450B Pecky</b> pool
             </div>
             <div className={css({ display: "grid", gap: "8px", mb: "12px" })}>
@@ -566,26 +873,55 @@ export default function NFTPage() {
                     color: "#a06500",
                   }}
                 >
-                  <div style={{ fontWeight: "700", marginBottom: "4px", color: "#a06500" }}>{rarity.name}</div>
-                  <div style={{ fontSize: "11px", opacity: "0.9", color: "#a06500", marginBottom: "3px" }}>
+                  <div
+                    style={{
+                      fontWeight: "700",
+                      marginBottom: "4px",
+                      color: "#a06500",
+                    }}
+                  >
+                    {rarity.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      opacity: "0.9",
+                      color: "#a06500",
+                      marginBottom: "3px",
+                    }}
+                  >
                     {rarity.count} NFTs • {rarity.percent}/month
                   </div>
                   <div style={{ fontSize: "11px", color: "#a06500" }}>
-                    Monthly NFT reward is now {(rarity.monthlyReward / 1_000_000).toFixed(2)}M $Pecky
+                    Monthly NFT reward is now{" "}
+                    {(rarity.monthlyReward / 1_000_000).toFixed(2)}M $Pecky
                   </div>
                 </div>
               ))}
             </div>
 
             <div className={css({ textAlign: "center", mb: "12px" })}>
-              <div className={css({ fontSize: "13px", fontWeight: "600", color: "#a06500", mb: "8px" })}>
+              <div
+                className={css({
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#a06500",
+                  mb: "8px",
+                })}
+              >
                 HODL your NFT = Monthly passive Pecky power!
               </div>
               <a
                 href={EXTERNAL_LINKS.crystara}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={css({ fontSize: "13px", color: "#ff7700", fontWeight: "600", textDecoration: "none", _hover: { opacity: "0.8" } })}
+                className={css({
+                  fontSize: "13px",
+                  color: "#ff7700",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                  _hover: { opacity: "0.8" },
+                })}
               >
                 Trade your NFT on Crystara
               </a>

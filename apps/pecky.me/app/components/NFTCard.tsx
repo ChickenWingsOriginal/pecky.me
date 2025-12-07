@@ -19,6 +19,21 @@ interface NFTCardProps {
   walletConnected?: boolean;
 }
 
+// Rarity color mapping
+const rarityColors: { [key: string]: string } = {
+  "Common": "#0099ff",
+  "Rare": "#25c36a",
+  "Epic": "#ff53a2",
+  "Legendary": "#ffe270",
+  "Mythic": "#a259ff",
+};
+
+// Extract rarity type from rarity label (remove emoji if present)
+function getRarityType(rarityLabel?: string): string {
+  if (!rarityLabel) return "Unknown";
+  return rarityLabel.replace(/\s*🍗\s*/, "").trim();
+}
+
 export function NFTCard({
   name,
   image,
@@ -37,6 +52,10 @@ export function NFTCard({
       : claimStatus.status === "cooldown"
       ? "#ff9000"
       : "#888";
+
+  // Get border color based on rarity
+  const rarityType = getRarityType(rarity);
+  const borderColor = rarityColors[rarityType] || "#f3c35b";
 
   const handleClaimClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -58,15 +77,18 @@ export function NFTCard({
 
   return (
     <div
-      className={css({
-        p: "12px",
+      style={{
+        padding: "12px",
         borderRadius: "12px",
-        border: "2px solid #f3c35b",
-        bg: "white",
+        border: `2px solid ${borderColor}`,
+        backgroundColor: "white",
         transition: "all 0.2s ease",
+        cursor: "pointer",
+      }}
+      className={css({
         _hover: {
           transform: "scale(1.02)",
-          borderColor: "#ffaa00",
+          boxShadow: `0 0 12px ${borderColor}40`,
         },
       })}
     >

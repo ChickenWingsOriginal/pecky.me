@@ -88,10 +88,10 @@ export default function InfoPage() {
       <main className={css({ maxW: "520px", w: "90%", mt: "40px" })}>
         <div className={css({ textAlign: "center", mb: "20px" })}>
           <Image
-            src="/images/pecky-egg.png"
+            src="/images/info-icon.png"
             alt="Pecky Egg"
-            width={50}
-            height={75}
+            width={100}
+            height={100}
             style={{ margin: "0 auto" }}
           />
         </div>

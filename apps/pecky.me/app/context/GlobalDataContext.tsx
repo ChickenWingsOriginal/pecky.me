@@ -2,12 +2,19 @@
 
 import React, { createContext, useEffect, useState, ReactNode } from 'react';
 import { fetchPeckyPrice, fetchCirculatingSupply, fetchBurnedPecky, fetchNftPoolRemaining } from '@/app/lib/walletService';
+import { fetchActiveNodesSorted } from '@/app/lib/nodeService';
+
+export interface ActiveNode {
+  nodeId: string;
+  name: string;
+}
 
 export interface GlobalDataState {
   peckyPrice: number | null;
   circulatingSupply: bigint | null;
   burnedPecky: bigint | null;
   nftPoolRemaining: bigint | null;
+  activeNodes: ActiveNode[];
   isLoading: boolean;
   error: string | null;
 }
@@ -28,6 +35,7 @@ export function GlobalDataProvider({ children }: GlobalDataProviderProps) {
     circulatingSupply: null,
     burnedPecky: null,
     nftPoolRemaining: null,
+    activeNodes: [],
     isLoading: true,
     error: null,
   });
@@ -35,11 +43,12 @@ export function GlobalDataProvider({ children }: GlobalDataProviderProps) {
   const fetchGlobalData = async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
-      const [price, supply, burned, nftPool] = await Promise.all([
+      const [price, supply, burned, nftPool, nodes] = await Promise.all([
         fetchPeckyPrice(),
         fetchCirculatingSupply(),
         fetchBurnedPecky(),
         fetchNftPoolRemaining(),
+        fetchActiveNodesSorted(),
       ]);
 
       setState({
@@ -47,6 +56,7 @@ export function GlobalDataProvider({ children }: GlobalDataProviderProps) {
         circulatingSupply: supply,
         burnedPecky: burned,
         nftPoolRemaining: nftPool,
+        activeNodes: nodes,
         isLoading: false,
         error: null,
       });

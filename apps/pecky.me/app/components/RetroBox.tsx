@@ -8,7 +8,7 @@ interface RetroBoxProps {
 
 export function RetroBox({ children, className }: RetroBoxProps) {
   const baseStyles = css({
-    maxW: "520px",
+    w: "100%",
     margin: "20px auto",
     p: "16px",
     bg: "white",
@@ -16,6 +16,7 @@ export function RetroBox({ children, className }: RetroBoxProps) {
     borderRadius: "14px",
     boxShadow: "0 4px 0 #f1b24a",
     mb: "30px",
+    boxSizing: "border-box",
   });
 
   return (
