@@ -335,9 +335,7 @@ export default function BotPage() {
             All $Pecky used for the bot will be burned.
           </div>
         </RetroBox>
-      </div>
 
-      <div className={css({ w: "100%", mt: "4px", px: "5%" })}>
         <RetroBox>
           <button
             onClick={handleActivateBot}

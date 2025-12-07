@@ -340,7 +340,7 @@ export default function NFTPage() {
       if (result.success) {
         toast.success("Reward claimed successfully!");
         // Wait for blockchain confirmation
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Refresh only this specific NFT's status
         await refreshSpecificNft(tokenName);
@@ -490,7 +490,7 @@ export default function NFTPage() {
       if (result.success) {
         toast.success("NFT airdrop claimed successfully!");
         // Wait for blockchain confirmation
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
         // Refresh only this specific NFT's status
         await refreshSpecificNft(tokenName);
@@ -590,9 +590,7 @@ export default function NFTPage() {
             </div>
           </div>
         </RetroBox>
-      </div>
 
-      <div className={css({ w: "100%", mt: "4px", px: "5%" })}>
         <RetroBox>
           <div
             className={css({
@@ -833,9 +831,7 @@ export default function NFTPage() {
             </div>
           </div>
         </RetroBox>
-      </div>
 
-      <div className={css({ w: "100%", mt: "4px", px: "5%", mb: "100px" })}>
         <RetroBox>
           <div className={css({ textAlign: "center" })}>
             <h3
