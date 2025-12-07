@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd ../.. && pnpm build",
+  "installCommand": "corepack enable && corepack prepare pnpm@9.15.4 --activate && pnpm install",
+  "outputDirectory": ".next"
+}
