@@ -183,6 +183,70 @@ export async function getUserRewards(walletAddress: string, nodeId: string): Pro
   }
 }
 
+export interface UserStakeInfo {
+  nodeId: string;
+  displayName: string;
+  staked: bigint;
+  rewards: bigint;
+}
+
+/**
+ * Get ALL nodes that a user has staked on (not just nodes they own)
+ * Uses get_user_stake_triplets which returns [nodeIds[], displayNames[], amounts[]]
+ */
+export async function getUserStakedNodes(walletAddress: string): Promise<UserStakeInfo[]> {
+  try {
+    const client = await SupraClient.init(RPC_URL);
+    const result = await client.invokeViewMethod(
+      `${STAKE_MODULE}::stake::get_user_stake_triplets`,
+      [],
+      [walletAddress],
+    );
+
+    // Response format: [[["TOKEN_1","TOKEN_2"],["NodeName1","NodeName2"],["1000","2000"]]]
+    let arr = Array.isArray(result) ? result : [];
+    if (arr.length === 1 && Array.isArray(arr[0])) {
+      arr = arr[0];
+    }
+
+    // Should have exactly 3 arrays: nodeIds, displayNames, amounts
+    if (!Array.isArray(arr) || arr.length !== 3) {
+      console.warn("Unexpected format from get_user_stake_triplets:", result);
+      return [];
+    }
+
+    const [nodeIds, displayNames, amounts] = arr;
+
+    if (!Array.isArray(nodeIds) || !Array.isArray(displayNames) || !Array.isArray(amounts)) {
+      console.warn("Invalid triplet arrays:", arr);
+      return [];
+    }
+
+    const stakes: UserStakeInfo[] = [];
+
+    for (let i = 0; i < nodeIds.length; i++) {
+      const nodeId = String(nodeIds[i] || "");
+      const displayName = String(displayNames[i] || nodeId);
+      const staked = BigInt(amounts[i] || 0);
+
+      // Fetch rewards for this node
+      const rewards = await getUserRewards(walletAddress, nodeId);
+
+      stakes.push({
+        nodeId,
+        displayName,
+        staked,
+        rewards,
+      });
+    }
+
+    return stakes;
+  } catch (error) {
+    console.error(`Failed to fetch user staked nodes for ${walletAddress}:`, error);
+    return [];
+  }
+}
+
 export interface PendingUnstake {
   release: bigint; // Unix timestamp in seconds
   amountMicro: bigint;

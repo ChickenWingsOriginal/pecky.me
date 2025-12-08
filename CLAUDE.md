@@ -1,5 +1,14 @@
 # Development Notes for Claude
 
+## Important Workflow Rules
+
+### Token Conservation
+**DO NOT run builds automatically** - To save tokens on routine tasks:
+- ❌ Don't run `pnpm build` or similar commands unless explicitly requested
+- ✅ Instead, inform the user when they should build (e.g., "Please run `pnpm build` to verify the changes")
+- ✅ Let the user report build results back to you
+- **Reasoning**: Building is a simple task that doesn't require AI assistance. Save tokens for actual coding and problem-solving.
+
 ## Project Overview
 
 **Main Goal**: Refactor `apps/pecky.me.old` (vanilla HTML/JS dApp) into a fresh Next.js 16 project at `apps/pecky.me`.

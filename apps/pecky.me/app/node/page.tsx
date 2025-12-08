@@ -18,6 +18,8 @@ import {
   getPendingUnstakes,
   getUserStake,
   getUserRewards,
+  getUserStakedNodes,
+  type UserStakeInfo,
 } from "@/app/utils/nodeService";
 import { formatCountdownFromTimestamp } from "@/app/utils/formatCountdownFromTimestamp";
 import { formatTimestamp } from "@/app/utils/formatTimestamp";
@@ -55,9 +57,10 @@ export default function NodePage() {
   );
   const [unstakingNodeId, setUnstakingNodeId] = useState<string | null>(null);
   const [isClaimingUnstakes, setIsClaimingUnstakes] = useState(false);
-  const [nodeStakes, setNodeStakes] = useState<
-    Record<string, { staked: bigint; rewards: bigint }>
-  >({});
+  const [userStakedNodes, setUserStakedNodes] = useState<UserStakeInfo[]>([]);
+  const [claimingUserRewardNodeId, setClaimingUserRewardNodeId] = useState<
+    string | null
+  >(null);
 
   const walletAddress = connectedWallet?.walletAddress;
   const peckyBalance = walletState.peckyBalance ?? BigInt(0);
@@ -318,34 +321,24 @@ export default function NodePage() {
   useEffect(() => {
     if (!walletAddress) {
       setPendingUnstakes([]);
-      setNodeStakes({});
+      setUserStakedNodes([]);
       return;
     }
 
     (async () => {
       try {
-        const unstakes = await getPendingUnstakes(walletAddress);
+        const [unstakes, stakedNodes] = await Promise.all([
+          getPendingUnstakes(walletAddress),
+          getUserStakedNodes(walletAddress),
+        ]);
+
         setPendingUnstakes(unstakes);
-
-        if (walletState.ownedNodes && walletState.ownedNodes.length > 0) {
-          const stakes: Record<string, { staked: bigint; rewards: bigint }> =
-            {};
-
-          for (const node of walletState.ownedNodes) {
-            const [staked, rewards] = await Promise.all([
-              getUserStake(walletAddress, node.nodeId),
-              getUserRewards(walletAddress, node.nodeId),
-            ]);
-            stakes[node.nodeId] = { staked, rewards };
-          }
-
-          setNodeStakes(stakes);
-        }
+        setUserStakedNodes(stakedNodes);
       } catch (error) {
         console.error("Failed to fetch unstakes/stakes:", error);
       }
     })();
-  }, [walletAddress, walletState.ownedNodes]);
+  }, [walletAddress]);
 
   const handleUnstake = async (nodeId: string) => {
     if (!walletAddress) return;
@@ -357,7 +350,8 @@ export default function NodePage() {
     }
 
     const amountMicro = BigInt(Math.floor(parseFloat(amount) * 1_000_000));
-    const stakedAmount = nodeStakes[nodeId]?.staked ?? BigInt(0);
+    const nodeStake = userStakedNodes.find((n) => n.nodeId === nodeId);
+    const stakedAmount = nodeStake?.staked ?? BigInt(0);
 
     if (amountMicro > stakedAmount) {
       toast.error(
@@ -392,14 +386,13 @@ export default function NodePage() {
         );
         setUnstakeAmounts({ ...unstakeAmounts, [nodeId]: "" });
 
-        const [unstakes, staked, rewards] = await Promise.all([
+        const [unstakes, stakedNodes] = await Promise.all([
           getPendingUnstakes(walletAddress),
-          getUserStake(walletAddress, nodeId),
-          getUserRewards(walletAddress, nodeId),
+          getUserStakedNodes(walletAddress),
         ]);
 
         setPendingUnstakes(unstakes);
-        setNodeStakes({ ...nodeStakes, [nodeId]: { staked, rewards } });
+        setUserStakedNodes(stakedNodes);
       } else {
         const errorMsg = result.reason || result.error || "";
         if (
@@ -424,6 +417,60 @@ export default function NodePage() {
       }
     } finally {
       setUnstakingNodeId(null);
+    }
+  };
+
+  const handleClaimUserReward = async (nodeId: string) => {
+    if (!walletAddress) return;
+
+    setClaimingUserRewardNodeId(nodeId);
+    try {
+      const serializedNodeId = serializeString(nodeId);
+
+      const result = await sendTransaction({
+        payload: {
+          moduleAddress: STAKE_MODULE,
+          moduleName: "stake",
+          functionName: "claim_user_reward",
+          typeArguments: [],
+          arguments: [serializedNodeId],
+        },
+      });
+
+      if (result.success) {
+        console.log("User reward claimed for node:", nodeId);
+        toast.success("Rewards claimed successfully!");
+
+        // Refresh user staked nodes to update rewards
+        const stakedNodes = await getUserStakedNodes(walletAddress);
+        setUserStakedNodes(stakedNodes);
+
+        // Refresh wallet balance
+        await refreshBalances();
+      } else {
+        const errorMsg = result.reason || result.error || "";
+        if (
+          errorMsg.includes("All transaction approaches failed") ||
+          errorMsg.includes("User rejected")
+        ) {
+          console.log("Transaction cancelled by user");
+        } else {
+          toast.error("Claim failed: " + errorMsg);
+        }
+      }
+    } catch (error: any) {
+      console.error("Claim user reward error:", error);
+      const errorMsg = error?.message || error?.toString() || "";
+      if (
+        errorMsg.includes("All transaction approaches failed") ||
+        errorMsg.includes("User rejected")
+      ) {
+        console.log("Transaction cancelled by user");
+      } else {
+        toast.error("Claim failed");
+      }
+    } finally {
+      setClaimingUserRewardNodeId(null);
     }
   };
 
@@ -1397,7 +1444,7 @@ export default function NodePage() {
             </div>
           </div>
 
-          {walletState.ownedNodes && walletState.ownedNodes.length > 0 && (
+          {userStakedNodes.length > 0 && (
             <div>
               <hr
                 className={css({
@@ -1424,10 +1471,9 @@ export default function NodePage() {
                   gap: "10px",
                 })}
               >
-                {walletState.ownedNodes.map((node) => {
-                  const nodeData = nodeStakes[node.nodeId];
-                  const stakedAmount = nodeData?.staked ?? BigInt(0);
-                  const rewardsAmount = nodeData?.rewards ?? BigInt(0);
+                {userStakedNodes.map((node) => {
+                  const stakedAmount = node.staked;
+                  const rewardsAmount = node.rewards;
 
                   return (
                     <div
@@ -1447,7 +1493,7 @@ export default function NodePage() {
                             color: "#4a2c00",
                           })}
                         >
-                          {node.name}
+                          {node.displayName}
                         </div>
                         <div
                           className={css({
@@ -1574,6 +1620,44 @@ export default function NodePage() {
                             : "Unstake"}
                         </button>
                       </div>
+
+                      <button
+                        onClick={() => handleClaimUserReward(node.nodeId)}
+                        disabled={
+                          claimingUserRewardNodeId === node.nodeId ||
+                          rewardsAmount === BigInt(0)
+                        }
+                        className={css({
+                          w: "100%",
+                          height: "40px",
+                          px: "16px",
+                          borderRadius: "10px",
+                          bg:
+                            claimingUserRewardNodeId === node.nodeId ||
+                            rewardsAmount === BigInt(0)
+                              ? "#cccccc"
+                              : "linear-gradient(to right, #ffaa00, #ff7700)",
+                          border: "none",
+                          color: "white",
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          cursor:
+                            claimingUserRewardNodeId === node.nodeId ||
+                            rewardsAmount === BigInt(0)
+                              ? "not-allowed"
+                              : "pointer",
+                          opacity:
+                            claimingUserRewardNodeId === node.nodeId ||
+                            rewardsAmount === BigInt(0)
+                              ? 0.6
+                              : 1,
+                          mt: "8px",
+                        })}
+                      >
+                        {claimingUserRewardNodeId === node.nodeId
+                          ? "Claiming..."
+                          : "Claim Rewards"}
+                      </button>
                     </div>
                   );
                 })}
@@ -1589,7 +1673,8 @@ export default function NodePage() {
                   borderTop: "1.7px dashed #ffd36e",
                 })}
               >
-                Unstake anytime (2 days unlock period before claim).
+                Claim rewards or unstake anytime (2 days unlock period before
+                claiming unstaked funds).
               </div>
             </div>
           )}
