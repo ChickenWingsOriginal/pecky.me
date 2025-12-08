@@ -92,8 +92,37 @@ const claimNFTReward = async (tokenName: string) => {
 - ❌ Using `window.supraProvider` → doesn't exist, use `useSupraConnect()` hook
 - ❌ Forgetting to import `BCS` from `supra-l1-sdk` → build fails
 
-### Coin IDL Location
-`app/lib/coin-idl.json` - Contains all exposed functions and their parameter types for the Pecky Coin module.
+## Contract ABIs
+
+All contract ABIs are stored in `app/lib/` and can be read directly when needed. **Do not duplicate ABI content in CLAUDE.md** - reference by file path instead.
+
+### Available ABIs
+
+1. **`app/lib/coin-abi.json`** - Pecky Coin Module
+   - Address: `0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d`
+   - Key functions:
+     - `claim_nft_airdrop(&signer, 0x1::string::String)` - Claim NFT airdrop rewards
+     - `claim_from_airdrop_vault_staking(&signer)` - Claim staking rewards
+     - `transfer(&signer, address, u64)` - Transfer Pecky tokens
+     - `balance(address) -> u64` - View function to check balance
+     - `has_claimed_NFT_airdrop(0x1::string::String) -> bool` - Check if NFT claimed
+
+2. **`app/lib/stake-abi.json`** - Node Staking Module
+   - Address: `0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d`
+   - Key functions:
+     - `stake(&signer, 0x1::string::String, u64)` - Stake on a node
+     - `unstake(&signer, 0x1::string::String, u64)` - Unstake from a node
+     - `claim_user_reward(&signer, 0x1::string::String)` - Claim user staking rewards
+     - `claim_node_reward(&signer, 0x1::string::String)` - Claim node operator rewards
+     - `get_user_stake(address, 0x1::string::String) -> u64` - View user stake
+     - `get_user_rewards(address, 0x1::string::String) -> u64` - View user rewards
+     - `get_user_stake_triplets(address)` - Get all nodes user has staked on
+
+3. **`app/lib/pbo-delegation-pool-abi.json`** - PBO Delegation Pool (Meridian Staking)
+   - Module: `0x1::pbo_delegation_pool`
+   - Key functions:
+     - `add_stake(&signer, address, u64)` - Add stake to pool
+     - `get_stake(address, address) -> u64` - View function to get stake amount
 
 ---
 

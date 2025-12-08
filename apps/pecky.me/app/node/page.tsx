@@ -293,22 +293,13 @@ export default function NodePage() {
           console.log("Fetched fresh allNodes:", nodesToUse);
         }
 
-        const nodesWithApy: NodeWithData[] = [];
-        for (let i = 0; i < nodesToUse.length; i++) {
-          const node = nodesToUse[i];
-          if (i > 0) await new Promise((resolve) => setTimeout(resolve, 10));
+        const nodesWithData: NodeWithData[] = nodesToUse.map((node) => ({
+          nodeId: node.nodeId,
+          name: node.name,
+        }));
 
-          const apy = await getOperatorApyForOwner(node.nodeId);
-
-          nodesWithApy.push({
-            nodeId: node.nodeId,
-            name: node.name,
-            apy,
-          });
-        }
-
-        setAllNodes(nodesWithApy);
-        console.log("All nodes with APY:", nodesWithApy);
+        setAllNodes(nodesWithData);
+        console.log("All nodes loaded:", nodesWithData);
       } catch (error) {
         console.error("Failed to fetch all nodes:", error);
         setAllNodes([]);
@@ -1096,22 +1087,9 @@ export default function NodePage() {
                             fontSize: "14px",
                             fontWeight: "700",
                             color: "#a06500",
-                            mb: "4px",
                           })}
                         >
                           {node.name}
-                        </div>
-                        <div
-                          className={css({
-                            fontSize: "12px",
-                            color: "#b48512",
-                            fontWeight: "600",
-                          })}
-                        >
-                          APY:{" "}
-                          <strong className={css({ color: "#ff7700" })}>
-                            {(node.apy ?? 0).toFixed(2)}%
-                          </strong>
                         </div>
                       </div>
                     </div>
