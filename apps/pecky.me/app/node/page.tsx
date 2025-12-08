@@ -18,9 +18,13 @@ import {
   getPendingUnstakes,
   getUserStake,
   getUserRewards,
-} from "@/app/lib/nodeService";
+  getUserStakedNodes,
+  type UserStakeInfo,
+} from "@/app/utils/nodeService";
+import { formatCountdownFromTimestamp } from "@/app/utils/formatCountdownFromTimestamp";
+import { formatTimestamp } from "@/app/utils/formatTimestamp";
 import type { ActiveNode } from "@/app/context/WalletContext";
-import type { PendingUnstake } from "@/app/lib/nodeService";
+import type { PendingUnstake } from "@/app/utils/nodeService";
 
 interface RarityNFT {
   tokenName: string;
@@ -53,9 +57,10 @@ export default function NodePage() {
   );
   const [unstakingNodeId, setUnstakingNodeId] = useState<string | null>(null);
   const [isClaimingUnstakes, setIsClaimingUnstakes] = useState(false);
-  const [nodeStakes, setNodeStakes] = useState<
-    Record<string, { staked: bigint; rewards: bigint }>
-  >({});
+  const [userStakedNodes, setUserStakedNodes] = useState<UserStakeInfo[]>([]);
+  const [claimingUserRewardNodeId, setClaimingUserRewardNodeId] = useState<
+    string | null
+  >(null);
 
   const walletAddress = connectedWallet?.walletAddress;
   const peckyBalance = walletState.peckyBalance ?? BigInt(0);
@@ -67,7 +72,6 @@ export default function NodePage() {
     if (!walletAddress) return;
     setIsUnlinking(true);
     try {
-      // BCS serialize the string arguments (Move String type: 0x1::string::String)
       const serializedNodeId = serializeString(nodeId);
       const serializedTokenName = serializeString(tokenName);
 
@@ -96,7 +100,6 @@ export default function NodePage() {
     if (!walletAddress) return;
     setIsLinking(true);
     try {
-      // BCS serialize the string arguments (Move String type: 0x1::string::String)
       const serializedNodeId = serializeString(nodeId);
       const serializedTokenName = serializeString(tokenName);
 
@@ -126,7 +129,6 @@ export default function NodePage() {
     setIsClaimingRewards(true);
     setClaimingNodeId(nodeId);
     try {
-      // BCS serialize the node ID (Move String type: 0x1::string::String)
       const serializedNodeId = serializeString(nodeId);
 
       const result = await sendTransaction({
@@ -140,10 +142,8 @@ export default function NodePage() {
       });
       if (result.success) {
         console.log("Rewards claimed for node:", nodeId);
-        // Refresh wallet balance and node rewards
         try {
           await refreshBalances();
-          // Update the rewards for this specific node
           const updatedRewards = await getOperatorRewards(nodeId);
           setOwnedNodes((prevNodes) =>
             prevNodes.map((node) =>
@@ -177,7 +177,6 @@ export default function NodePage() {
 
     setIsStaking(true);
     try {
-      // Convert amount from $Pecky to micro-units (1 Pecky = 1,000,000 micro-units)
       const amountNumber = parseFloat(stakeAmount);
       if (isNaN(amountNumber) || amountNumber <= 0) {
         console.error("Invalid stake amount");
@@ -186,13 +185,11 @@ export default function NodePage() {
       }
       const amountMicro = Math.floor(amountNumber * 1_000_000);
 
-      // BCS serialize arguments
       const serializedNodeId = BCS.bcsSerializeStr(selectedNodeId);
 
-      // For u64, we need to serialize it as a little-endian 8-byte value
       const buffer = new Uint8Array(8);
       const view = new DataView(buffer.buffer);
-      view.setBigUint64(0, BigInt(amountMicro), true); // true for little-endian
+      view.setBigUint64(0, BigInt(amountMicro), true);
       const serializedAmount = new Uint8Array(buffer);
 
       const result = await sendTransaction({
@@ -211,17 +208,14 @@ export default function NodePage() {
           amount: stakeAmount,
           txHash: result.txHash,
         });
-        // Refresh wallet balance and page data
         try {
           await refreshBalances();
-          // Wait a moment for the balance to update, then reload the page to show latest data
           setTimeout(() => {
             window.location.reload();
           }, 500);
         } catch (error) {
           console.error("Error refreshing wallet data:", error);
         }
-        // Reset form
         setStakeAmount("");
         setSelectedNodeId(null);
       } else {
@@ -234,7 +228,6 @@ export default function NodePage() {
     }
   };
 
-  // Fetch node rewards and APY for owned nodes
   useEffect(() => {
     if (!walletState.ownedNodes || walletState.ownedNodes.length === 0) {
       setOwnedNodes([]);
@@ -245,24 +238,21 @@ export default function NodePage() {
 
     (async () => {
       try {
-        // Fetch operator rewards and APY for each owned node with delay
         const nodesWithData: NodeWithData[] = [];
         for (let i = 0; i < ownedNodesData.length; i++) {
           const node = ownedNodesData[i];
-          if (i > 0) await new Promise((resolve) => setTimeout(resolve, 10)); // 10ms delay
+          if (i > 0) await new Promise((resolve) => setTimeout(resolve, 10));
 
           const [rewards, apy] = await Promise.all([
             getOperatorRewards(node.nodeId),
             getOperatorApyForOwner(node.nodeId),
           ]);
 
-          // Convert linked rarities to RarityNFT format
           const linkedRarities = node.linkedRarities.map((tokenName) => ({
             tokenName,
             rarity: rarityLabel(tokenName),
           }));
 
-          // Convert available rarities to RarityNFT format
           const availableRarities = (walletState.availableRarityNfts || []).map(
             (tokenName) => ({
               tokenName,
@@ -289,29 +279,24 @@ export default function NodePage() {
     })();
   }, [walletState.ownedNodes, walletState.availableRarityNfts]);
 
-  // Fetch all active nodes with APY (only if not in context)
   useEffect(() => {
     (async () => {
       setIsLoading(true);
       try {
         let nodesToUse: ActiveNode[] = [];
 
-        // Check if allNodes exists in context
         if (walletState.allNodes && walletState.allNodes.length > 0) {
-          // Use cached data from context
           nodesToUse = walletState.allNodes;
           console.log("Using cached allNodes from context:", nodesToUse);
         } else {
-          // Fetch fresh data if not in context
           nodesToUse = await fetchActiveNodesSorted();
           console.log("Fetched fresh allNodes:", nodesToUse);
         }
 
-        // Fetch APY for each node with delay
         const nodesWithApy: NodeWithData[] = [];
         for (let i = 0; i < nodesToUse.length; i++) {
           const node = nodesToUse[i];
-          if (i > 0) await new Promise((resolve) => setTimeout(resolve, 10)); // 10ms delay
+          if (i > 0) await new Promise((resolve) => setTimeout(resolve, 10));
 
           const apy = await getOperatorApyForOwner(node.nodeId);
 
@@ -333,40 +318,27 @@ export default function NodePage() {
     })();
   }, [walletAddress, walletState.allNodes]);
 
-  // Fetch pending unstakes and node stakes
   useEffect(() => {
     if (!walletAddress) {
       setPendingUnstakes([]);
-      setNodeStakes({});
+      setUserStakedNodes([]);
       return;
     }
 
     (async () => {
       try {
-        // Fetch pending unstakes
-        const unstakes = await getPendingUnstakes(walletAddress);
+        const [unstakes, stakedNodes] = await Promise.all([
+          getPendingUnstakes(walletAddress),
+          getUserStakedNodes(walletAddress),
+        ]);
+
         setPendingUnstakes(unstakes);
-
-        // Fetch stakes and rewards for owned nodes
-        if (walletState.ownedNodes && walletState.ownedNodes.length > 0) {
-          const stakes: Record<string, { staked: bigint; rewards: bigint }> =
-            {};
-
-          for (const node of walletState.ownedNodes) {
-            const [staked, rewards] = await Promise.all([
-              getUserStake(walletAddress, node.nodeId),
-              getUserRewards(walletAddress, node.nodeId),
-            ]);
-            stakes[node.nodeId] = { staked, rewards };
-          }
-
-          setNodeStakes(stakes);
-        }
+        setUserStakedNodes(stakedNodes);
       } catch (error) {
         console.error("Failed to fetch unstakes/stakes:", error);
       }
     })();
-  }, [walletAddress, walletState.ownedNodes]);
+  }, [walletAddress]);
 
   const handleUnstake = async (nodeId: string) => {
     if (!walletAddress) return;
@@ -378,7 +350,8 @@ export default function NodePage() {
     }
 
     const amountMicro = BigInt(Math.floor(parseFloat(amount) * 1_000_000));
-    const stakedAmount = nodeStakes[nodeId]?.staked ?? BigInt(0);
+    const nodeStake = userStakedNodes.find((n) => n.nodeId === nodeId);
+    const stakedAmount = nodeStake?.staked ?? BigInt(0);
 
     if (amountMicro > stakedAmount) {
       toast.error(
@@ -391,7 +364,6 @@ export default function NodePage() {
     try {
       const serializedNodeId = serializeString(nodeId);
 
-      // Serialize u64 amount
       const buffer = new Uint8Array(8);
       const view = new DataView(buffer.buffer);
       view.setBigUint64(0, amountMicro, true);
@@ -414,23 +386,19 @@ export default function NodePage() {
         );
         setUnstakeAmounts({ ...unstakeAmounts, [nodeId]: "" });
 
-        // Refresh data
-        const [unstakes, staked, rewards] = await Promise.all([
+        const [unstakes, stakedNodes] = await Promise.all([
           getPendingUnstakes(walletAddress),
-          getUserStake(walletAddress, nodeId),
-          getUserRewards(walletAddress, nodeId),
+          getUserStakedNodes(walletAddress),
         ]);
 
         setPendingUnstakes(unstakes);
-        setNodeStakes({ ...nodeStakes, [nodeId]: { staked, rewards } });
+        setUserStakedNodes(stakedNodes);
       } else {
-        // Check if user closed wallet
         const errorMsg = result.reason || result.error || "";
         if (
           errorMsg.includes("All transaction approaches failed") ||
           errorMsg.includes("User rejected")
         ) {
-          // User closed wallet, don't show error
           console.log("Transaction cancelled by user");
         } else {
           toast.error("Unstake failed: " + errorMsg);
@@ -438,19 +406,71 @@ export default function NodePage() {
       }
     } catch (error: any) {
       console.error("Unstake error:", error);
-      // Check if user closed wallet
       const errorMsg = error?.message || error?.toString() || "";
       if (
         errorMsg.includes("All transaction approaches failed") ||
         errorMsg.includes("User rejected")
       ) {
-        // User closed wallet, don't show error
         console.log("Transaction cancelled by user");
       } else {
         toast.error("Unstake failed");
       }
     } finally {
       setUnstakingNodeId(null);
+    }
+  };
+
+  const handleClaimUserReward = async (nodeId: string) => {
+    if (!walletAddress) return;
+
+    setClaimingUserRewardNodeId(nodeId);
+    try {
+      const serializedNodeId = serializeString(nodeId);
+
+      const result = await sendTransaction({
+        payload: {
+          moduleAddress: STAKE_MODULE,
+          moduleName: "stake",
+          functionName: "claim_user_reward",
+          typeArguments: [],
+          arguments: [serializedNodeId],
+        },
+      });
+
+      if (result.success) {
+        console.log("User reward claimed for node:", nodeId);
+        toast.success("Rewards claimed successfully!");
+
+        // Refresh user staked nodes to update rewards
+        const stakedNodes = await getUserStakedNodes(walletAddress);
+        setUserStakedNodes(stakedNodes);
+
+        // Refresh wallet balance
+        await refreshBalances();
+      } else {
+        const errorMsg = result.reason || result.error || "";
+        if (
+          errorMsg.includes("All transaction approaches failed") ||
+          errorMsg.includes("User rejected")
+        ) {
+          console.log("Transaction cancelled by user");
+        } else {
+          toast.error("Claim failed: " + errorMsg);
+        }
+      }
+    } catch (error: any) {
+      console.error("Claim user reward error:", error);
+      const errorMsg = error?.message || error?.toString() || "";
+      if (
+        errorMsg.includes("All transaction approaches failed") ||
+        errorMsg.includes("User rejected")
+      ) {
+        console.log("Transaction cancelled by user");
+      } else {
+        toast.error("Claim failed");
+      }
+    } finally {
+      setClaimingUserRewardNodeId(null);
     }
   };
 
@@ -473,18 +493,15 @@ export default function NodePage() {
         console.log("Claimed unstakes successfully");
         toast.success("Claimed unstaked funds!");
 
-        // Refresh data
         await refreshBalances();
         const unstakes = await getPendingUnstakes(walletAddress);
         setPendingUnstakes(unstakes);
       } else {
-        // Check if user closed wallet
         const errorMsg = result.reason || result.error || "";
         if (
           errorMsg.includes("All transaction approaches failed") ||
           errorMsg.includes("User rejected")
         ) {
-          // User closed wallet, don't show error
           console.log("Transaction cancelled by user");
         } else {
           toast.error("Claim failed: " + errorMsg);
@@ -492,13 +509,11 @@ export default function NodePage() {
       }
     } catch (error: any) {
       console.error("Claim unstakes error:", error);
-      // Check if user closed wallet
       const errorMsg = error?.message || error?.toString() || "";
       if (
         errorMsg.includes("All transaction approaches failed") ||
         errorMsg.includes("User rejected")
       ) {
-        // User closed wallet, don't show error
         console.log("Transaction cancelled by user");
       } else {
         toast.error("Claim failed");
@@ -506,26 +521,6 @@ export default function NodePage() {
     } finally {
       setIsClaimingUnstakes(false);
     }
-  };
-
-  const formatCountdown = (releaseTimestamp: bigint): string => {
-    const now = Math.floor(Date.now() / 1000);
-    const diff = Number(releaseTimestamp) - now;
-
-    if (diff <= 0) return "ready";
-
-    const days = Math.floor(diff / 86400);
-    const hours = Math.floor((diff % 86400) / 3600);
-    const minutes = Math.floor((diff % 3600) / 60);
-
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
-  };
-
-  const formatDateTime = (timestamp: bigint): string => {
-    const date = new Date(Number(timestamp) * 1000);
-    return date.toLocaleString();
   };
 
   return (
@@ -713,7 +708,6 @@ export default function NodePage() {
           </div>
         </RetroBox>
 
-        {/* Your Nodes Section */}
         <RetroBox>
           <div className={css({ textAlign: "center", mb: "20px" })}>
             <h2
@@ -865,7 +859,6 @@ export default function NodePage() {
                     </button>
                   </div>
 
-                  {/* Linked Rarities Section */}
                   {node.linkedRarities && node.linkedRarities.length > 0 && (
                     <div
                       className={css({
@@ -930,7 +923,6 @@ export default function NodePage() {
                     </div>
                   )}
 
-                  {/* Available Rarities Section */}
                   {node.availableRarities &&
                     node.availableRarities.length > 0 && (
                       <div className={css({ mb: "12px" })}>
@@ -1008,7 +1000,6 @@ export default function NodePage() {
           )}
         </RetroBox>
 
-        {/* Active Nodes Section with Staking */}
         <RetroBox>
           <div className={css({ textAlign: "center", mb: "20px" })}>
             <h2
@@ -1045,7 +1036,6 @@ export default function NodePage() {
             </div>
           ) : allNodes.length > 0 ? (
             <>
-              {/* Nodes List with Radio Selection - Grid Layout */}
               <div
                 className={css({
                   display: "grid",
@@ -1129,7 +1119,6 @@ export default function NodePage() {
                 })}
               </div>
 
-              {/* Staking UI */}
               <div
                 className={css({
                   display: "flex",
@@ -1149,7 +1138,6 @@ export default function NodePage() {
                   {allNodes.find((n) => n.nodeId === selectedNodeId)?.name}
                 </div>
 
-                {/* Pecky Balance Display */}
                 {walletState.isConnected && (
                   <div
                     className={css({
@@ -1172,7 +1160,6 @@ export default function NodePage() {
                   </div>
                 )}
 
-                {/* Amount Input */}
                 <input
                   type="number"
                   placeholder="Amount in $Pecky"
@@ -1190,7 +1177,6 @@ export default function NodePage() {
                   })}
                 />
 
-                {/* Quick Percentage Buttons */}
                 <div
                   className={css({
                     display: "grid",
@@ -1268,7 +1254,6 @@ export default function NodePage() {
                   </button>
                 </div>
 
-                {/* Stake Button */}
                 <button
                   onClick={handleStake}
                   disabled={!selectedNodeId || !stakeAmount || isStaking}
@@ -1308,9 +1293,7 @@ export default function NodePage() {
           )}
         </RetroBox>
 
-        {/* Unstakes & Pending Section */}
         <RetroBox>
-          {/* Pending Unstakes */}
           <div className={css({ mb: "16px" })}>
             <div
               className={css({
@@ -1408,13 +1391,13 @@ export default function NodePage() {
                         <strong>
                           {unstake.claimable
                             ? "ready"
-                            : formatDateTime(unstake.release)}
+                            : formatTimestamp(unstake.release)}
                         </strong>{" "}
                         <span className={css({ opacity: 0.75 })}>
                           (
                           {unstake.claimable
                             ? "✓ claimable"
-                            : `release in ${formatCountdown(unstake.release)}`}
+                            : `release in ${formatCountdownFromTimestamp(unstake.release)}`}
                           )
                         </span>
                       </div>
@@ -1461,8 +1444,7 @@ export default function NodePage() {
             </div>
           </div>
 
-          {/* Your Node Stakes (Unstake Section) */}
-          {walletState.ownedNodes && walletState.ownedNodes.length > 0 && (
+          {userStakedNodes.length > 0 && (
             <div>
               <hr
                 className={css({
@@ -1489,10 +1471,9 @@ export default function NodePage() {
                   gap: "10px",
                 })}
               >
-                {walletState.ownedNodes.map((node) => {
-                  const nodeData = nodeStakes[node.nodeId];
-                  const stakedAmount = nodeData?.staked ?? BigInt(0);
-                  const rewardsAmount = nodeData?.rewards ?? BigInt(0);
+                {userStakedNodes.map((node) => {
+                  const stakedAmount = node.staked;
+                  const rewardsAmount = node.rewards;
 
                   return (
                     <div
@@ -1512,7 +1493,7 @@ export default function NodePage() {
                             color: "#4a2c00",
                           })}
                         >
-                          {node.name}
+                          {node.displayName}
                         </div>
                         <div
                           className={css({
@@ -1639,6 +1620,44 @@ export default function NodePage() {
                             : "Unstake"}
                         </button>
                       </div>
+
+                      <button
+                        onClick={() => handleClaimUserReward(node.nodeId)}
+                        disabled={
+                          claimingUserRewardNodeId === node.nodeId ||
+                          rewardsAmount === BigInt(0)
+                        }
+                        className={css({
+                          w: "100%",
+                          height: "40px",
+                          px: "16px",
+                          borderRadius: "10px",
+                          bg:
+                            claimingUserRewardNodeId === node.nodeId ||
+                            rewardsAmount === BigInt(0)
+                              ? "#cccccc"
+                              : "linear-gradient(to right, #ffaa00, #ff7700)",
+                          border: "none",
+                          color: "white",
+                          fontSize: "13px",
+                          fontWeight: "600",
+                          cursor:
+                            claimingUserRewardNodeId === node.nodeId ||
+                            rewardsAmount === BigInt(0)
+                              ? "not-allowed"
+                              : "pointer",
+                          opacity:
+                            claimingUserRewardNodeId === node.nodeId ||
+                            rewardsAmount === BigInt(0)
+                              ? 0.6
+                              : 1,
+                          mt: "8px",
+                        })}
+                      >
+                        {claimingUserRewardNodeId === node.nodeId
+                          ? "Claiming..."
+                          : "Claim Rewards"}
+                      </button>
                     </div>
                   );
                 })}
@@ -1654,7 +1673,8 @@ export default function NodePage() {
                   borderTop: "1.7px dashed #ffd36e",
                 })}
               >
-                Unstake anytime (2 days unlock period before claim).
+                Claim rewards or unstake anytime (2 days unlock period before
+                claiming unstaked funds).
               </div>
             </div>
           )}

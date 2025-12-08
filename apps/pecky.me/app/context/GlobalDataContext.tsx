@@ -1,8 +1,8 @@
 'use client';
 
 import React, { createContext, useEffect, useState, ReactNode } from 'react';
-import { fetchPeckyPrice, fetchCirculatingSupply, fetchBurnedPecky, fetchNftPoolRemaining } from '@/app/lib/walletService';
-import { fetchActiveNodesSorted } from '@/app/lib/nodeService';
+import { fetchPeckyPrice, fetchCirculatingSupply, fetchBurnedPecky, fetchNftPoolRemaining } from '@/app/utils/walletService';
+import { fetchActiveNodesSorted } from '@/app/utils/nodeService';
 
 export interface ActiveNode {
   nodeId: string;

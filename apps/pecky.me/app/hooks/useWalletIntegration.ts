@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useSupraConnect } from '@gerritsen/supra-connect';
 import { useWallet } from '@/app/context/WalletContext';
-import { refreshAllWalletData, fetchPeckyPrice } from '@/app/lib/walletService';
+import { refreshAllWalletData, fetchPeckyPrice } from '@/app/utils/walletService';
 
 const BALANCE_REFRESH_INTERVAL = 30000; // 30 seconds
 const NFT_REFRESH_INTERVAL = 60000; // 60 seconds

@@ -8,6 +8,10 @@ import { EXTERNAL_LINKS } from "@/app/constants/links";
 import { useWallet } from "@/app/context/WalletContext";
 import { useSupraConnect } from "@gerritsen/supra-connect";
 import { toast } from "sonner";
+import { checkPeckyBotStatus } from "@/app/utils/checkPeckyBotStatus";
+import { getPeckyBotDaysRemaining } from "@/app/utils/getPeckyBotDaysRemaining";
+import { getBotTransactionFailureReason } from "@/app/utils/getBotTransactionFailureReason";
+import { formatBotStatus } from "@/app/utils/formatBotStatus";
 
 const PECKY_COIN_MODULE =
   "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
@@ -43,81 +47,19 @@ export default function BotPage() {
   const checkBotStatus = async () => {
     if (!connectedWallet?.walletAddress) return;
 
-    try {
-      const response = await fetch(
-        "https://rpc-mainnet.supra.com/rpc/v1/view",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            function: `${PECKY_COIN_MODULE}::PeckyBotV2::is_peckybot_active`,
-            arguments: [connectedWallet.walletAddress],
-            type_arguments: [],
-          }),
-        },
-      );
+    const isActive = await checkPeckyBotStatus(connectedWallet.walletAddress);
+    setBotActive(isActive);
 
-      const data = await response.json();
-      const isActive = data?.result?.[0] === true;
-      setBotActive(isActive);
-
-      if (isActive) {
-        getDaysRemaining();
-      }
-    } catch (error) {
-      console.error("Failed to check bot status:", error);
+    if (isActive) {
+      getDaysRemaining();
     }
   };
 
   const getDaysRemaining = async () => {
     if (!connectedWallet?.walletAddress) return;
 
-    try {
-      const response = await fetch(
-        "https://rpc-mainnet.supra.com/rpc/v1/view",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            function: `${PECKY_COIN_MODULE}::PeckyBotV2::get_remaining_days`,
-            arguments: [connectedWallet.walletAddress],
-            type_arguments: [],
-          }),
-        },
-      );
-
-      const data = await response.json();
-      const days = data?.result?.[0] || 0;
-      setDaysLeft(days);
-    } catch (error) {
-      console.error("Failed to get days remaining:", error);
-    }
-  };
-
-  const getFailureReason = async (txHash: string): Promise<string> => {
-    try {
-      const response = await fetch(
-        `https://rpc-mainnet.supra.com/rpc/v1/transactions/${txHash}`,
-      );
-      const data = await response.json();
-      const status = data?.output?.Move?.vm_status;
-
-      if (status?.includes("0x7d0")) {
-        return "You're already activated – no need to pay twice.";
-      } else if (status?.includes("0x7d1")) {
-        return "Please enter a positive number of days.";
-      } else if (status?.includes("0x7d2")) {
-        return "You can't extend a bot that isn't active. Activate it first!";
-      } else if (status?.includes("0x7d3")) {
-        return "Your grace period has expired – reactivate with Supra first.";
-      } else if (status?.includes("0x3e7")) {
-        return "You need to register first.";
-      } else {
-        return "Transaction failed. Reason unknown.";
-      }
-    } catch {
-      return "Transaction failed.";
-    }
+    const days = await getPeckyBotDaysRemaining(connectedWallet.walletAddress);
+    setDaysLeft(days);
   };
 
   const handleActivateBot = async () => {
@@ -157,7 +99,9 @@ export default function BotPage() {
       if (isActive) {
         toast.success("PeckyBot activated with Supra!");
       } else {
-        const failureMsg = await getFailureReason(result.txHash || "");
+        const failureMsg = await getBotTransactionFailureReason(
+          result.txHash || ""
+        );
         toast.error(failureMsg);
       }
     } catch (error) {
@@ -220,7 +164,9 @@ export default function BotPage() {
         setExtendDays("");
         await refreshBalances();
       } else {
-        const failureMsg = await getFailureReason(result.txHash || "");
+        const failureMsg = await getBotTransactionFailureReason(
+          result.txHash || ""
+        );
         toast.error(failureMsg);
       }
     } catch (error) {
@@ -231,15 +177,6 @@ export default function BotPage() {
     }
   };
 
-  const getBotStatus = () => {
-    if (!connectedWallet?.walletAddress) {
-      return "connect wallet";
-    }
-    if (botActive) {
-      return `✅ ACTIVE - ${daysLeft} days left`;
-    }
-    return "❌ inactive";
-  };
   return (
     <div
       className={css({
@@ -375,7 +312,13 @@ export default function BotPage() {
             })}
           >
             Bot status:{" "}
-            <span className={css({ color: "#2e2e2e" })}>{getBotStatus()}</span>
+            <span className={css({ color: "#2e2e2e" })}>
+              {formatBotStatus(
+                !!connectedWallet?.walletAddress,
+                botActive,
+                daysLeft
+              )}
+            </span>
           </div>
 
           <hr
