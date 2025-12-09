@@ -538,7 +538,7 @@ export default function NodePage() {
         <RetroBox>
           <div className={css({ textAlign: "center", mb: "20px" })}>
             <Image
-              src="/images/node.png"
+              src="/images/node-icon.png"
               alt="Node icon"
               width={96}
               height={96}
@@ -1115,6 +1115,29 @@ export default function NodePage() {
                   Stake $Pecky to{" "}
                   {allNodes.find((n) => n.nodeId === selectedNodeId)?.name}
                 </div>
+
+                {selectedNodeId && (
+                  <div
+                    className={css({
+                      position: "relative",
+                      w: "100%",
+                      maxW: "300px",
+                      mx: "auto",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                    })}
+                  >
+                    <img
+                      src={`https://smartnft.pecky.me/animation/pecky-node/${selectedNodeId}.gif?cb=${Math.floor(Date.now() / (15 * 60 * 1000)) * (15 * 60 * 1000)}`}
+                      alt={allNodes.find((n) => n.nodeId === selectedNodeId)?.name}
+                      loading="lazy"
+                      className={css({
+                        w: "100%",
+                        objectFit: "cover",
+                      })}
+                    />
+                  </div>
+                )}
 
                 {walletState.isConnected && (
                   <div
