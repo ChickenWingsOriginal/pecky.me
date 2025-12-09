@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { css } from "@/styled-system/css";
 import { NFTCard } from "./NFTCard";
@@ -32,7 +32,9 @@ export function NFTGrid({
 }: NFTGridProps) {
   if (isLoading) {
     return (
-      <div className={css({ textAlign: "center", py: "20px", color: "#a06500" })}>
+      <div
+        className={css({ textAlign: "center", py: "20px", color: "#a06500" })}
+      >
         Loading your NFTs...
       </div>
     );
@@ -40,34 +42,46 @@ export function NFTGrid({
 
   if (nfts.length === 0) {
     return (
-      <div className={css({ textAlign: "center", py: "20px", color: "#a06500" })}>
+      <div
+        className={css({ textAlign: "center", py: "20px", color: "#a06500" })}
+      >
         No NFTs found
       </div>
     );
   }
 
   return (
-    <div className={css({ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "12px", mb: "16px" })}>
-      {nfts.map((nft) => (
-        <NFTCard
-          key={nft.name}
-          name={nft.name}
-          image={nft.image}
-          rarity={nft.rarity}
-          claimStatus={
-            nft.claimStatus || {
-              status: "unknown",
-              text: "Loading...",
+    <div
+      className={css({
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+        gap: "12px",
+        mb: "16px",
+      })}
+    >
+      {nfts.map((nft) => {
+        console.log("NFT", nft.name, nft.image);
+        return (
+          <NFTCard
+            key={nft.name}
+            name={nft.name}
+            image={nft.image}
+            rarity={nft.rarity}
+            claimStatus={
+              nft.claimStatus || {
+                status: "unknown",
+                text: "Loading...",
+              }
             }
-          }
-          airdropAvailable={nft.airdropAvailable}
-          isClaiming={isClaimingNft === nft.name}
-          isClaimingAirdrop={isClaimingAirdropNft === nft.name}
-          onClaim={onClaim}
-          onClaimAirdrop={onClaimAirdrop}
-          walletConnected={walletConnected}
-        />
-      ))}
+            airdropAvailable={nft.airdropAvailable}
+            isClaiming={isClaimingNft === nft.name}
+            isClaimingAirdrop={isClaimingAirdropNft === nft.name}
+            onClaim={onClaim}
+            onClaimAirdrop={onClaimAirdrop}
+            walletConnected={walletConnected}
+          />
+        );
+      })}
     </div>
   );
 }
