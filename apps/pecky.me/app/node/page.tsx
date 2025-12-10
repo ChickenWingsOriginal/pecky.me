@@ -16,8 +16,6 @@ import {
   rarityLabel,
   serializeString,
   getPendingUnstakes,
-  getUserStake,
-  getUserRewards,
   getUserStakedNodes,
   type UserStakeInfo,
 } from "@/app/utils/nodeService";
@@ -1030,7 +1028,10 @@ export default function NodePage() {
               <div
                 className={css({
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gridTemplateColumns: {
+                    base: "repeat(2, 1fr)",
+                    md: "repeat(3, 1fr)",
+                  },
                   gap: "10px",
                   mb: "20px",
                   pb: "20px",
@@ -1129,7 +1130,9 @@ export default function NodePage() {
                   >
                     <img
                       src={`https://smartnft.pecky.me/animation/pecky-node/${selectedNodeId}.gif?cb=${Math.floor(Date.now() / (15 * 60 * 1000)) * (15 * 60 * 1000)}`}
-                      alt={allNodes.find((n) => n.nodeId === selectedNodeId)?.name}
+                      alt={
+                        allNodes.find((n) => n.nodeId === selectedNodeId)?.name
+                      }
                       loading="lazy"
                       className={css({
                         w: "100%",
