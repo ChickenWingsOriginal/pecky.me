@@ -17,6 +17,7 @@ import { getNftsFromCache } from "@/app/utils/getNftsFromCache";
 import { saveNftsToCache } from "@/app/utils/saveNftsToCache";
 import { getTokenClaimStatus } from "@/app/utils/getTokenClaimStatus";
 import { checkAirdropStatus } from "@/app/utils/checkAirdropStatus";
+import { formatMillions } from "@/app/utils/format";
 
 const NFT_POOL_TOTAL = 450_000_000_000;
 
@@ -152,26 +153,42 @@ export default function NFTPage() {
 
     setLoadingNfts(true);
     try {
-      const tokensWithStatus = await Promise.all(
-        nfts.map(async (token: OwnedNFT) => {
-          const [claimStatus, airdropStatus] = await Promise.all([
-            getTokenClaimStatus(token.name),
-            checkAirdropStatus(token.name),
-          ]);
-          console.log({
-            ...token,
-            rarity: rarityLabel(token.name),
-            claimStatus,
-            airdropAvailable: airdropStatus,
-          });
-          return {
-            ...token,
-            rarity: rarityLabel(token.name),
-            claimStatus,
-            airdropAvailable: airdropStatus,
-          };
-        }),
-      );
+      // Process NFTs in batches of 10 with 100ms delay between batches
+      const BATCH_SIZE = 10;
+      const BATCH_DELAY_MS = 100;
+      const tokensWithStatus: OwnedNFT[] = [];
+
+      for (let i = 0; i < nfts.length; i += BATCH_SIZE) {
+        const batch = nfts.slice(i, i + BATCH_SIZE);
+
+        const batchResults = await Promise.all(
+          batch.map(async (token: OwnedNFT) => {
+            const [claimStatus, airdropStatus] = await Promise.all([
+              getTokenClaimStatus(token.name),
+              checkAirdropStatus(token.name),
+            ]);
+            console.log({
+              ...token,
+              rarity: rarityLabel(token.name),
+              claimStatus,
+              airdropAvailable: airdropStatus,
+            });
+            return {
+              ...token,
+              rarity: rarityLabel(token.name),
+              claimStatus,
+              airdropAvailable: airdropStatus,
+            };
+          }),
+        );
+
+        tokensWithStatus.push(...batchResults);
+
+        // Wait between batches (except for the last batch)
+        if (i + BATCH_SIZE < nfts.length) {
+          await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+        }
+      }
 
       setOwnedNfts(tokensWithStatus as any);
       if (connectedWallet?.walletAddress) {
@@ -761,13 +778,18 @@ export default function NFTPage() {
                   <div style={{ fontSize: "11px", color: "#a06500" }}>
                     Monthly NFT reward is now{" "}
                     {nftPoolRemaining !== null
-                      ? (
-                          Math.round(
-                            Number(nftPoolRemaining) * rarity.monthlyPercent,
-                          ) / 1_000_000
-                        ).toFixed(2)
+                      ? formatMillions(
+                          Number(
+                            (
+                              Math.round(
+                                Number(nftPoolRemaining) *
+                                  rarity.monthlyPercent,
+                              ) / 1_000_000
+                            ).toFixed(2),
+                          ),
+                        )
                       : "–"}
-                    M $Pecky
+                    $Pecky
                   </div>
                 </div>
               ))}

@@ -265,15 +265,16 @@ export async function checkDiscordLinkStatus(walletAddress: string): Promise<{
     }
 
     // If linked, get Discord ID
-    const discordIdResult = await viewCall<string[]>({
+    // Note: get_discord_id returns (bool, u128) - [exists, discord_id]
+    const discordIdResult = await viewCall<[boolean, string]>({
       function: `${PECKY_COIN_MODULE}::discord_link::get_discord_id`,
       type_arguments: [],
       arguments: [walletAddress],
     });
 
     const discordId =
-      Array.isArray(discordIdResult) && discordIdResult.length > 0
-        ? discordIdResult[0]
+      Array.isArray(discordIdResult) && discordIdResult.length > 1 && discordIdResult[0]
+        ? discordIdResult[1]  // Second element is the actual Discord ID (u128)
         : undefined;
     return {
       isLinked: true,
