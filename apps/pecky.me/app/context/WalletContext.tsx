@@ -11,6 +11,7 @@ import {
   fetchOwnedNfts,
   fetchOwnedNodeNfts,
   fetchPeckyBalance,
+  checkDiscordLinkStatus,
 } from "@/app/utils/walletService";
 import {
   rarityLabel,
@@ -225,6 +226,7 @@ interface WalletContextType {
   refreshBalances: () => Promise<void>;
   refreshNfts: () => Promise<void>;
   refreshStakingInfo: () => Promise<void>;
+  refreshDiscordStatus: () => Promise<void>;
 }
 
 export const WalletContext = createContext<WalletContextType | undefined>(
@@ -307,6 +309,26 @@ export function WalletProvider({ children }: WalletProviderProps) {
       });
     } finally {
       dispatch({ type: "SET_LOADING_STAKING", payload: false });
+    }
+  }, [state.walletAddress]);
+
+  const refreshDiscordStatus = useCallback(async () => {
+    if (!state.walletAddress) return;
+    try {
+      const discordStatus = await checkDiscordLinkStatus(state.walletAddress);
+      dispatch({
+        type: "SET_DISCORD_STATUS",
+        payload: discordStatus,
+      });
+    } catch (error) {
+      console.error("Failed to refresh Discord status:", error);
+      dispatch({
+        type: "SET_ERROR",
+        payload:
+          error instanceof Error
+            ? error.message
+            : "Failed to refresh Discord status",
+      });
     }
   }, [state.walletAddress]);
 
@@ -416,6 +438,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
         refreshBalances,
         refreshNfts,
         refreshStakingInfo,
+        refreshDiscordStatus,
       }}
     >
       {children}

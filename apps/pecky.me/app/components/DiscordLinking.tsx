@@ -5,9 +5,11 @@ import { useState } from "react";
 import { useWallet } from "@/app/context/WalletContext";
 import { useSupraConnect } from "@gerritsen/supra-connect";
 import { RetroBox } from "./RetroBox";
+// @ts-ignore
+import { BCS } from "supra-l1-sdk";
 
 export function DiscordLinking() {
-  const { state } = useWallet();
+  const { state, refreshDiscordStatus } = useWallet();
   const { connectedWallet, sendTransaction } = useSupraConnect();
   const [discordInput, setDiscordInput] = useState("");
   const [linkingDiscord, setLinkingDiscord] = useState(false);
@@ -18,22 +20,32 @@ export function DiscordLinking() {
       return;
     }
 
-    if (!discordInput.trim()) {
+    const idStr = discordInput.trim();
+    if (!idStr) {
       alert("Please enter a Discord ID");
+      return;
+    }
+
+    // Validate Discord ID format (16-20 digits)
+    if (!/^\d{16,20}$/.test(idStr)) {
+      alert("Please enter a valid Discord ID (16-20 digits)");
       return;
     }
 
     setLinkingDiscord(true);
     try {
-      const PECKY_COIN_MODULE = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
+      const DISCORD_MODULE_ADDR = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
+
+      // Serialize Discord ID as u128
+      const serializedDiscordId = BCS.bcsSerializeU128(idStr);
 
       const result = await sendTransaction({
         payload: {
-          moduleAddress: PECKY_COIN_MODULE,
-          moduleName: 'Coin',
-          functionName: 'link_discord',
+          moduleAddress: DISCORD_MODULE_ADDR,
+          moduleName: 'discord_link',
+          functionName: 'register_discord',
           typeArguments: [],
-          arguments: [discordInput],
+          arguments: [serializedDiscordId],
         },
       });
 
@@ -43,6 +55,9 @@ export function DiscordLinking() {
 
       alert("Discord linked successfully!");
       setDiscordInput("");
+
+      // Refresh Discord status to update UI
+      await refreshDiscordStatus();
     } catch (error) {
       console.error("Discord linking failed:", error);
       alert("Failed to link Discord");
@@ -59,13 +74,13 @@ export function DiscordLinking() {
 
     setLinkingDiscord(true);
     try {
-      const PECKY_COIN_MODULE = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
+      const DISCORD_MODULE_ADDR = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
 
       const result = await sendTransaction({
         payload: {
-          moduleAddress: PECKY_COIN_MODULE,
-          moduleName: 'Coin',
-          functionName: 'unlink_discord',
+          moduleAddress: DISCORD_MODULE_ADDR,
+          moduleName: 'discord_link',
+          functionName: 'unregister_discord',
           typeArguments: [],
           arguments: [],
         },
@@ -76,6 +91,9 @@ export function DiscordLinking() {
       }
 
       alert("Discord unlinked successfully!");
+
+      // Refresh Discord status to update UI
+      await refreshDiscordStatus();
     } catch (error) {
       console.error("Discord unlinking failed:", error);
       alert("Failed to unlink Discord");
