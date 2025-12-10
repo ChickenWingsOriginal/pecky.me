@@ -59,29 +59,26 @@ export function NFTGrid({
         mb: "16px",
       })}
     >
-      {nfts.map((nft) => {
-        console.log("NFT", nft.name, nft.image);
-        return (
-          <NFTCard
-            key={nft.name}
-            name={nft.name}
-            image={nft.image}
-            rarity={nft.rarity}
-            claimStatus={
-              nft.claimStatus || {
-                status: "unknown",
-                text: "Loading...",
-              }
+      {nfts.map((nft) => (
+        <NFTCard
+          key={nft.name}
+          name={nft.name}
+          image={nft.image}
+          rarity={nft.rarity}
+          claimStatus={
+            nft.claimStatus || {
+              status: "unknown",
+              text: "Loading...",
             }
-            airdropAvailable={nft.airdropAvailable}
-            isClaiming={isClaimingNft === nft.name}
-            isClaimingAirdrop={isClaimingAirdropNft === nft.name}
-            onClaim={onClaim}
-            onClaimAirdrop={onClaimAirdrop}
-            walletConnected={walletConnected}
-          />
-        );
-      })}
+          }
+          airdropAvailable={nft.airdropAvailable}
+          isClaiming={isClaimingNft === nft.name}
+          isClaimingAirdrop={isClaimingAirdropNft === nft.name}
+          onClaim={onClaim}
+          onClaimAirdrop={onClaimAirdrop}
+          walletConnected={walletConnected}
+        />
+      ))}
     </div>
   );
 }

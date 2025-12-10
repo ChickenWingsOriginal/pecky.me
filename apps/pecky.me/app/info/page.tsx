@@ -59,7 +59,7 @@ export default function InfoPage() {
       height: 36,
     },
     {
-      href: "https://app.dexlyn.com/?inputCurrency=SUPRA&amount=&outputCurrency=PECKY",
+      href: "https://app.dexlyn.com/?outputCurrency=31&inputCurrency=48",
       src: "Dexlyn.png",
       alt: "Dexlyn",
       width: 34,

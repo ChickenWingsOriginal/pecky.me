@@ -12,6 +12,7 @@ import { useWallet } from "@/app/context/WalletContext";
 import { useGlobalData } from "@/app/context/GlobalDataContext";
 import { getRandomQuote } from "@/app/constants/quotes";
 import { formatMicroUnits } from "@/app/utils/format";
+import { toast } from "sonner";
 
 const navItems = [
   { href: "/bot", label: "Bot", icon: "bot-icon.png" },
@@ -42,12 +43,12 @@ export default function Navigation() {
   // Handle register button click
   const handleRegister = async () => {
     if (!state.isConnected || !state.walletAddress) {
-      alert("Please connect your wallet first");
+      toast.error("Please connect your wallet first");
       return;
     }
 
     if (state.isRegistered) {
-      alert("You are already registered for Pecky rewards!");
+      toast.info("You are already registered for Pecky rewards!");
       return;
     }
 
@@ -56,7 +57,7 @@ export default function Navigation() {
       // Get the Supra provider from the window
       const provider = (window as any).supraProvider;
       if (!provider) {
-        alert("Supra wallet not available");
+        toast.error("Supra wallet not available");
         setRegisterLoading(false);
         return;
       }
@@ -81,10 +82,10 @@ export default function Navigation() {
         value: "",
       });
 
-      alert("Registration complete!");
+      toast.success("Registration complete!");
     } catch (error) {
       console.error("Registration failed:", error);
-      alert("Registration failed. You may already be registered.");
+      toast.error("Registration failed. You may already be registered.");
     } finally {
       setRegisterLoading(false);
     }
@@ -389,7 +390,13 @@ export default function Navigation() {
           zIndex: "50",
         })}
       >
-        <nav className={flex({ justify: "center", py: "0.5rem", gap: "1rem" })}>
+        <nav
+          className={flex({
+            justify: "center",
+            py: "0.5rem",
+            gap: { base: "0.5rem", md: "1rem" },
+          })}
+        >
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (

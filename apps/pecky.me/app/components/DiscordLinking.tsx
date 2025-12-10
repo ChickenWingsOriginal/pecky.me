@@ -7,6 +7,7 @@ import { useSupraConnect } from "@gerritsen/supra-connect";
 import { RetroBox } from "./RetroBox";
 // @ts-ignore
 import { BCS } from "supra-l1-sdk";
+import { toast } from "sonner";
 
 export function DiscordLinking() {
   const { state, refreshDiscordStatus } = useWallet();
@@ -16,19 +17,19 @@ export function DiscordLinking() {
 
   const handleLinkDiscord = async () => {
     if (!connectedWallet?.walletAddress) {
-      alert("Please connect your wallet first");
+      toast.error("Please connect your wallet first");
       return;
     }
 
     const idStr = discordInput.trim();
     if (!idStr) {
-      alert("Please enter a Discord ID");
+      toast.error("Please enter a Discord ID");
       return;
     }
 
     // Validate Discord ID format (16-20 digits)
     if (!/^\d{16,20}$/.test(idStr)) {
-      alert("Please enter a valid Discord ID (16-20 digits)");
+      toast.error("Please enter a valid Discord ID (16-20 digits)");
       return;
     }
 
@@ -53,14 +54,14 @@ export function DiscordLinking() {
         throw new Error(result.error || result.reason || "Failed to link Discord");
       }
 
-      alert("Discord linked successfully!");
+      toast.success("Discord linked successfully!");
       setDiscordInput("");
 
       // Refresh Discord status to update UI
       await refreshDiscordStatus();
     } catch (error) {
       console.error("Discord linking failed:", error);
-      alert("Failed to link Discord");
+      toast.error("Failed to link Discord");
     } finally {
       setLinkingDiscord(false);
     }
@@ -68,7 +69,7 @@ export function DiscordLinking() {
 
   const handleUnlinkDiscord = async () => {
     if (!connectedWallet?.walletAddress) {
-      alert("Please connect your wallet first");
+      toast.error("Please connect your wallet first");
       return;
     }
 
@@ -90,13 +91,13 @@ export function DiscordLinking() {
         throw new Error(result.error || result.reason || "Failed to unlink Discord");
       }
 
-      alert("Discord unlinked successfully!");
+      toast.success("Discord unlinked successfully!");
 
       // Refresh Discord status to update UI
       await refreshDiscordStatus();
     } catch (error) {
       console.error("Discord unlinking failed:", error);
-      alert("Failed to unlink Discord");
+      toast.error("Failed to unlink Discord");
     } finally {
       setLinkingDiscord(false);
     }
