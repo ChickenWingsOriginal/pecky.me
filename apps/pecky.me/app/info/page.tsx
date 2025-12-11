@@ -39,28 +39,28 @@ export default function InfoPage() {
   const partners = [
     {
       href: "https://supra.com/",
-      src: "Supra-icon.png",
+      src: "supra-icon.png",
       alt: "Supra",
       width: 37,
       height: 36,
     },
     {
       href: "https://ribbitwallet.com/",
-      src: "Ribbitwallet.png",
+      src: "ribbitwallet.png",
       alt: "Ribbit Wallet",
       width: 95,
       height: 36,
     },
     {
       href: "https://futurameridian.com",
-      src: "Meridian.png",
+      src: "meridian.png",
       alt: "Meridian",
       width: 36,
       height: 36,
     },
     {
       href: "https://app.dexlyn.com/?outputCurrency=31&inputCurrency=48",
-      src: "Dexlyn.png",
+      src: "dexlyn.png",
       alt: "Dexlyn",
       width: 34,
       height: 36,
@@ -149,7 +149,7 @@ export default function InfoPage() {
 
         <div className={css({ textAlign: "center", mb: "20px" })}>
           <Image
-            src="/images/Peckyburning.png"
+            src="/images/peckyburning.png"
             alt="Pecky Burning"
             width={75}
             height={75}
@@ -267,7 +267,7 @@ export default function InfoPage() {
             title="Discord"
           >
             <Image
-              src="/images/Discord-pecky.png"
+              src="/images/discord-pecky.png"
               alt="Discord"
               width={37}
               height={37}
@@ -280,7 +280,7 @@ export default function InfoPage() {
             title="X (Twitter)"
           >
             <Image
-              src="/images/Xchickenwings.png"
+              src="/images/xchickenwings.png"
               alt="Twitter/X"
               width={34}
               height={34}
