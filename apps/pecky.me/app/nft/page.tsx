@@ -251,8 +251,8 @@ export default function NFTPage() {
       const result = await sendTransaction({
         payload: {
           moduleAddress: PECKY_COIN_MODULE,
-          moduleName: "Coin",
-          functionName: "claim_nft_airdrop",
+          moduleName: "ClaimNFT",
+          functionName: "claim",
           typeArguments: [],
           arguments: [serializedTokenName],
         },
