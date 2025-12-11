@@ -83,12 +83,20 @@ export default function NodePage() {
         },
       });
       if (result.success) {
-        console.log("Unlinked:", tokenName);
+        toast.success(`Unlinked ${tokenName} from node`);
       } else {
-        console.error("Unlink failed:", result.reason || result.error);
+        toast.error(`Unlink failed: ${result.reason || result.error}`);
       }
-    } catch (error) {
-      console.error("Unlink error:", error);
+    } catch (error: any) {
+      const errorMsg = error?.message || error?.toString() || "";
+      if (
+        errorMsg.includes("All transaction approaches failed") ||
+        errorMsg.includes("User rejected")
+      ) {
+        console.log("Transaction cancelled by user");
+      } else {
+        toast.error("Unlink failed");
+      }
     } finally {
       setIsUnlinking(false);
     }
@@ -111,12 +119,20 @@ export default function NodePage() {
         },
       });
       if (result.success) {
-        console.log("Linked:", tokenName);
+        toast.success(`Linked ${tokenName} to node`);
       } else {
-        console.error("Link failed:", result.reason || result.error);
+        toast.error(`Link failed: ${result.reason || result.error}`);
       }
-    } catch (error) {
-      console.error("Link error:", error);
+    } catch (error: any) {
+      const errorMsg = error?.message || error?.toString() || "";
+      if (
+        errorMsg.includes("All transaction approaches failed") ||
+        errorMsg.includes("User rejected")
+      ) {
+        console.log("Transaction cancelled by user");
+      } else {
+        toast.error("Link failed");
+      }
     } finally {
       setIsLinking(false);
     }
@@ -139,7 +155,7 @@ export default function NodePage() {
         },
       });
       if (result.success) {
-        console.log("Rewards claimed for node:", nodeId);
+        toast.success("Operator rewards claimed successfully!");
         try {
           await refreshBalances();
           const updatedRewards = await getOperatorRewards(nodeId);
@@ -154,10 +170,26 @@ export default function NodePage() {
           console.error("Error refreshing wallet balance:", error);
         }
       } else {
-        console.error("Claim failed:", result.reason || result.error);
+        const errorMsg = result.reason || result.error || "";
+        if (
+          errorMsg.includes("All transaction approaches failed") ||
+          errorMsg.includes("User rejected")
+        ) {
+          console.log("Transaction cancelled by user");
+        } else {
+          toast.error("Claim failed: " + errorMsg);
+        }
       }
-    } catch (error) {
-      console.error("Claim error:", error);
+    } catch (error: any) {
+      const errorMsg = error?.message || error?.toString() || "";
+      if (
+        errorMsg.includes("All transaction approaches failed") ||
+        errorMsg.includes("User rejected")
+      ) {
+        console.log("Transaction cancelled by user");
+      } else {
+        toast.error("Claim failed");
+      }
     } finally {
       setIsClaimingRewards(false);
       setClaimingNodeId(null);
@@ -177,7 +209,7 @@ export default function NodePage() {
     try {
       const amountNumber = parseFloat(stakeAmount);
       if (isNaN(amountNumber) || amountNumber <= 0) {
-        console.error("Invalid stake amount");
+        toast.error("Please enter a valid stake amount");
         setIsStaking(false);
         return;
       }
@@ -201,11 +233,7 @@ export default function NodePage() {
       });
 
       if (result.success) {
-        console.log("Staked successfully:", {
-          nodeId: selectedNodeId,
-          amount: stakeAmount,
-          txHash: result.txHash,
-        });
+        toast.success(`Staked ${amountNumber.toLocaleString()} $Pecky successfully!`);
         try {
           await refreshBalances();
           setTimeout(() => {
@@ -217,10 +245,26 @@ export default function NodePage() {
         setStakeAmount("");
         setSelectedNodeId(null);
       } else {
-        console.error("Stake failed:", result.reason || result.error);
+        const errorMsg = result.reason || result.error || "";
+        if (
+          errorMsg.includes("All transaction approaches failed") ||
+          errorMsg.includes("User rejected")
+        ) {
+          console.log("Transaction cancelled by user");
+        } else {
+          toast.error("Stake failed: " + errorMsg);
+        }
       }
-    } catch (error) {
-      console.error("Stake error:", error);
+    } catch (error: any) {
+      const errorMsg = error?.message || error?.toString() || "";
+      if (
+        errorMsg.includes("All transaction approaches failed") ||
+        errorMsg.includes("User rejected")
+      ) {
+        console.log("Transaction cancelled by user");
+      } else {
+        toast.error("Stake failed");
+      }
     } finally {
       setIsStaking(false);
     }
@@ -276,6 +320,44 @@ export default function NodePage() {
       }
     })();
   }, [walletState.ownedNodes, walletState.availableRarityNfts]);
+
+  // Auto-refresh all rewards every 30 seconds (rewards accrue continuously)
+  useEffect(() => {
+    const hasOwnedNodes = ownedNodes && ownedNodes.length > 0;
+    const hasUserStakes = walletAddress && userStakedNodes.length > 0;
+
+    if (!hasOwnedNodes && !hasUserStakes) {
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      try {
+        // Refresh operator rewards and APY for owned nodes
+        if (hasOwnedNodes) {
+          const updatedNodes = await Promise.all(
+            ownedNodes.map(async (node) => {
+              const [rewards, apy] = await Promise.all([
+                getOperatorRewards(node.nodeId),
+                getOperatorApyForOwner(node.nodeId),
+              ]);
+              return { ...node, rewards, apy };
+            })
+          );
+          setOwnedNodes(updatedNodes);
+        }
+
+        // Refresh user staking rewards
+        if (hasUserStakes) {
+          const stakedNodes = await getUserStakedNodes(walletAddress);
+          setUserStakedNodes(stakedNodes);
+        }
+      } catch (error) {
+        console.error("Failed to refresh rewards:", error);
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [walletAddress, ownedNodes.length, userStakedNodes.length]); // Re-create interval when any count changes
 
   useEffect(() => {
     (async () => {
@@ -1039,10 +1121,9 @@ export default function NodePage() {
                 })}
               >
                 {allNodes.map((node) => {
-                  const isOwned = ownedNodes.some((owned) => {
-                    console.log(node);
-                    return owned.nodeId === node.nodeId;
-                  });
+                  const isOwned = ownedNodes.some(
+                    (owned) => owned.nodeId === node.nodeId
+                  );
                   return (
                     <div
                       key={node.nodeId}

@@ -476,7 +476,7 @@ export default function BotPage() {
               title="Join Discord"
             >
               <img
-                src="/images/Discord-pecky.png"
+                src="/images/discord-pecky.png"
                 alt="Discord"
                 style={{ height: "42px" }}
               />
