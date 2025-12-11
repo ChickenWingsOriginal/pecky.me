@@ -12,7 +12,7 @@ export default function InfoPage() {
   const burningSections = [
     {
       title: "STAKING",
-      icon: "Meridian.png",
+      icon: "meridian.png",
       description:
         "Stake your $SUPRA on the <b>Meridian node</b> and get the same 8% node rewards as anywhere else,<br>but you also get the same amount of $Pecky as your daily staked $SUPRA! <br>Even better: <b>50% of the node rewards</b> are used to buy up and burn $Pecky for the community!",
       width: 36,
