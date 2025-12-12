@@ -75,7 +75,7 @@ const SPIN_ANIMATION_CSS = `
 
 export default function NFTPage() {
   const { nftPoolRemaining, refetch: refetchGlobalData } = useGlobalData();
-  const { state, dispatch, refreshBalances } = useWallet();
+  const { state, dispatch, refreshBalances, refreshNfts } = useWallet();
   const { sendTransaction, connectedWallet } = useSupraConnect();
   const [ownedNfts, setOwnedNfts] = useState<OwnedNFT[]>([]);
   const [loadingNfts, setLoadingNfts] = useState(false);
@@ -94,56 +94,20 @@ export default function NFTPage() {
       state.isRegistered &&
       connectedWallet?.walletAddress
     ) {
+      // Try cache first for instant display
       const cachedNfts = getNftsFromCache(connectedWallet.walletAddress);
       if (cachedNfts && cachedNfts.length > 0) {
         setOwnedNfts(cachedNfts);
-        return;
       }
+
+      // Then load from WalletContext (which has images now!)
       if (state.ownedNfts && state.ownedNfts.length > 0) {
         loadUserNfts(state.ownedNfts);
-      } else {
-        fetchAndLoadNfts();
       }
     } else {
       setOwnedNfts([]);
     }
-  }, [state.isConnected, state.isRegistered, connectedWallet?.walletAddress]);
-
-  const fetchAndLoadNfts = async () => {
-    if (!connectedWallet?.walletAddress) return;
-
-    setLoadingNfts(true);
-    try {
-      const res = await fetch(
-        `https://api.pecky.me/api/nfts?wallet=${connectedWallet.walletAddress}`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.owned_tokens)) {
-          const seen = new Set<string>();
-          let tokens = data.owned_tokens.filter((t: OwnedNFT) => {
-            const key = (t?.name || "").toUpperCase();
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-          });
-
-          tokens.sort((a: OwnedNFT, b: OwnedNFT) => {
-            const ia = parseInt((a?.name || "").replace("TOKEN_", ""), 10) || 0;
-            const ib = parseInt((b?.name || "").replace("TOKEN_", ""), 10) || 0;
-            return ia - ib;
-          });
-
-          await loadUserNfts(tokens);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch NFTs:", error);
-      setOwnedNfts([]);
-    } finally {
-      setLoadingNfts(false);
-    }
-  };
+  }, [state.isConnected, state.isRegistered, connectedWallet?.walletAddress, state.ownedNfts]);
 
   const loadUserNfts = async (nfts: any[] | null = null) => {
     if (!nfts || nfts.length === 0) {
@@ -205,7 +169,9 @@ export default function NFTPage() {
   const handleRefreshNfts = async () => {
     setIsRefreshing(true);
     try {
-      await fetchAndLoadNfts();
+      // Refresh NFTs from WalletContext (single source of truth)
+      await refreshNfts();
+      // The useEffect will pick up the change and enhance with claim status
     } finally {
       setIsRefreshing(false);
     }
