@@ -361,6 +361,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
           payload: nfts.map((nft) => ({
             id: nft.id,
             name: nft.name,
+            image: nft.image,
             rarity: rarityLabel(nft.name),
           })),
         });
