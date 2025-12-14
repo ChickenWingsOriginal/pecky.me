@@ -84,6 +84,22 @@ export async function getOperatorRewards(nodeId: string): Promise<number> {
   }
 }
 
+export async function getOperatorRewardsLive(nodeId: string): Promise<number> {
+  try {
+    const client = await SupraClient.init(RPC_URL);
+    const result = await client.invokeViewMethod(
+      `${STAKE_MODULE}::stake::get_operator_rewards_live_for_owner`,
+      [],
+      [nodeId],
+    );
+    const micro = Array.isArray(result) ? BigInt(result[0] ?? 0) : BigInt(result ?? 0);
+    return Number(micro) / 1_000_000;
+  } catch (error) {
+    console.error(`Failed to fetch live operator rewards for ${nodeId}:`, error);
+    return 0;
+  }
+}
+
 export async function getOperatorApyForOwner(nodeId: string): Promise<number> {
   try {
     const client = await SupraClient.init(RPC_URL);

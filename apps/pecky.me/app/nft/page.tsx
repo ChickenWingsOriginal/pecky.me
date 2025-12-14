@@ -107,7 +107,12 @@ export default function NFTPage() {
     } else {
       setOwnedNfts([]);
     }
-  }, [state.isConnected, state.isRegistered, connectedWallet?.walletAddress, state.ownedNfts]);
+  }, [
+    state.isConnected,
+    state.isRegistered,
+    connectedWallet?.walletAddress,
+    state.ownedNfts,
+  ]);
 
   const loadUserNfts = async (nfts: any[] | null = null) => {
     if (!nfts || nfts.length === 0) {
@@ -403,28 +408,36 @@ export default function NFTPage() {
           mt: "40px",
           display: "flex",
           flexDir: "column",
-          gap: "5px",
+          gap: "4px",
         })}
       >
+        <div className={css({ textAlign: "center", mb: "20px" })}>
+          <Image
+            src="/images/nft-icon.png"
+            alt="NFT Icon"
+            width={100}
+            height={100}
+            style={{ margin: "0 auto", marginBottom: "12px" }}
+          />
+        </div>
         <RetroBox>
-          <div className={css({ textAlign: "center" })}>
-            <Image
-              src="/images/nft-icon.png"
-              alt="NFT Icon"
-              width={100}
-              height={100}
-              style={{ margin: "0 auto", marginBottom: "12px" }}
-            />
-            <h1
+          <div className={css({ textAlign: "center", mb: "20px" })}>
+            <h2
               className={css({
                 fontSize: "24px",
                 fontWeight: "700",
-                color: "#4a2c00",
-                mb: "12px",
+                color: "#a06500",
               })}
             >
               Own a ChickenWings NFT?
-            </h1>
+            </h2>
+          </div>
+          <div
+            className={css({
+              p: "4px",
+              mb: "20px",
+            })}
+          >
             <div
               className={css({
                 fontSize: "14px",
@@ -433,11 +446,9 @@ export default function NFTPage() {
               })}
             >
               As an NFT holder, you're a co-owner of Pecky—think of it as
-              holding shares!
-              <br />
-              There are only <b>500 ChickenWings NFTs</b> in existence.
-              <br />
-              Every month, you'll receive $Pecky based on your NFT's rarity.
+              holding shares! There are only <b>500 ChickenWings NFTs</b> in
+              existence. Every month, you'll receive $Pecky based on your NFT's
+              rarity.
               <br />
               Buy or sell on <b>Crystara</b>.
             </div>

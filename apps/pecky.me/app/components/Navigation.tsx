@@ -11,7 +11,7 @@ import { SupraConnectButton } from "@gerritsen/supra-connect";
 import { useWallet } from "@/app/context/WalletContext";
 import { useGlobalData } from "@/app/context/GlobalDataContext";
 import { getRandomQuote } from "@/app/constants/quotes";
-import { formatMicroUnits } from "@/app/utils/format";
+import { formatMicroUnits, formatMillions } from "@/app/utils/format";
 import { toast } from "sonner";
 
 const navItems = [
@@ -95,7 +95,7 @@ export default function Navigation() {
   const formatBalance = (balance: bigint | null): string => {
     if (!balance) return "0.00";
     const balanceNumber = Number(balance) / Math.pow(10, PECKY_DECIMALS);
-    return balanceNumber.toFixed(2);
+    return formatMillions(balanceNumber);
   };
 
   // Calculate Pecky worth in Supra
