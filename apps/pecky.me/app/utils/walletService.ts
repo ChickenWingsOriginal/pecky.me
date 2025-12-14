@@ -273,8 +273,10 @@ export async function checkDiscordLinkStatus(walletAddress: string): Promise<{
     });
 
     const discordId =
-      Array.isArray(discordIdResult) && discordIdResult.length > 1 && discordIdResult[0]
-        ? discordIdResult[1]  // Second element is the actual Discord ID (u128)
+      Array.isArray(discordIdResult) &&
+      discordIdResult.length > 1 &&
+      discordIdResult[0]
+        ? discordIdResult[1] // Second element is the actual Discord ID (u128)
         : undefined;
     return {
       isLinked: true,
@@ -300,10 +302,7 @@ export async function fetchOwnedNfts(
     }
 
     const data = await response.json();
-    // API returns either "nfts" or "owned_tokens"
-    const nfts = data.nfts || data.owned_tokens || [];
-    console.log("Fetched NFTs from API:", { raw: data, parsed: nfts });
-    return nfts;
+    return data.nfts || data.owned_tokens || [];
   } catch (error) {
     console.error("Failed to fetch NFTs:", error);
     throw error;
@@ -324,16 +323,10 @@ export async function fetchOwnedNodeNfts(
     }
 
     const data = await response.json();
-    // API returns: { network: "mainnet", owned_tokens: [{ name: "TOKEN_11", ... }] }
     const ownedTokens = data.owned_tokens || [];
-
-    // Extract token names (e.g., "TOKEN_11", "TOKEN_25")
-    const tokenNames = ownedTokens
+    return ownedTokens
       .map((token: any) => token.name)
       .filter((name: string) => /^TOKEN_\d+$/.test(name));
-
-    console.log("Fetched owned node NFTs from API:", tokenNames);
-    return tokenNames;
   } catch (error) {
     console.error("Failed to fetch owned node NFTs:", error);
     return [];
