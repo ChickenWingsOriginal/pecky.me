@@ -24,6 +24,13 @@ export function RetroTabs({
   const containerStyles = css({
     w: "100%",
     margin: "10px auto",
+    display: "flex",
+    flexDir: "column",
+    gap: "4px",
+  });
+
+  const tabHeaderContainerStyles = css({
+    w: "100%",
     bg: "white",
     border: "2px solid #f3c35b",
     borderRadius: "14px",
@@ -34,7 +41,6 @@ export function RetroTabs({
 
   const tabHeaderStyles = css({
     display: "flex",
-    borderBottom: "2px solid #f3c35b",
     bg: "#fffbe8",
   });
 
@@ -70,28 +76,26 @@ export function RetroTabs({
     bg: "#ff7700",
   });
 
-  const contentStyles = css({
-    p: "16px",
-  });
-
   return (
     <div className={className ? `${containerStyles} ${className}` : containerStyles}>
-      {/* Tab Headers */}
-      <div className={tabHeaderStyles}>
-        {tabs.map((tab, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveIndex(index)}
-            className={tabButtonStyles(activeIndex === index)}
-          >
-            {tab.title}
-            {activeIndex === index && <div className={activeIndicatorStyles} />}
-          </button>
-        ))}
+      {/* Tab Headers with RetroBox styling */}
+      <div className={tabHeaderContainerStyles}>
+        <div className={tabHeaderStyles}>
+          {tabs.map((tab, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveIndex(index)}
+              className={tabButtonStyles(activeIndex === index)}
+            >
+              {tab.title}
+              {activeIndex === index && <div className={activeIndicatorStyles} />}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Tab Content */}
-      <div className={contentStyles}>{tabs[activeIndex]?.content}</div>
+      {/* Tab Content - Clean, no styling */}
+      <div>{tabs[activeIndex]?.content}</div>
     </div>
   );
 }

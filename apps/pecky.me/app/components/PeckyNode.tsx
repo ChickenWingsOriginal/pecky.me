@@ -9,14 +9,9 @@ import { toast } from "sonner";
 // @ts-ignore
 import { BCS } from "supra-l1-sdk";
 import {
-  getOperatorRewards,
-  getOperatorRewardsLive,
-  getOperatorApyForOwner,
   fetchActiveNodesSorted,
   rarityLabel,
   serializeString,
-  getPendingUnstakes,
-  getUserStakedNodes,
   type UserStakeInfo,
 } from "@/app/utils/nodeService";
 import { formatCountdownFromTimestamp } from "@/app/utils/formatCountdownFromTimestamp";
@@ -42,9 +37,13 @@ const STAKE_MODULE =
 
 export function PeckyNode() {
   const { sendTransaction } = useSupraConnect();
-  const { state: walletState, refreshBalances } = useWallet();
+  const {
+    state: walletState,
+    refreshBalances,
+    refreshStakingInfo,
+    refreshNodeOperatorData,
+  } = useWallet();
   const [allNodes, setAllNodes] = useState<NodeWithData[]>([]);
-  const [ownedNodes, setOwnedNodes] = useState<NodeWithData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUnlinking, setIsUnlinking] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
@@ -53,20 +52,45 @@ export function PeckyNode() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [stakeAmount, setStakeAmount] = useState("");
   const [isStaking, setIsStaking] = useState(false);
-  const [pendingUnstakes, setPendingUnstakes] = useState<PendingUnstake[]>([]);
   const [unstakeAmounts, setUnstakeAmounts] = useState<Record<string, string>>(
     {},
   );
   const [unstakingNodeId, setUnstakingNodeId] = useState<string | null>(null);
   const [isClaimingUnstakes, setIsClaimingUnstakes] = useState(false);
-  const [userStakedNodes, setUserStakedNodes] = useState<UserStakeInfo[]>([]);
   const [claimingUserRewardNodeId, setClaimingUserRewardNodeId] = useState<
     string | null
   >(null);
-  const [refreshingNodeId, setRefreshingNodeId] = useState<string | null>(null);
 
   const walletAddress = walletState.walletAddress;
   const peckyBalance = walletState.peckyBalance ?? BigInt(0);
+  const pendingUnstakes = walletState.staking.peckyNode.pendingUnstakes;
+  const userStakedNodes = walletState.staking.peckyNode.userStakedNodes;
+
+  // Transform WalletContext ownedNodes to NodeWithData format
+  const ownedNodes: NodeWithData[] =
+    walletState.ownedNodes?.map((node) => {
+      const linkedRarities = node.linkedRarities.map((tokenName) => ({
+        tokenName,
+        rarity: rarityLabel(tokenName),
+      }));
+
+      const availableRarities = (walletState.availableRarityNfts || []).map(
+        (tokenName) => ({
+          tokenName,
+          rarity: rarityLabel(tokenName),
+        }),
+      );
+
+      return {
+        nodeId: node.nodeId,
+        name: node.name,
+        rewards: node.rewards,
+        rewardsLive: node.rewardsLive,
+        apy: node.apy,
+        linkedRarities,
+        availableRarities,
+      };
+    }) || [];
 
   const handleUnlinkRarity = async (nodeId: string, tokenName: string) => {
     if (!walletAddress) return;
@@ -141,23 +165,11 @@ export function PeckyNode() {
   };
 
   const handleRefreshNode = async (nodeId: string) => {
-    setRefreshingNodeId(nodeId);
     try {
-      const [rewardsLive, apy] = await Promise.all([
-        getOperatorRewardsLive(nodeId),
-        getOperatorApyForOwner(nodeId),
-      ]);
-
-      setOwnedNodes((prevNodes) =>
-        prevNodes.map((node) =>
-          node.nodeId === nodeId ? { ...node, rewardsLive, apy } : node
-        ),
-      );
+      await refreshNodeOperatorData();
     } catch (error) {
       console.error("Failed to refresh node data:", error);
       toast.error("Failed to refresh node data");
-    } finally {
-      setRefreshingNodeId(null);
     }
   };
 
@@ -181,14 +193,7 @@ export function PeckyNode() {
         toast.success("Operator rewards claimed successfully!");
         try {
           await refreshBalances();
-          const updatedRewardsLive = await getOperatorRewardsLive(nodeId);
-          setOwnedNodes((prevNodes) =>
-            prevNodes.map((node) =>
-              node.nodeId === nodeId
-                ? { ...node, rewardsLive: updatedRewardsLive }
-                : node,
-            ),
-          );
+          refreshNodeOperatorData();
         } catch (error) {
           console.error("Error refreshing wallet balance:", error);
         }
@@ -296,98 +301,6 @@ export function PeckyNode() {
   };
 
   useEffect(() => {
-    if (!walletState.ownedNodes || walletState.ownedNodes.length === 0) {
-      setOwnedNodes([]);
-      return;
-    }
-
-    const ownedNodesData = walletState.ownedNodes;
-
-    (async () => {
-      try {
-        const nodesWithData: NodeWithData[] = [];
-        for (let i = 0; i < ownedNodesData.length; i++) {
-          const node = ownedNodesData[i];
-          if (i > 0) await new Promise((resolve) => setTimeout(resolve, 10));
-
-          const [rewards, rewardsLive, apy] = await Promise.all([
-            getOperatorRewards(node.nodeId),
-            getOperatorRewardsLive(node.nodeId),
-            getOperatorApyForOwner(node.nodeId),
-          ]);
-
-          const linkedRarities = node.linkedRarities.map((tokenName) => ({
-            tokenName,
-            rarity: rarityLabel(tokenName),
-          }));
-
-          const availableRarities = (walletState.availableRarityNfts || []).map(
-            (tokenName) => ({
-              tokenName,
-              rarity: rarityLabel(tokenName),
-            }),
-          );
-
-          nodesWithData.push({
-            nodeId: node.nodeId,
-            name: node.name,
-            rewards,
-            rewardsLive,
-            apy,
-            linkedRarities,
-            availableRarities,
-          });
-        }
-
-        setOwnedNodes(nodesWithData);
-        console.log("Owned nodes with data:", nodesWithData);
-      } catch (error) {
-        console.error("Failed to fetch node data:", error);
-        setOwnedNodes([]);
-      }
-    })();
-  }, [walletState.ownedNodes, walletState.availableRarityNfts]);
-
-  // Auto-refresh all rewards every 30 seconds (rewards accrue continuously)
-  useEffect(() => {
-    const hasOwnedNodes = ownedNodes && ownedNodes.length > 0;
-    const hasUserStakes = walletAddress && userStakedNodes.length > 0;
-
-    if (!hasOwnedNodes && !hasUserStakes) {
-      return;
-    }
-
-    const interval = setInterval(async () => {
-      try {
-        // Refresh operator rewards and APY for owned nodes
-        if (hasOwnedNodes) {
-          const updatedNodes = await Promise.all(
-            ownedNodes.map(async (node) => {
-              const [rewards, rewardsLive, apy] = await Promise.all([
-                getOperatorRewards(node.nodeId),
-                getOperatorRewardsLive(node.nodeId),
-                getOperatorApyForOwner(node.nodeId),
-              ]);
-              return { ...node, rewards, rewardsLive, apy };
-            }),
-          );
-          setOwnedNodes(updatedNodes);
-        }
-
-        // Refresh user staking rewards
-        if (hasUserStakes) {
-          const stakedNodes = await getUserStakedNodes(walletAddress);
-          setUserStakedNodes(stakedNodes);
-        }
-      } catch (error) {
-        console.error("Failed to refresh rewards:", error);
-      }
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, [walletAddress, ownedNodes.length, userStakedNodes.length]); // Re-create interval when any count changes
-
-  useEffect(() => {
     (async () => {
       setIsLoading(true);
       try {
@@ -412,29 +325,7 @@ export function PeckyNode() {
         setIsLoading(false);
       }
     })();
-  }, [walletAddress, walletState.allNodes]);
-
-  useEffect(() => {
-    if (!walletAddress) {
-      setPendingUnstakes([]);
-      setUserStakedNodes([]);
-      return;
-    }
-
-    (async () => {
-      try {
-        const [unstakes, stakedNodes] = await Promise.all([
-          getPendingUnstakes(walletAddress),
-          getUserStakedNodes(walletAddress),
-        ]);
-
-        setPendingUnstakes(unstakes);
-        setUserStakedNodes(stakedNodes);
-      } catch (error) {
-        console.error("Failed to fetch unstakes/stakes:", error);
-      }
-    })();
-  }, [walletAddress]);
+  }, [walletState.allNodes]); // Only depends on allNodes from WalletContext, not wallet connection
 
   const handleUnstake = async (nodeId: string) => {
     if (!walletAddress) return;
@@ -482,13 +373,7 @@ export function PeckyNode() {
         );
         setUnstakeAmounts({ ...unstakeAmounts, [nodeId]: "" });
 
-        const [unstakes, stakedNodes] = await Promise.all([
-          getPendingUnstakes(walletAddress),
-          getUserStakedNodes(walletAddress),
-        ]);
-
-        setPendingUnstakes(unstakes);
-        setUserStakedNodes(stakedNodes);
+        refreshStakingInfo();
       } else {
         const errorMsg = result.reason || result.error || "";
         if (
@@ -537,11 +422,8 @@ export function PeckyNode() {
         console.log("User reward claimed for node:", nodeId);
         toast.success("Rewards claimed successfully!");
 
-        // Refresh user staked nodes to update rewards
-        const stakedNodes = await getUserStakedNodes(walletAddress);
-        setUserStakedNodes(stakedNodes);
-
-        // Refresh wallet balance
+        // Refresh staking data and wallet balance
+        refreshStakingInfo();
         await refreshBalances();
       } else {
         const errorMsg = result.reason || result.error || "";
@@ -590,8 +472,7 @@ export function PeckyNode() {
         toast.success("Claimed unstaked funds!");
 
         await refreshBalances();
-        const unstakes = await getPendingUnstakes(walletAddress);
-        setPendingUnstakes(unstakes);
+        refreshStakingInfo();
       } else {
         const errorMsg = result.reason || result.error || "";
         if (
@@ -870,7 +751,6 @@ export function PeckyNode() {
                     </div>
                     <button
                       onClick={() => handleRefreshNode(node.nodeId)}
-                      disabled={refreshingNodeId === node.nodeId}
                       className={css({
                         fontSize: "11px",
                         px: "8px",
@@ -880,18 +760,14 @@ export function PeckyNode() {
                         borderRadius: "4px",
                         color: "#ff7700",
                         fontWeight: "600",
-                        cursor:
-                          refreshingNodeId === node.nodeId
-                            ? "not-allowed"
-                            : "pointer",
-                        opacity: refreshingNodeId === node.nodeId ? 0.5 : 1,
+                        cursor: "pointer",
                         transition: "opacity 0.2s ease",
                         _hover: {
                           bg: "#fff9f0",
                         },
                       })}
                     >
-                      {refreshingNodeId === node.nodeId ? "..." : "↻"}
+                      ↻
                     </button>
                   </div>
                 </div>

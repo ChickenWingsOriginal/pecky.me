@@ -39,12 +39,12 @@ export default function StakingPage() {
         <RetroTabs
           tabs={[
             {
-              title: "Meridian Staking",
-              content: <MeridianStaking />,
+              title: "Pecky Staking",
+              content: <PeckyNode />,
             },
             {
-              title: "Pecky Node",
-              content: <PeckyNode />,
+              title: "Meridian Staking",
+              content: <MeridianStaking />,
             },
           ]}
         />

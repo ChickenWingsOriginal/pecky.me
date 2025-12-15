@@ -10,34 +10,25 @@ import { toast } from "sonner";
 import { BCS, HexString } from "supra-l1-sdk";
 import { formatSupraBalance } from "@/app/utils/formatSupraBalance";
 import { formatCountdownTime } from "@/app/utils/formatCountdownTime";
-import { fetchNextClaimTime as fetchNextClaim } from "@/app/utils/fetchNextClaimTime";
-import { fetchStakingData as fetchStake } from "@/app/utils/fetchStakingData";
 import { calculateMaxStakeAmount } from "@/app/utils/calculateMaxStakeAmount";
+import { RetroBox } from "./RetroBox";
 
 const SUPRA_DECIMALS = 8;
 const MERIDIAN_POOL =
   "0x72b93dccbda04c9caf1b8726d96cb28edee5feceb85e32db318dd1eea4320331";
 const PECKY_COIN_MODULE =
   "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
-const STAKING_CLAIM_TABLE =
-  "0x68ff22fd7edc5d53bb61af22aa979170286489af715fbab3d080ed57df6717a4";
 
 export function MeridianStaking() {
-  const { state, dispatch, refreshBalances } = useWallet();
+  const { state, refreshBalances, refreshStakingInfo } = useWallet();
   const { sendTransaction } = useSupraConnect();
   const [stakeAmount, setStakeAmount] = useState("");
   const [isStaking, setIsStaking] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
-  const [nextClaimTime, setNextClaimTime] = useState<number | null>(null);
   const [timeUntilClaim, setTimeUntilClaim] = useState("");
 
   const walletAddress = state.walletAddress;
-
-  useEffect(() => {
-    if (walletAddress) {
-      fetchStakingData();
-    }
-  }, [walletAddress]);
+  const nextClaimTime = state.staking.meridian.nextClaimTime;
 
   useEffect(() => {
     if (!nextClaimTime) return;
@@ -53,26 +44,6 @@ export function MeridianStaking() {
 
     return () => clearInterval(interval);
   }, [nextClaimTime]);
-
-  const fetchNextClaimTime = async () => {
-    if (!walletAddress) return;
-    const time = await fetchNextClaim(walletAddress, STAKING_CLAIM_TABLE);
-    if (time) {
-      setNextClaimTime(time);
-    }
-  };
-
-  const fetchStakingData = async () => {
-    if (!walletAddress) return;
-    const stakedAmount = await fetchStake(walletAddress, MERIDIAN_POOL);
-    if (stakedAmount) {
-      dispatch({
-        type: "SET_STAKING_INFO",
-        payload: { stakedAmount },
-      });
-    }
-    await fetchNextClaimTime();
-  };
 
   const handleMaxClick = () => {
     const amount = calculateMaxStakeAmount(state.supraBalance);
@@ -128,8 +99,7 @@ export function MeridianStaking() {
       setStakeAmount("");
 
       setTimeout(() => {
-        fetchStakingData();
-        fetchNextClaimTime();
+        refreshStakingInfo();
       }, 2000);
     } catch (error) {
       console.error("Staking failed:", error);
@@ -169,8 +139,7 @@ export function MeridianStaking() {
 
       setTimeout(async () => {
         await refreshBalances();
-        fetchStakingData();
-        fetchNextClaimTime();
+        refreshStakingInfo();
       }, 2000);
     } catch (error) {
       console.error("Claim failed:", error);
@@ -181,219 +150,175 @@ export function MeridianStaking() {
   };
 
   return (
-    <>
-      <div className={css({ textAlign: "center", mb: "20px" })}>
-        <h2
-          className={css({
-            fontSize: "24px",
-            fontWeight: "700",
-            color: "#a06500",
-          })}
-        >
-          Stake $Supra on the Meridian Node
-        </h2>
-      </div>
-
-      <div
-        className={css({
-          bg: "#fffbe8",
-          p: "16px",
-          borderRadius: "12px",
-          mb: "20px",
-          border: "1px solid #ffae00",
-        })}
-      >
-        <ul
-          className={css({
-            fontSize: "13px",
-            color: "#b48512",
-            lineHeight: "1.8",
-            pl: "20px",
-            m: "0",
-          })}
-        >
-          <li>
-            Stake your Supra and earn{" "}
-            <span className={css({ fontWeight: "700" })}>8% APY</span>
-          </li>
-          <li>
-            Get daily $Pecky –{" "}
-            <span className={css({ fontWeight: "700" })}>
-              1 $Pecky per staked Supra, every day
-            </span>
-          </li>
-          <li>
-            <span className={css({ fontWeight: "700" })}>
-              50% of the node's profit is used to buy & burn $Pecky!
-            </span>
-          </li>
-          <li>No chicken left behind 🐔</li>
-        </ul>
-      </div>
-
-      <div
-        className={css({
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "12px",
-          mb: "20px",
-        })}
-      >
+    <RetroBox startOpen={true}>
+      <RetroBox.Title>Stake $Supra on the Meridian Node</RetroBox.Title>
+      <RetroBox.Content>
         <div
           className={css({
             bg: "#fffbe8",
-            p: "12px",
-            borderRadius: "10px",
-            border: "1px solid #ffae00",
-            textAlign: "center",
-          })}
-        >
-          <div
-            className={css({
-              fontSize: "11px",
-              color: "#a06500",
-              mb: "4px",
-            })}
-          >
-            SUPRA Balance
-          </div>
-          <div
-            className={css({
-              fontSize: "18px",
-              fontWeight: "700",
-              color: "#ff7700",
-            })}
-          >
-            {state.isLoadingStaking
-              ? "..."
-              : formatSupraBalance(state.supraBalance)}
-          </div>
-        </div>
-        <div
-          className={css({
-            bg: "#fffbe8",
-            p: "12px",
-            borderRadius: "10px",
-            border: "1px solid #ffae00",
-            textAlign: "center",
-          })}
-        >
-          <div
-            className={css({
-              fontSize: "11px",
-              color: "#a06500",
-              mb: "4px",
-            })}
-          >
-            Staked
-          </div>
-          <div
-            className={css({
-              fontSize: "18px",
-              fontWeight: "700",
-              color: "#ff7700",
-            })}
-          >
-            {state.isLoadingStaking
-              ? "..."
-              : formatSupraBalance(state.stakedAmount)}
-          </div>
-        </div>
-      </div>
-
-      <div className={flex({ gap: "8px", mb: "20px" })}>
-        <input
-          type="number"
-          placeholder="0.000"
-          value={stakeAmount}
-          onChange={(e) => setStakeAmount(e.target.value)}
-          className={css({
-            flex: "1",
-            px: "12px",
-            py: "10px",
-            borderRadius: "10px",
-            border: "1.5px solid #ffae00",
-            fontSize: "14px",
-            bg: "#fff",
-          })}
-        />
-        <button
-          onClick={handleMaxClick}
-          disabled={!state.supraBalance || state.supraBalance === BigInt(0)}
-          className={css({
-            px: "16px",
-            py: "10px",
-            borderRadius: "10px",
-            bg:
-              state.supraBalance && state.supraBalance > BigInt(0)
-                ? "white"
-                : "#f0f0f0",
-            border: "1.5px solid #ffae00",
-            color:
-              state.supraBalance && state.supraBalance > BigInt(0)
-                ? "#ff7700"
-                : "#ccc",
-            fontSize: "13px",
-            fontWeight: "600",
-            cursor:
-              state.supraBalance && state.supraBalance > BigInt(0)
-                ? "pointer"
-                : "not-allowed",
-            transition: "transform 0.1s",
-            _hover:
-              state.supraBalance && state.supraBalance > BigInt(0)
-                ? { transform: "scale(1.05)" }
-                : {},
-          })}
-        >
-          MAX
-        </button>
-      </div>
-
-      <div
-        className={flex({
-          flexDir: "column",
-          gap: "12px",
-          mb: "20px",
-        })}
-      >
-        <button
-          onClick={handleStake}
-          disabled={isStaking || !walletAddress || !stakeAmount}
-          className={css({
-            bg: "linear-gradient(to right, #ffaa00, #ff7700)",
-            color: "white",
-            py: "14px",
-            px: "20px",
+            p: "16px",
             borderRadius: "12px",
-            border: "none",
-            fontSize: "15px",
-            fontWeight: "600",
-            cursor:
-              isStaking || !walletAddress || !stakeAmount
-                ? "not-allowed"
-                : "pointer",
-            transition: "transform 0.1s",
-            opacity:
-              isStaking || !walletAddress || !stakeAmount ? "0.6" : "1",
-            _hover:
-              isStaking || !walletAddress || !stakeAmount
-                ? {}
-                : { transform: "scale(1.03)" },
+            mb: "20px",
+            border: "1px solid #ffae00",
           })}
         >
-          {isStaking ? "Staking..." : "Stake on Meridian"}
-        </button>
+          <ul
+            className={css({
+              fontSize: "13px",
+              color: "#b48512",
+              lineHeight: "1.8",
+              pl: "20px",
+              m: "0",
+            })}
+          >
+            <li>
+              Stake your Supra and earn{" "}
+              <span className={css({ fontWeight: "700" })}>8% APY</span>
+            </li>
+            <li>
+              Get daily $Pecky –{" "}
+              <span className={css({ fontWeight: "700" })}>
+                1 $Pecky per staked Supra, every day
+              </span>
+            </li>
+            <li>
+              <span className={css({ fontWeight: "700" })}>
+                50% of the node's profit is used to buy & burn $Pecky!
+              </span>
+            </li>
+            <li>No chicken left behind 🐔</li>
+          </ul>
+        </div>
+
         <div
           className={css({
-            display: "flex",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "12px",
+            mb: "20px",
+          })}
+        >
+          <div
+            className={css({
+              bg: "#fffbe8",
+              p: "12px",
+              borderRadius: "10px",
+              border: "1px solid #ffae00",
+              textAlign: "center",
+            })}
+          >
+            <div
+              className={css({
+                fontSize: "11px",
+                color: "#a06500",
+                mb: "4px",
+              })}
+            >
+              SUPRA Balance
+            </div>
+            <div
+              className={css({
+                fontSize: "18px",
+                fontWeight: "700",
+                color: "#ff7700",
+              })}
+            >
+              {state.staking.isLoading
+                ? "..."
+                : formatSupraBalance(state.supraBalance)}
+            </div>
+          </div>
+          <div
+            className={css({
+              bg: "#fffbe8",
+              p: "12px",
+              borderRadius: "10px",
+              border: "1px solid #ffae00",
+              textAlign: "center",
+            })}
+          >
+            <div
+              className={css({
+                fontSize: "11px",
+                color: "#a06500",
+                mb: "4px",
+              })}
+            >
+              Staked
+            </div>
+            <div
+              className={css({
+                fontSize: "18px",
+                fontWeight: "700",
+                color: "#ff7700",
+              })}
+            >
+              {state.staking.isLoading
+                ? "..."
+                : formatSupraBalance(state.staking.meridian.stakedAmount)}
+            </div>
+          </div>
+        </div>
+
+        <div className={flex({ gap: "8px", mb: "20px" })}>
+          <input
+            type="number"
+            placeholder="0.000"
+            value={stakeAmount}
+            onChange={(e) => setStakeAmount(e.target.value)}
+            className={css({
+              flex: "1",
+              px: "12px",
+              py: "10px",
+              borderRadius: "10px",
+              border: "1.5px solid #ffae00",
+              fontSize: "14px",
+              bg: "#fff",
+            })}
+          />
+          <button
+            onClick={handleMaxClick}
+            disabled={!state.supraBalance || state.supraBalance === BigInt(0)}
+            className={css({
+              px: "16px",
+              py: "10px",
+              borderRadius: "10px",
+              bg:
+                state.supraBalance && state.supraBalance > BigInt(0)
+                  ? "white"
+                  : "#f0f0f0",
+              border: "1.5px solid #ffae00",
+              color:
+                state.supraBalance && state.supraBalance > BigInt(0)
+                  ? "#ff7700"
+                  : "#ccc",
+              fontSize: "13px",
+              fontWeight: "600",
+              cursor:
+                state.supraBalance && state.supraBalance > BigInt(0)
+                  ? "pointer"
+                  : "not-allowed",
+              transition: "transform 0.1s",
+              _hover:
+                state.supraBalance && state.supraBalance > BigInt(0)
+                  ? { transform: "scale(1.05)" }
+                  : {},
+            })}
+          >
+            MAX
+          </button>
+        </div>
+
+        <div
+          className={flex({
             flexDir: "column",
-            gap: "4px",
+            gap: "12px",
+            mb: "20px",
           })}
         >
           <button
-            onClick={handleClaim}
-            disabled={isClaiming || !walletAddress || timeUntilClaim !== ""}
+            onClick={handleStake}
+            disabled={isStaking || !walletAddress || !stakeAmount}
             className={css({
               bg: "linear-gradient(to right, #ffaa00, #ff7700)",
               color: "white",
@@ -404,100 +329,135 @@ export function MeridianStaking() {
               fontSize: "15px",
               fontWeight: "600",
               cursor:
-                isClaiming || !walletAddress || timeUntilClaim !== ""
+                isStaking || !walletAddress || !stakeAmount
                   ? "not-allowed"
                   : "pointer",
               transition: "transform 0.1s",
               opacity:
-                isClaiming || !walletAddress || timeUntilClaim !== ""
-                  ? "0.6"
-                  : "1",
+                isStaking || !walletAddress || !stakeAmount ? "0.6" : "1",
               _hover:
-                isClaiming || !walletAddress || timeUntilClaim !== ""
+                isStaking || !walletAddress || !stakeAmount
                   ? {}
                   : { transform: "scale(1.03)" },
             })}
           >
-            {isClaiming ? "Claiming..." : "Claim Meridian Reward"}
+            {isStaking ? "Staking..." : "Stake on Meridian"}
           </button>
-          {timeUntilClaim && (
-            <div
+          <div
+            className={css({
+              display: "flex",
+              flexDir: "column",
+              gap: "4px",
+            })}
+          >
+            <button
+              onClick={handleClaim}
+              disabled={isClaiming || !walletAddress || timeUntilClaim !== ""}
               className={css({
-                fontSize: "12px",
-                color: "#b48512",
-                textAlign: "center",
+                bg: "linear-gradient(to right, #ffaa00, #ff7700)",
+                color: "white",
+                py: "14px",
+                px: "20px",
+                borderRadius: "12px",
+                border: "none",
+                fontSize: "15px",
+                fontWeight: "600",
+                cursor:
+                  isClaiming || !walletAddress || timeUntilClaim !== ""
+                    ? "not-allowed"
+                    : "pointer",
+                transition: "transform 0.1s",
+                opacity:
+                  isClaiming || !walletAddress || timeUntilClaim !== ""
+                    ? "0.6"
+                    : "1",
+                _hover:
+                  isClaiming || !walletAddress || timeUntilClaim !== ""
+                    ? {}
+                    : { transform: "scale(1.03)" },
               })}
             >
-              {timeUntilClaim}
-            </div>
-          )}
+              {isClaiming ? "Claiming..." : "Claim Meridian Reward"}
+            </button>
+            {timeUntilClaim && (
+              <div
+                className={css({
+                  fontSize: "12px",
+                  color: "#b48512",
+                  textAlign: "center",
+                })}
+              >
+                {timeUntilClaim}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div
-        className={css({
-          bg: "#fffbe8",
-          p: "16px",
-          borderRadius: "12px",
-          mb: "20px",
-          border: "1px solid #ffae00",
-        })}
-      >
         <div
           className={css({
-            fontSize: "12px",
-            fontWeight: "600",
-            color: "#a06500",
-            mb: "8px",
-          })}
-        >
-          Airdrop Vault
-        </div>
-        <div
-          className={css({
-            w: "100%",
-            h: "20px",
-            bg: "#e8e8e8",
-            borderRadius: "10px",
-            overflow: "hidden",
+            bg: "#fffbe8",
+            p: "16px",
+            borderRadius: "12px",
+            mb: "20px",
+            border: "1px solid #ffae00",
           })}
         >
           <div
             className={css({
-              h: "100%",
-              w: "48%",
-              bg: "linear-gradient(to right, #ffaa00, #ff7700)",
+              fontSize: "12px",
+              fontWeight: "600",
+              color: "#a06500",
+              mb: "8px",
             })}
-          />
+          >
+            Airdrop Vault
+          </div>
+          <div
+            className={css({
+              w: "100%",
+              h: "20px",
+              bg: "#e8e8e8",
+              borderRadius: "10px",
+              overflow: "hidden",
+            })}
+          >
+            <div
+              className={css({
+                h: "100%",
+                w: "48%",
+                bg: "linear-gradient(to right, #ffaa00, #ff7700)",
+              })}
+            />
+          </div>
+          <div
+            className={css({
+              fontSize: "11px",
+              color: "#b48512",
+              mt: "6px",
+            })}
+          >
+            ~48,801,667,994 $Pecky left for grab
+          </div>
         </div>
+
         <div
           className={css({
-            fontSize: "11px",
-            color: "#b48512",
-            mt: "6px",
+            fontSize: "12px",
+            color: "#888",
+            textAlign: "center",
+            lineHeight: "1.8",
           })}
         >
-          ~48,801,667,994 $Pecky left for grab
+          <div>
+            Each staked Supra earns{" "}
+            <span className={css({ fontWeight: "700" })}>1 $Pecky</span> per day
+          </div>
+          <div>Ex: 500,000 staked → 500,000 $Pecky / 24h</div>
+          <div className={css({ mt: "8px", fontSize: "11px" })}>
+            As long as the airdrop vault still has $Pecky left.
+          </div>
         </div>
-      </div>
-
-      <div
-        className={css({
-          fontSize: "12px",
-          color: "#888",
-          textAlign: "center",
-          lineHeight: "1.8",
-        })}
-      >
-        <div>
-          Each staked Supra earns{" "}
-          <span className={css({ fontWeight: "700" })}>1 $Pecky</span> per day
-        </div>
-        <div>Ex: 500,000 staked → 500,000 $Pecky / 24h</div>
-        <div className={css({ mt: "8px", fontSize: "11px" })}>
-          As long as the airdrop vault still has $Pecky left.
-        </div>
-      </div>
-    </>
+      </RetroBox.Content>
+    </RetroBox>
   );
 }

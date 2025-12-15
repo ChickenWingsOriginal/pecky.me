@@ -58,14 +58,14 @@ export function useWalletIntegration() {
     try {
       dispatch({ type: 'SET_LOADING_BALANCES', payload: true });
       dispatch({ type: 'SET_LOADING_NFTS', payload: true });
-      dispatch({ type: 'SET_LOADING_STAKING', payload: true });
+      dispatch({ type: 'SET_STAKING_LOADING', payload: true });
 
       const data = await refreshAllWalletData(address);
 
       // Update all state
       dispatch({ type: 'SET_PECKY_BALANCE', payload: data.peckyBalance });
       dispatch({ type: 'SET_SUPRA_BALANCE', payload: data.supraBalance });
-      dispatch({ type: 'SET_STAKING_INFO', payload: { stakedAmount: data.stakingInfo.stakedAmount } });
+      dispatch({ type: 'SET_MERIDIAN_STAKED_AMOUNT', payload: data.stakingInfo.stakedAmount });
       dispatch({ type: 'SET_REGISTRATION_STATUS', payload: data.isRegistered });
       dispatch({ type: 'SET_DISCORD_STATUS', payload: data.discordStatus });
       dispatch({
@@ -84,7 +84,7 @@ export function useWalletIntegration() {
     } finally {
       dispatch({ type: 'SET_LOADING_BALANCES', payload: false });
       dispatch({ type: 'SET_LOADING_NFTS', payload: false });
-      dispatch({ type: 'SET_LOADING_STAKING', payload: false });
+      dispatch({ type: 'SET_STAKING_LOADING', payload: false });
     }
   }
 
@@ -101,7 +101,7 @@ export function useWalletIntegration() {
 
         dispatch({ type: 'SET_PECKY_BALANCE', payload: peckyBalance });
         dispatch({ type: 'SET_SUPRA_BALANCE', payload: supraBalance });
-        dispatch({ type: 'SET_STAKING_INFO', payload: { stakedAmount: stakingInfo.stakedAmount } });
+        dispatch({ type: 'SET_MERIDIAN_STAKED_AMOUNT', payload: stakingInfo.stakedAmount });
         dispatch({ type: 'UPDATE_REFRESH_TIME', payload: 'balances' });
       } catch (error) {
         console.error('Balance refresh error:', error);
