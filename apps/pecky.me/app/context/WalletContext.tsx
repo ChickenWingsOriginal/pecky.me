@@ -5,6 +5,7 @@ import React, {
   useReducer,
   useCallback,
   useEffect,
+  useRef,
   ReactNode,
 } from "react";
 import {
@@ -17,7 +18,16 @@ import {
   rarityLabel,
   fetchActiveNodesSorted,
   getAttachedMainNames,
+  getPendingUnstakes,
+  getUserStakedNodes,
+  getOperatorRewards,
+  getOperatorRewardsLive,
+  getOperatorApyForOwner,
+  type PendingUnstake,
+  type UserStakeInfo,
 } from "@/app/utils/nodeService";
+import { fetchStakingData as fetchMeridianStake } from "@/app/utils/fetchStakingData";
+import { fetchNextClaimTime as fetchMeridianNextClaim } from "@/app/utils/fetchNextClaimTime";
 
 // Types
 export interface NFT {
@@ -43,6 +53,26 @@ export interface OwnedNode {
   nodeId: string;
   name: string;
   linkedRarities: string[]; // NFT token names linked to this node
+  rewards?: number; // Node operator rewards
+  rewardsLive?: number; // Live operator rewards
+  apy?: number; // APY for node owner
+}
+
+// Staking namespace - all staking-page specific data
+export interface StakingState {
+  // Meridian Pool Staking
+  meridian: {
+    stakedAmount: bigint | null;
+    nextClaimTime: number | null;
+  };
+
+  // Pecky Node Staking
+  peckyNode: {
+    pendingUnstakes: PendingUnstake[];
+    userStakedNodes: UserStakeInfo[];
+  };
+
+  isLoading: boolean;
 }
 
 export interface WalletState {
@@ -52,13 +82,12 @@ export interface WalletState {
   isConnected: boolean;
   error: string | null;
 
-  // Balances
+  // Balances (shared across app)
   peckyBalance: bigint | null;
   supraBalance: bigint | null;
 
-  // Staking
-  stakedAmount: bigint | null;
-  delegationPoolInfo: DelegationPoolInfo | null;
+  // Staking (staking page specific data)
+  staking: StakingState;
 
   // NFTs
   ownedNfts: NFT[] | null;
@@ -77,7 +106,6 @@ export interface WalletState {
   // Refresh status
   isLoadingBalances: boolean;
   isLoadingNfts: boolean;
-  isLoadingStaking: boolean;
   isLoadingNodes: boolean;
   lastBalanceRefresh: number | null;
   lastNftRefresh: number | null;
@@ -89,10 +117,6 @@ export type WalletAction =
   | { type: "WALLET_DISCONNECTED" }
   | { type: "SET_PECKY_BALANCE"; payload: bigint }
   | { type: "SET_SUPRA_BALANCE"; payload: bigint }
-  | {
-      type: "SET_STAKING_INFO";
-      payload: { stakedAmount: bigint; poolInfo?: DelegationPoolInfo };
-    }
   | { type: "SET_NFTS"; payload: NFT[] }
   | { type: "SET_OWNED_RARITY_NFTS"; payload: string[] }
   | { type: "SET_AVAILABLE_RARITY_NFTS"; payload: string[] }
@@ -105,10 +129,15 @@ export type WalletAction =
     }
   | { type: "SET_LOADING_BALANCES"; payload: boolean }
   | { type: "SET_LOADING_NFTS"; payload: boolean }
-  | { type: "SET_LOADING_STAKING"; payload: boolean }
   | { type: "SET_LOADING_NODES"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null }
-  | { type: "UPDATE_REFRESH_TIME"; payload: "balances" | "nfts" };
+  | { type: "UPDATE_REFRESH_TIME"; payload: "balances" | "nfts" }
+  // Staking actions
+  | { type: "SET_STAKING_LOADING"; payload: boolean }
+  | { type: "SET_MERIDIAN_STAKED_AMOUNT"; payload: bigint }
+  | { type: "SET_MERIDIAN_NEXT_CLAIM_TIME"; payload: number | null }
+  | { type: "SET_PENDING_UNSTAKES"; payload: PendingUnstake[] }
+  | { type: "SET_USER_STAKED_NODES"; payload: UserStakeInfo[] };
 
 const initialState: WalletState = {
   walletAddress: null,
@@ -117,8 +146,17 @@ const initialState: WalletState = {
   error: null,
   peckyBalance: null,
   supraBalance: null,
-  stakedAmount: null,
-  delegationPoolInfo: null,
+  staking: {
+    meridian: {
+      stakedAmount: null,
+      nextClaimTime: null,
+    },
+    peckyNode: {
+      pendingUnstakes: [],
+      userStakedNodes: [],
+    },
+    isLoading: false,
+  },
   ownedNfts: null,
   ownedRarityNfts: null,
   availableRarityNfts: null,
@@ -129,7 +167,6 @@ const initialState: WalletState = {
   discordId: null,
   isLoadingBalances: false,
   isLoadingNfts: false,
-  isLoadingStaking: false,
   isLoadingNodes: false,
   lastBalanceRefresh: null,
   lastNftRefresh: null,
@@ -157,13 +194,6 @@ function walletReducer(state: WalletState, action: WalletAction): WalletState {
 
     case "SET_SUPRA_BALANCE":
       return { ...state, supraBalance: action.payload };
-
-    case "SET_STAKING_INFO":
-      return {
-        ...state,
-        stakedAmount: action.payload.stakedAmount,
-        delegationPoolInfo: action.payload.poolInfo || null,
-      };
 
     case "SET_NFTS":
       return { ...state, ownedNfts: action.payload };
@@ -196,9 +226,6 @@ function walletReducer(state: WalletState, action: WalletAction): WalletState {
     case "SET_LOADING_NFTS":
       return { ...state, isLoadingNfts: action.payload };
 
-    case "SET_LOADING_STAKING":
-      return { ...state, isLoadingStaking: action.payload };
-
     case "SET_LOADING_NODES":
       return { ...state, isLoadingNodes: action.payload };
 
@@ -212,6 +239,64 @@ function walletReducer(state: WalletState, action: WalletAction): WalletState {
         return { ...state, lastNftRefresh: Date.now() };
       }
       return state;
+
+    // Staking actions
+    case "SET_STAKING_LOADING":
+      return {
+        ...state,
+        staking: {
+          ...state.staking,
+          isLoading: action.payload,
+        },
+      };
+
+    case "SET_MERIDIAN_STAKED_AMOUNT":
+      return {
+        ...state,
+        staking: {
+          ...state.staking,
+          meridian: {
+            ...state.staking.meridian,
+            stakedAmount: action.payload,
+          },
+        },
+      };
+
+    case "SET_MERIDIAN_NEXT_CLAIM_TIME":
+      return {
+        ...state,
+        staking: {
+          ...state.staking,
+          meridian: {
+            ...state.staking.meridian,
+            nextClaimTime: action.payload,
+          },
+        },
+      };
+
+    case "SET_PENDING_UNSTAKES":
+      return {
+        ...state,
+        staking: {
+          ...state.staking,
+          peckyNode: {
+            ...state.staking.peckyNode,
+            pendingUnstakes: action.payload,
+          },
+        },
+      };
+
+    case "SET_USER_STAKED_NODES":
+      return {
+        ...state,
+        staking: {
+          ...state.staking,
+          peckyNode: {
+            ...state.staking.peckyNode,
+            userStakedNodes: action.payload,
+          },
+        },
+      };
 
     default:
       return state;
@@ -227,6 +312,7 @@ interface WalletContextType {
   refreshNfts: () => Promise<void>;
   refreshStakingInfo: () => Promise<void>;
   refreshDiscordStatus: () => Promise<void>;
+  refreshNodeOperatorData: () => Promise<void>;
 }
 
 export const WalletContext = createContext<WalletContextType | undefined>(
@@ -236,6 +322,11 @@ export const WalletContext = createContext<WalletContextType | undefined>(
 interface WalletProviderProps {
   children: ReactNode;
 }
+
+const MERIDIAN_POOL =
+  "0x72b93dccbda04c9caf1b8726d96cb28edee5feceb85e32db318dd1eea4320331";
+const STAKING_CLAIM_TABLE =
+  "0x68ff22fd7edc5d53bb61af22aa979170286489af715fbab3d080ed57df6717a4";
 
 export function WalletProvider({ children }: WalletProviderProps) {
   const [state, dispatch] = useReducer(walletReducer, initialState);
@@ -296,10 +387,45 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
   const refreshStakingInfo = useCallback(async () => {
     if (!state.walletAddress) return;
-    dispatch({ type: "SET_LOADING_STAKING", payload: true });
+    dispatch({ type: "SET_STAKING_LOADING", payload: true });
     try {
-      // Will be implemented with actual RPC calls
+      // Fetch Meridian staking data
+      const [meridianStaked, meridianNextClaim] = await Promise.all([
+        fetchMeridianStake(state.walletAddress, MERIDIAN_POOL),
+        fetchMeridianNextClaim(state.walletAddress, STAKING_CLAIM_TABLE),
+      ]);
+
+      if (meridianStaked !== null) {
+        dispatch({
+          type: "SET_MERIDIAN_STAKED_AMOUNT",
+          payload: meridianStaked,
+        });
+      }
+
+      if (meridianNextClaim !== null) {
+        dispatch({
+          type: "SET_MERIDIAN_NEXT_CLAIM_TIME",
+          payload: meridianNextClaim,
+        });
+      }
+
+      // Fetch Pecky Node staking data
+      const [pendingUnstakes, userStakedNodes] = await Promise.all([
+        getPendingUnstakes(state.walletAddress),
+        getUserStakedNodes(state.walletAddress),
+      ]);
+
+      dispatch({
+        type: "SET_PENDING_UNSTAKES",
+        payload: pendingUnstakes,
+      });
+
+      dispatch({
+        type: "SET_USER_STAKED_NODES",
+        payload: userStakedNodes,
+      });
     } catch (error) {
+      console.error("Failed to refresh staking info:", error);
       dispatch({
         type: "SET_ERROR",
         payload:
@@ -308,7 +434,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
             : "Failed to refresh staking info",
       });
     } finally {
-      dispatch({ type: "SET_LOADING_STAKING", payload: false });
+      dispatch({ type: "SET_STAKING_LOADING", payload: false });
     }
   }, [state.walletAddress]);
 
@@ -331,6 +457,42 @@ export function WalletProvider({ children }: WalletProviderProps) {
       });
     }
   }, [state.walletAddress]);
+
+  // Use ref to access current state without causing dependency issues
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const refreshNodeOperatorData = useCallback(async () => {
+    // Access current state via ref to avoid closure issues
+    const currentOwnedNodes = stateRef.current.ownedNodes;
+    if (!currentOwnedNodes || currentOwnedNodes.length === 0) return;
+
+    try {
+      const updatedNodes: OwnedNode[] = [];
+
+      for (let i = 0; i < currentOwnedNodes.length; i++) {
+        const node = currentOwnedNodes[i];
+        if (i > 0) await new Promise((resolve) => setTimeout(resolve, 10));
+
+        const [rewards, rewardsLive, apy] = await Promise.all([
+          getOperatorRewards(node.nodeId),
+          getOperatorRewardsLive(node.nodeId),
+          getOperatorApyForOwner(node.nodeId),
+        ]);
+
+        updatedNodes.push({
+          ...node,
+          rewards,
+          rewardsLive,
+          apy,
+        });
+      }
+
+      dispatch({ type: "SET_OWNED_NODES", payload: updatedNodes });
+    } catch (error) {
+      console.error("Failed to refresh node operator data:", error);
+    }
+  }, []); // Stable function - uses ref to access current state
 
   // When wallet connects, fetch: 1) balance, 2) NFTs, 3) all nodes in parallel
   // Then: 4) owned nodes, 5) linked NFTs per node in parallel
@@ -413,6 +575,9 @@ export function WalletProvider({ children }: WalletProviderProps) {
           ownedNodes: ownedNodesWithLinked,
           availableRarities,
         });
+
+        // Fetch staking data (non-blocking)
+        refreshStakingInfo();
       } catch (error) {
         console.error("Failed to fetch wallet data:", error);
         dispatch({
@@ -427,7 +592,46 @@ export function WalletProvider({ children }: WalletProviderProps) {
         dispatch({ type: "SET_LOADING_NODES", payload: false });
       }
     })();
-  }, [state.walletAddress]);
+  }, [state.walletAddress, refreshStakingInfo]);
+
+  // Fetch node operator data when owned nodes are loaded
+  useEffect(() => {
+    if (state.ownedNodes && state.ownedNodes.length > 0) {
+      refreshNodeOperatorData();
+    }
+  }, [state.ownedNodes?.length, refreshNodeOperatorData]);
+
+  // Auto-refresh node operator data and staking rewards every 30 seconds
+  useEffect(() => {
+    const hasOwnedNodes = state.ownedNodes && state.ownedNodes.length > 0;
+    const hasUserStakes =
+      state.staking.peckyNode.userStakedNodes.length > 0;
+
+    if (!hasOwnedNodes && !hasUserStakes) return;
+
+    const interval = setInterval(
+      async () => {
+        try {
+          if (hasOwnedNodes) {
+            await refreshNodeOperatorData();
+          }
+          if (hasUserStakes) {
+            refreshStakingInfo();
+          }
+        } catch (error) {
+          console.error("Failed to refresh rewards:", error);
+        }
+      },
+      30000,
+    ); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [
+    state.ownedNodes?.length,
+    state.staking.peckyNode.userStakedNodes.length,
+    refreshNodeOperatorData,
+    refreshStakingInfo,
+  ]);
 
   return (
     <WalletContext.Provider
@@ -440,6 +644,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
         refreshNfts,
         refreshStakingInfo,
         refreshDiscordStatus,
+        refreshNodeOperatorData,
       }}
     >
       {children}

@@ -19,7 +19,6 @@ const navItems = [
   { href: "/nft", label: "NFT", icon: "nft-icon.png" },
   { href: "/", label: "Home", icon: "home-icon.png" },
   { href: "/staking", label: "Staking", icon: "staking-icon.png" },
-  { href: "/node", label: "Node", icon: "node-icon.png" },
   { href: "/info", label: "Info", icon: "info-icon.png" },
 ];
 

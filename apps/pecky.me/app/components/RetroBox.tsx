@@ -126,6 +126,8 @@ function RetroBoxContent({ children }: RetroBoxContentProps) {
   const { isOpen } = context;
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState<number>(0);
+  const [enableTransition, setEnableTransition] = useState(false);
+  const initialHeightSet = useRef(false);
 
   // Measure content height whenever it changes or mounts
   useEffect(() => {
@@ -133,6 +135,17 @@ function RetroBoxContent({ children }: RetroBoxContentProps) {
       // Get the natural height of the content
       const height = contentRef.current.scrollHeight;
       setContentHeight(height);
+
+      // Only enable transitions after the initial height has been set and rendered
+      if (!initialHeightSet.current && height > 0) {
+        initialHeightSet.current = true;
+        // Wait for next frame to ensure the initial height is rendered
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setEnableTransition(true);
+          });
+        });
+      }
     }
   }, [children, isOpen]);
 
@@ -154,7 +167,9 @@ function RetroBoxContent({ children }: RetroBoxContentProps) {
         height: isOpen ? `${contentHeight}px` : "0px",
         opacity: isOpen ? 1 : 0,
         overflow: "hidden",
-        transition: "height 0.3s ease-in-out, opacity 0.3s ease-in-out",
+        transition: enableTransition
+          ? "height 0.3s ease-in-out, opacity 0.3s ease-in-out"
+          : "none",
       }}
     >
       <div
