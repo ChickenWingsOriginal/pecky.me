@@ -15,7 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pecky - ChickenWings dApp",
+  title: {
+    template: "PECKY - %s",
+    default: "PECKY - ChickenWings dApp",
+  },
   description: "Earn Pecky tokens by staking Supra, holding NFTs, and using our Discord bot",
   icons: {
     icon: "/images/pecky-icon.png",
