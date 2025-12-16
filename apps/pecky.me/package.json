@@ -13,20 +13,20 @@
   },
   "dependencies": {
     "@gerritsen/supra-connect": "0.0.7",
-    "next": "16.0.8",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "next": "16.0.10",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "sonner": "2.0.7",
     "supra-l1-sdk": "4.6.0"
   },
   "devDependencies": {
-    "@pandacss/dev": "1.7.0",
-    "@types/node": "24.10.1",
+    "@pandacss/dev": "1.7.1",
+    "@types/node": "25.0.2",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "eslint": "9.39.1",
-    "eslint-config-next": "16.0.8",
-    "sharp": "^0.34.5",
+    "eslint": "9.39.2",
+    "eslint-config-next": "16.0.10",
+    "sharp": "0.34.5",
     "typescript": "5.9.3"
   }
 }

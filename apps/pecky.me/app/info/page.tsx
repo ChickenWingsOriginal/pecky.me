@@ -1,13 +1,21 @@
-"use client";
-
 import { css } from "@/styled-system/css";
 import Image from "next/image";
-import { useGlobalData } from "@/app/context/GlobalDataContext";
-import { formatMicroUnits } from "@/app/utils/format";
-import { RetroBox } from "@/app/components/RetroBox";
+import { BurnedPeckyDisplay } from "@/app/components/BurnedPeckyDisplay";
+import { getBurnedPecky } from "@/app/lib/blockchain-data";
+import type { Metadata } from "next";
 
-export default function InfoPage() {
-  const { burnedPecky } = useGlobalData();
+export const metadata: Metadata = {
+  title: "Info",
+  description: "Learn about Pecky, the community-driven token on Supra with zero team tokens. Discover how we burn Pecky through staking, NFT royalties, and PeckyBot.",
+  openGraph: {
+    title: "PECKY - Info",
+    description: "Learn about Pecky, the community-driven token on Supra with zero team tokens.",
+    type: "website",
+  },
+};
+
+export default async function InfoPage() {
+  const burnedPecky = await getBurnedPecky();
 
   const burningSections = [
     {
@@ -123,29 +131,7 @@ export default function InfoPage() {
           wings on!
         </div>
 
-        <RetroBox className={css({ textAlign: "center" })}>
-          <div
-            className={css({
-              fontSize: "18px",
-              fontWeight: "700",
-              color: "#4a2c00",
-              mb: "8px",
-            })}
-          >
-            🔥 Total Pecky Burned
-          </div>
-          <div
-            className={css({
-              fontSize: "20px",
-              fontWeight: "700",
-              color: "#a06500",
-            })}
-          >
-            {burnedPecky !== null
-              ? formatMicroUnits(burnedPecky) + " $Pecky"
-              : "–"}
-          </div>
-        </RetroBox>
+        <BurnedPeckyDisplay burnedPecky={burnedPecky} />
 
         <div className={css({ textAlign: "center", mb: "20px" })}>
           <Image

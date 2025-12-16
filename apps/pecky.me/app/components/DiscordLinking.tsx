@@ -1,13 +1,14 @@
 'use client';
 
 import { css } from "@/styled-system/css";
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { useWallet } from "@/app/context/WalletContext";
 import { useSupraConnect } from "@gerritsen/supra-connect";
 import { RetroBox } from "./RetroBox";
-// @ts-ignore
-import { BCS } from "supra-l1-sdk";
 import { toast } from "sonner";
+import { PECKY_COIN_MODULE } from "@/app/utils/constants";
+// @ts-ignore - supra-l1-sdk doesn't have TypeScript definitions
+import { BCS } from "supra-l1-sdk";
 
 export function DiscordLinking() {
   const { state, refreshDiscordStatus } = useWallet();
@@ -35,14 +36,12 @@ export function DiscordLinking() {
 
     setLinkingDiscord(true);
     try {
-      const DISCORD_MODULE_ADDR = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
-
       // Serialize Discord ID as u128
       const serializedDiscordId = BCS.bcsSerializeU128(idStr);
 
       const result = await sendTransaction({
         payload: {
-          moduleAddress: DISCORD_MODULE_ADDR,
+          moduleAddress: PECKY_COIN_MODULE,
           moduleName: 'discord_link',
           functionName: 'register_discord',
           typeArguments: [],
@@ -51,7 +50,9 @@ export function DiscordLinking() {
       });
 
       if (!result.success) {
-        throw new Error(result.error || result.reason || "Failed to link Discord");
+        const errorMsg = result.error || result.reason || "Transaction failed";
+        toast.error(`Failed to link Discord: ${errorMsg}`);
+        return;
       }
 
       toast.success("Discord linked successfully!");
@@ -61,7 +62,8 @@ export function DiscordLinking() {
       await refreshDiscordStatus();
     } catch (error) {
       console.error("Discord linking failed:", error);
-      toast.error("Failed to link Discord");
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to link Discord: ${errorMsg}`);
     } finally {
       setLinkingDiscord(false);
     }
@@ -75,11 +77,9 @@ export function DiscordLinking() {
 
     setLinkingDiscord(true);
     try {
-      const DISCORD_MODULE_ADDR = '0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d';
-
       const result = await sendTransaction({
         payload: {
-          moduleAddress: DISCORD_MODULE_ADDR,
+          moduleAddress: PECKY_COIN_MODULE,
           moduleName: 'discord_link',
           functionName: 'unregister_discord',
           typeArguments: [],
@@ -88,7 +88,9 @@ export function DiscordLinking() {
       });
 
       if (!result.success) {
-        throw new Error(result.error || result.reason || "Failed to unlink Discord");
+        const errorMsg = result.error || result.reason || "Transaction failed";
+        toast.error(`Failed to unlink Discord: ${errorMsg}`);
+        return;
       }
 
       toast.success("Discord unlinked successfully!");
@@ -97,9 +99,16 @@ export function DiscordLinking() {
       await refreshDiscordStatus();
     } catch (error) {
       console.error("Discord unlinking failed:", error);
-      toast.error("Failed to unlink Discord");
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      toast.error(`Failed to unlink Discord: ${errorMsg}`);
     } finally {
       setLinkingDiscord(false);
+    }
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !linkingDiscord && state.isConnected) {
+      void handleLinkDiscord();
     }
   };
 
@@ -151,6 +160,7 @@ export function DiscordLinking() {
             placeholder="Discord ID (snowflake)"
             value={discordInput}
             onChange={(e) => setDiscordInput(e.target.value)}
+            onKeyDown={handleKeyPress}
             disabled={!state.isConnected || linkingDiscord}
             className={css({
               p: "10px 14px",

@@ -4,6 +4,12 @@ import { QuickLinks } from "@/app/components/QuickLinks";
 import { DiscordLinking } from "@/app/components/DiscordLinking";
 import { EarnSection } from "@/app/components/EarnSection";
 import { Tokenomics } from "@/app/components/Tokenomics";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+  description: "Pecky - Earn tokens by staking Supra, holding ChickenWings NFTs, and using our Discord bot. 100% community-owned with zero team tokens.",
+};
 
 export default function Home() {
   return (
