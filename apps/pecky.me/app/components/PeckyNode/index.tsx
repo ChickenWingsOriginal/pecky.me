@@ -255,16 +255,14 @@ export function PeckyNode() {
         toast.success(
           `Staked ${amountNumber.toLocaleString()} $Pecky successfully!`,
         );
+        setStakeAmount("");
+        setSelectedNodeId(null);
         try {
           await refreshBalances();
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
+          await refreshStakingInfo();
         } catch (error) {
           console.error("Error refreshing wallet data:", error);
         }
-        setStakeAmount("");
-        setSelectedNodeId(null);
       } else {
         const errorMsg = result.reason || result.error || "";
         if (

@@ -1,10 +1,21 @@
-"use client";
-
 import { css } from "@/styled-system/css";
 import Image from "next/image";
 import { RetroTabs } from "@/app/components/RetroTabs";
 import { MeridianStaking } from "@/app/components/MeridianStaking";
 import { PeckyNode } from "@/app/components/PeckyNode";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Staking",
+  description:
+    "Stake Supra on Meridian Node to earn 8% APY + daily Pecky rewards, or stake Pecky on Nodes for passive income. All staking rewards with zero fees.",
+  openGraph: {
+    title: "PECKY - Staking",
+    description:
+      "Earn rewards by staking Supra or Pecky tokens. Meridian Node offers 8% APY plus daily Pecky. Node staking provides passive Pecky income.",
+    type: "website",
+  },
+};
 
 export default function StakingPage() {
   return (
