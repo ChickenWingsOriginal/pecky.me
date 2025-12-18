@@ -127,7 +127,14 @@
     "noImage": "No image",
     "claiming": "Claiming...",
     "claim": "Claim",
-    "airdropAvailable": "Airdrop available"
+    "airdropAvailable": "Airdrop available",
+    "rewardsTitle": "Monthly Rewards by Rarity",
+    "poolDescription": "From a <bold>450B Pecky</bold> pool",
+    "nftsPerMonth": "NFTs • {percent}/month",
+    "monthlyReward": "Monthly NFT reward is now",
+    "hodlPower": "HODL your NFT = Monthly passive Pecky power!",
+    "tradeOnCrystara": "Trade your NFT on Crystara",
+    "airdropRewardClaimable": "Airdrop reward claimable?"
   },
   "staking": {
     "title": "Staking",

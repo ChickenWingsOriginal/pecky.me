@@ -127,7 +127,14 @@
     "noImage": "Sin imagen",
     "claiming": "Reclamando...",
     "claim": "Reclamar",
-    "airdropAvailable": "Airdrop disponible"
+    "airdropAvailable": "Airdrop disponible",
+    "rewardsTitle": "Recompensas Mensuales por Rareza",
+    "poolDescription": "De un pool de <bold>450B Pecky</bold>",
+    "nftsPerMonth": "NFTs • {percent}/mes",
+    "monthlyReward": "La recompensa mensual de NFT es ahora",
+    "hodlPower": "¡HODL tu NFT = Poder pasivo mensual de Pecky!",
+    "tradeOnCrystara": "Intercambia tu NFT en Crystara",
+    "airdropRewardClaimable": "¿Recompensa de airdrop reclamable?"
   },
   "staking": {
     "title": "Staking",
