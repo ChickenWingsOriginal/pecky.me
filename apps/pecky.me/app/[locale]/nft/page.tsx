@@ -301,7 +301,7 @@ export default function NFTPage() {
                 mb: "2px",
               })}
             >
-              Airdrop reward claimable?
+              {t('airdropRewardClaimable')}
             </div>
             <div className={css({ fontSize: "13px" })}>{airdropText}</div>
           </div>
@@ -705,7 +705,7 @@ export default function NFTPage() {
                 fontWeight: "700",
               })}
             >
-              Monthly Rewards by Rarity
+              {t('rewardsTitle')}
             </h3>
             <div
               className={css({
@@ -714,7 +714,9 @@ export default function NFTPage() {
                 color: "#b48512",
               })}
             >
-              From a <b>450B Pecky</b> pool
+              {t.rich('poolDescription', {
+                bold: (chunks) => <b>{chunks}</b>
+              })}
             </div>
             <div className={css({ display: "grid", gap: "8px", mb: "12px" })}>
               {rarities.map((rarity) => (
@@ -749,10 +751,10 @@ export default function NFTPage() {
                       marginBottom: "3px",
                     }}
                   >
-                    {rarity.count} NFTs • {rarity.percent}/month
+                    {rarity.count} {t('nftsPerMonth', { percent: rarity.percent })}
                   </div>
                   <div style={{ fontSize: "11px", color: "#a06500" }}>
-                    Monthly NFT reward is now{" "}
+                    {t('monthlyReward')}{" "}
                     {nftPoolRemaining !== null
                       ? formatMillions(
                           Number(
@@ -780,7 +782,7 @@ export default function NFTPage() {
                   mb: "8px",
                 })}
               >
-                HODL your NFT = Monthly passive Pecky power!
+                {t('hodlPower')}
               </div>
               <a
                 href={EXTERNAL_LINKS.crystara}
@@ -794,7 +796,7 @@ export default function NFTPage() {
                   _hover: { opacity: "0.8" },
                 })}
               >
-                Trade your NFT on Crystara
+                {t('tradeOnCrystara')}
               </a>
             </div>
           </div>
