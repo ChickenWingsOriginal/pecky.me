@@ -9,17 +9,17 @@ import HamburgerIcon from "./HamburgerIcon";
 import { SupraConnectButton } from "@gerritsen/supra-connect";
 import { useWallet } from "@/app/context/WalletContext";
 import { useGlobalData } from "@/app/context/GlobalDataContext";
-import { getRandomQuote } from "@/app/constants/quotes";
 import { formatMicroUnits, formatMillions } from "@/app/utils/format";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useTranslations } from "next-intl";
 
 const navItems = [
-  { href: "/bot", label: "Bot", icon: "bot-icon.png" },
-  { href: "/nft", label: "NFT", icon: "nft-icon.png" },
-  { href: "/", label: "Home", icon: "home-icon.png" },
-  { href: "/staking", label: "Staking", icon: "staking-icon.png" },
-  { href: "/info", label: "Info", icon: "info-icon.png" },
+  { href: "/bot", translationKey: "bot", icon: "bot-icon.png" },
+  { href: "/nft", translationKey: "nft", icon: "nft-icon.png" },
+  { href: "/", translationKey: "home", icon: "home-icon.png" },
+  { href: "/staking", translationKey: "staking", icon: "staking-icon.png" },
+  { href: "/info", translationKey: "info", icon: "info-icon.png" },
 ];
 
 export default function Navigation() {
@@ -28,7 +28,10 @@ export default function Navigation() {
   const { state } = useWallet();
   const { peckyPrice, circulatingSupply } = useGlobalData();
   const [registerLoading, setRegisterLoading] = useState(false);
-  const [randomQuote, setRandomQuote] = useState("");
+  const [randomQuoteKey, setRandomQuoteKey] = useState("quote1");
+  const t = useTranslations("wallet");
+  const tNav = useTranslations("nav");
+  const tQuotes = useTranslations("quotes");
 
   const PECKY_DECIMALS = 6; // Pecky uses 6 decimal places
   const PECKY_COIN_MODULE =
@@ -36,7 +39,8 @@ export default function Navigation() {
 
   // Get random quote on mount
   useEffect(() => {
-    setRandomQuote(getRandomQuote());
+    const quoteNumber = Math.floor(Math.random() * 10) + 1;
+    setRandomQuoteKey(`quote${quoteNumber}`);
   }, []);
 
   // Handle register button click
@@ -216,7 +220,7 @@ export default function Navigation() {
                 color: "#a06500",
               })}
             >
-              Wallet balance
+              {t("walletBalance")}
             </div>
             {state.isConnected && state.walletAddress ? (
               <>
@@ -227,17 +231,17 @@ export default function Navigation() {
                     color: "#513d0a",
                   })}
                 >
-                  $Pecky:{" "}
+                  {t("peckyLabel")}{" "}
                   {state.isLoadingBalances
-                    ? "Loading..."
+                    ? t("loading")
                     : formatBalance(state.peckyBalance)}
                 </div>
                 <div
                   className={css({ fontSize: "0.875rem", color: "#b48512" })}
                 >
-                  Your Pecky balance is worth:{" "}
+                  {t("peckyWorth")}{" "}
                   {state.isLoadingBalances
-                    ? "Loading..."
+                    ? t("loading")
                     : getPeckyWorthInSupra()}{" "}
                   $SUPRA
                 </div>
@@ -257,7 +261,7 @@ export default function Navigation() {
                 <div
                   className={css({ fontSize: "0.875rem", color: "#b48512" })}
                 >
-                  Connect wallet to view balance
+                  {t("connectToView")}
                 </div>
               </>
             )}
@@ -301,10 +305,10 @@ export default function Navigation() {
             })}
           >
             {registerLoading
-              ? "Registering..."
+              ? t("registering")
               : state.isRegistered === true
-                ? "✓ Registered"
-                : "Register"}
+                ? t("registered")
+                : t("register")}
           </button>
           {state.isRegistered !== true && (
             <div
@@ -315,7 +319,7 @@ export default function Navigation() {
                 textAlign: "center",
               })}
             >
-              (required only once)
+              {t("requiredOnce")}
             </div>
           )}
         </div>
@@ -334,7 +338,7 @@ export default function Navigation() {
             lineHeight: "1.5",
           })}
         >
-          "{randomQuote}"
+          "{tQuotes(randomQuoteKey as any)}"
         </div>
 
         {/* Circulating Supply */}
@@ -353,7 +357,7 @@ export default function Navigation() {
               mb: "0.5rem",
             })}
           >
-            Circulating Supply:
+            {t("circulatingSupply")}
           </div>
           <div
             className={css({
@@ -369,7 +373,7 @@ export default function Navigation() {
               : "–"}
           </div>
           <div className={css({ fontSize: "0.75rem", color: "#b48512" })}>
-            1 $Pecky = {peckyPrice ? peckyPrice.toFixed(6) : "–"} $SUPRA
+            {t("priceLabel")} {peckyPrice ? peckyPrice.toFixed(6) : "–"} $SUPRA
           </div>
         </div>
 
@@ -404,6 +408,7 @@ export default function Navigation() {
         >
           {navItems.map((item) => {
             const isActive = pathname === item.href;
+            const label = tNav(item.translationKey);
             return (
               <Link
                 key={item.href}
@@ -431,7 +436,7 @@ export default function Navigation() {
                 >
                   <Image
                     src={`/images/${item.icon}`}
-                    alt={item.label}
+                    alt={label}
                     fill
                     sizes="28px"
                     className={css({ objectFit: "contain" })}
@@ -443,7 +448,7 @@ export default function Navigation() {
                     paddingBottom: "0.125rem",
                   })}
                 >
-                  {item.label}
+                  {label}
                 </span>
               </Link>
             );
