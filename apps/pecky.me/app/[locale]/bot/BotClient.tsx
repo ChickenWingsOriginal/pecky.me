@@ -12,8 +12,10 @@ import { getPeckyBotDaysRemaining } from "@/app/utils/getPeckyBotDaysRemaining";
 import { getBotTransactionFailureReason } from "@/app/utils/getBotTransactionFailureReason";
 import { formatBotStatus } from "@/app/utils/formatBotStatus";
 import { PECKY_COIN_MODULE } from "@/app/utils/constants";
+import { useTranslations } from "next-intl";
 
 export function BotClient() {
+  const t = useTranslations('bot');
   const { refreshBalances } = useWallet();
   const { sendTransaction, connectedWallet } = useSupraConnect();
   const [extendDays, setExtendDays] = useState("");
@@ -61,7 +63,7 @@ export function BotClient() {
 
   const handleActivateBot = async () => {
     if (!connectedWallet?.walletAddress) {
-      toast.error("Please connect your wallet first");
+      toast.error(t('connectWalletFirst'));
       return;
     }
 
@@ -79,11 +81,11 @@ export function BotClient() {
 
       if (!result.success) {
         const errorMsg = result.error || result.reason || "Transaction failed";
-        toast.error(`Failed to activate bot: ${errorMsg}`);
+        toast.error(t('activationFailed', { error: errorMsg }));
         return;
       }
 
-      toast.success("Waiting for transaction confirmation...");
+      toast.success(t('waitingConfirmation'));
 
       let isActive = false;
       for (let i = 0; i < 10; i++) {
@@ -96,7 +98,7 @@ export function BotClient() {
       }
 
       if (isActive) {
-        toast.success("PeckyBot activated with Supra!");
+        toast.success(t('activatedSuccess'));
       } else {
         const failureMsg = await getBotTransactionFailureReason(
           result.txHash || "",
@@ -106,7 +108,7 @@ export function BotClient() {
     } catch (error) {
       console.error("Activation failed:", error);
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
-      toast.error(`Failed to activate bot: ${errorMsg}`);
+      toast.error(t('activationFailed', { error: errorMsg }));
     } finally {
       setIsActivating(false);
     }
@@ -114,12 +116,12 @@ export function BotClient() {
 
   const handleExtendBot = async () => {
     if (!connectedWallet?.walletAddress) {
-      toast.error("Please connect your wallet first");
+      toast.error(t('connectWalletFirst'));
       return;
     }
 
     if (!extendDays || parseInt(extendDays) <= 0) {
-      toast.error("Please enter a valid number of days");
+      toast.error(t('enterValidDays'));
       return;
     }
 
@@ -145,11 +147,11 @@ export function BotClient() {
 
       if (!result.success) {
         const errorMsg = result.error || result.reason || "Transaction failed";
-        toast.error(`Failed to extend bot: ${errorMsg}`);
+        toast.error(t('extensionFailed', { error: errorMsg }));
         return;
       }
 
-      toast.success("Waiting for transaction confirmation...");
+      toast.success(t('waitingConfirmation'));
 
       let success = false;
       for (let i = 0; i < 10; i++) {
@@ -162,7 +164,7 @@ export function BotClient() {
       }
 
       if (success) {
-        toast.success(`PeckyBot extended for ${extendDays} day(s)!`);
+        toast.success(t('extendedSuccess', { days: extendDays }));
         setExtendDays("");
         await refreshBalances();
       } else {
@@ -174,7 +176,7 @@ export function BotClient() {
     } catch (error) {
       console.error("Extension failed:", error);
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
-      toast.error(`Failed to extend bot: ${errorMsg}`);
+      toast.error(t('extensionFailed', { error: errorMsg }));
     } finally {
       setIsExtending(false);
     }
@@ -209,7 +211,7 @@ export function BotClient() {
               : { transform: "scale(1.02)" },
         })}
       >
-        {isActivating ? "Activating..." : "Activate PECKYBOT with Supra"}
+        {isActivating ? t('activating') : t('activateButton')}
       </button>
       <div
         className={css({
@@ -219,7 +221,7 @@ export function BotClient() {
           mb: "16px",
         })}
       >
-        Bot status:{" "}
+        {t('botStatus')}{" "}
         <span className={css({ color: "#2e2e2e" })}>
           {formatBotStatus(
             !!connectedWallet?.walletAddress,
@@ -247,7 +249,7 @@ export function BotClient() {
             mb: "8px",
           })}
         >
-          Extend with Pecky tokens:
+          {t('extendLabel')}
         </label>
         <div
           className={css({
@@ -262,7 +264,7 @@ export function BotClient() {
             min="1"
             value={extendDays}
             onChange={(e) => setExtendDays(e.target.value)}
-            placeholder="How many days?"
+            placeholder={t('daysPlaceholder')}
             className={css({
               flex: "2",
               minW: "120px",
@@ -305,7 +307,7 @@ export function BotClient() {
                   : { transform: "scale(1.02)" },
             })}
           >
-            {isExtending ? "Extending..." : "Extend with Pecky"}
+            {isExtending ? t('extending') : t('extendButton')}
           </button>
         </div>
       </div>
@@ -319,7 +321,7 @@ export function BotClient() {
         })}
       >
         {estimatedCost > 0 &&
-          `You will pay ${estimatedCost.toLocaleString()} Pecky`}
+          t('estimatedCost', { cost: estimatedCost.toLocaleString() })}
       </div>
       <div
         className={css({
@@ -330,7 +332,7 @@ export function BotClient() {
           mb: "16px",
         })}
       >
-        {botActive && `${daysLeft} days left active`}
+        {botActive && t('daysLeftActive', { days: daysLeft })}
       </div>
 
       <hr
@@ -352,12 +354,12 @@ export function BotClient() {
         })}
       >
         <div className={css({ mb: "8px" })}>
-          300,000 Pecky = 1 day bot activation.
+          {t('costInfo')}
         </div>
         <div className={css({ mb: "8px" })}>
-          Use the bot as long as you keep extending!
+          {t('keepExtending')}
         </div>
-        <div>Need help? Ask in Discord!</div>
+        <div>{t('needHelp')}</div>
       </div>
 
       <hr

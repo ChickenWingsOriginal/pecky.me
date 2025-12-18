@@ -2,21 +2,26 @@ import { BotClient } from "./BotClient";
 import type { Metadata } from "next";
 import { css } from "@/styled-system/css";
 import Image from "next/image";
-import { RetroBox } from "../components/RetroBox";
+import { RetroBox } from "@/app/components/RetroBox";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "PeckyBot",
-  description:
-    "Activate PeckyBot on Discord for NFT bid notifications and Crystara marketplace alerts. Pay 5,000 $SUPRA to activate, then extend with Pecky tokens.",
-  openGraph: {
-    title: "PECKY - PeckyBot",
-    description:
-      "Get exclusive Discord bot access for NFT notifications and marketplace alerts.",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('bot');
+
+  return {
+    title: t('pageTitle'),
+    description: t('pageDescription'),
+    openGraph: {
+      title: `PECKY - ${t('pageTitle')}`,
+      description: t('description'),
+      type: "website",
+    },
+  };
+}
 
 export default function BotPage() {
+  const t = useTranslations('bot');
   return (
     <div
       className={css({
@@ -57,7 +62,7 @@ export default function BotPage() {
                 mb: "12px",
               })}
             >
-              PECKYBOT on Discord
+              {t('heading')}
             </h1>
           </div>
 
@@ -70,7 +75,7 @@ export default function BotPage() {
                 mb: "10px",
               })}
             >
-              Get exclusive bot access:
+              {t('exclusiveAccess')}
             </div>
             <ul
               className={css({
@@ -82,25 +87,22 @@ export default function BotPage() {
                 mb: "12px",
               })}
             >
-              <li>Get notifications when someone bids on your NFT</li>
-              <li>
-                Set alerts for any top 25 NFT on Crystara with your rarity,
-                below your chosen price
-              </li>
-              <li>...and more features soon!</li>
+              <li>{t('feature1')}</li>
+              <li>{t('feature2')}</li>
+              <li>{t('feature3')}</li>
             </ul>
           </div>
 
           <div
             className={css({ fontSize: "14px", color: "#a06500", mb: "8px" })}
           >
-            Pay{" "}
+            {t('activationCost')}{" "}
             <span className={css({ fontWeight: "700" })}>
-              one time 5,000 $SUPRA
+              {t('activationAmount')}
             </span>{" "}
-            to activate the bot.
+            {t('activationText')}
             <br />
-            After that, you only need Pecky as gas to keep the bot active.
+            {t('gasText')}
           </div>
           <div
             className={css({
@@ -109,7 +111,7 @@ export default function BotPage() {
               fontWeight: "600",
             })}
           >
-            All $Pecky used for the bot will be burned.
+            {t('burnNotice')}
           </div>
         </RetroBox>
         <BotClient />

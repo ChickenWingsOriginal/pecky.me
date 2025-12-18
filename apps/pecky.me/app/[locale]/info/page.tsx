@@ -3,42 +3,45 @@ import Image from "next/image";
 import { BurnedPeckyDisplay } from "@/app/components/BurnedPeckyDisplay";
 import { getBurnedPecky } from "@/app/lib/blockchain-data";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Info",
-  description: "Learn about Pecky, the community-driven token on Supra with zero team tokens. Discover how we burn Pecky through staking, NFT royalties, and PeckyBot.",
-  openGraph: {
-    title: "PECKY - Info",
-    description: "Learn about Pecky, the community-driven token on Supra with zero team tokens.",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('info');
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: `PECKY - ${t('title')}`,
+      description: t('ogDescription'),
+      type: "website",
+    },
+  };
+}
 
 export default async function InfoPage() {
   const burnedPecky = await getBurnedPecky();
+  const t = await getTranslations('info');
 
   const burningSections = [
     {
-      title: "STAKING",
+      title: t('staking.title'),
       icon: "meridian.png",
-      description:
-        "Stake your $SUPRA on the <b>Meridian node</b> and get the same 8% node rewards as anywhere else,<br>but you also get the same amount of $Pecky as your daily staked $SUPRA! <br>Even better: <b>50% of the node rewards</b> are used to buy up and burn $Pecky for the community!",
+      description: t.raw('staking.description'),
       width: 36,
       height: 36,
     },
     {
-      title: "NFTs",
+      title: t('nfts.title'),
       icon: "crystara.png",
-      description:
-        "All NFTs sold on the Crystara marketplace have a 5% royalty.<br>Instead of keeping these fees, <b>we use every penny to buy and burn Pecky!</b>",
+      description: t.raw('nfts.description'),
       width: 115,
       height: 34,
     },
     {
-      title: "PECKYBOT",
+      title: t('peckybot.title'),
       icon: "bot-icon.png",
-      description:
-        "On Discord, our bot helps NFT traders by sending instant alerts when:<br>• someone bids on your NFT<br>• a top collection NFT is listed below your set price<br>All Pecky used as gas for the bot <b>is instantly sent to the burn pile!</b>",
+      description: t.raw('peckybot.description'),
       width: 33,
       height: 36,
     },
@@ -113,7 +116,7 @@ export default async function InfoPage() {
             mb: "16px",
           })}
         >
-          Welcome to the Info Page
+          {t('pageHeading')}
         </h1>
 
         <div
@@ -124,12 +127,8 @@ export default async function InfoPage() {
             textAlign: "center",
             lineHeight: "1.6",
           })}
-        >
-          Pecky was hatched from the ChickenWings NFT collection. <br />
-          Pecky is a true <b>community token</b> with <b>zero team tokens</b>.
-          Hold your Peckys tight, because we burn everything we can get our
-          wings on!
-        </div>
+          dangerouslySetInnerHTML={{ __html: t.raw('introText') }}
+        />
 
         <BurnedPeckyDisplay burnedPecky={burnedPecky} />
 
@@ -152,7 +151,7 @@ export default async function InfoPage() {
             mb: "20px",
           })}
         >
-          How does our burning ritual work?
+          {t('burningRitualHeading')}
         </div>
 
         {burningSections.map((section) => (
@@ -199,7 +198,7 @@ export default async function InfoPage() {
             textAlign: "center",
           })}
         >
-          Our partners:
+          {t('partnersHeading')}
         </div>
 
         <div
@@ -236,7 +235,7 @@ export default async function InfoPage() {
             fontSize: "15px",
           })}
         >
-          Have questions? Join our Discord or check us out on X!
+          {t('questionsText')}
         </div>
 
         <div

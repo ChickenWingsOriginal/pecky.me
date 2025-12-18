@@ -3,12 +3,14 @@
 import { css } from "@/styled-system/css";
 import { formatMicroUnits } from "@/app/utils/format";
 import { RetroBox } from "@/app/components/RetroBox";
+import { useTranslations } from "next-intl";
 
 interface BurnedPeckyDisplayProps {
   burnedPecky: bigint;
 }
 
 export function BurnedPeckyDisplay({ burnedPecky }: BurnedPeckyDisplayProps) {
+  const t = useTranslations('info');
 
   return (
     <RetroBox className={css({ textAlign: "center" })}>
@@ -20,7 +22,7 @@ export function BurnedPeckyDisplay({ burnedPecky }: BurnedPeckyDisplayProps) {
           mb: "8px",
         })}
       >
-        🔥 Total Pecky Burned
+        {t('totalBurned')}
       </div>
       <div
         className={css({

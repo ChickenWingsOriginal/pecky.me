@@ -1,7 +1,9 @@
 import { NFT_CLAIM_TABLE_HANDLE, NFT_CLAIM_COOLDOWN_DAYS } from "./constants";
 import { callSupraTable } from "./rpc";
 
-export async function getTokenClaimStatus(tokenName: string) {
+type TranslationFunction = (key: string) => string;
+
+export async function getTokenClaimStatus(tokenName: string, t?: TranslationFunction) {
   const encoder = new TextEncoder();
   const hexKey =
     "0x" +
@@ -18,8 +20,10 @@ export async function getTokenClaimStatus(tokenName: string) {
 
   const lastClaimTimestamp = Number(data || 0);
 
+  const availableText = t ? t('availableNow') : "Available now! ✓";
+
   if (isNaN(lastClaimTimestamp) || lastClaimTimestamp === 0) {
-    return { status: "claimable" as const, text: "Available now! ✓" };
+    return { status: "claimable" as const, text: availableText };
   }
 
   const cooldown = NFT_CLAIM_COOLDOWN_DAYS * 24 * 60 * 60;
@@ -28,7 +32,7 @@ export async function getTokenClaimStatus(tokenName: string) {
   const secondsLeft = nextClaimTime - now;
 
   if (secondsLeft <= 0) {
-    return { status: "claimable" as const, text: "Available now! ✓" };
+    return { status: "claimable" as const, text: availableText };
   } else {
     const d = Math.floor(secondsLeft / 86400);
     const h = Math.floor((secondsLeft % 86400) / 3600);
@@ -37,9 +41,13 @@ export async function getTokenClaimStatus(tokenName: string) {
     if (d > 0) parts.push(`${d}d`);
     if (h > 0) parts.push(`${h}h`);
     if (d === 0 && m > 0) parts.push(`${m}m`);
+
+    const timeString = parts.join(" ");
+    const cooldownText = t ? t('nextClaimIn') : "Next claim in";
+
     return {
       status: "cooldown" as const,
-      text: `Next claim in ${parts.join(" ")}`,
+      text: `${cooldownText} ${timeString}`,
     };
   }
 }

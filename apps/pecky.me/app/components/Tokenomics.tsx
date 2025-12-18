@@ -1,23 +1,28 @@
+'use client';
+
 import { css } from "@/styled-system/css";
 import { RetroBox } from "./RetroBox";
+import { useTranslations } from "next-intl";
 
 export function Tokenomics() {
+  const t = useTranslations('home.tokenomics');
+
   const tokenomicsData = [
-    { label: "45%", desc: "NFT Holders" },
-    { label: "10%", desc: "Airdrop" },
-    { label: "20%", desc: "Liquidity Pool", note: "(LP tokens are burned)" },
-    { label: "15%", desc: "Staking rewards" },
-    { label: "10%", desc: "Marketing & Community" },
-    { label: "0%", desc: "Team & Founders" },
+    { label: "45%", desc: t('nftHolders') },
+    { label: "10%", desc: t('airdrop') },
+    { label: "20%", desc: t('liquidityPool'), note: t('lpBurned') },
+    { label: "15%", desc: t('stakingRewards') },
+    { label: "10%", desc: t('marketing') },
+    { label: "0%", desc: t('team') },
   ];
 
   return (
     <RetroBox>
       <h3 className={css({ fontSize: "20px", fontWeight: "700", color: "#a06500", mb: "16px", textAlign: "center" })}>
-        $Pecky Tokenomics
+        {t('heading')}
       </h3>
       <div className={css({ fontSize: "14px", color: "#513d0a", textAlign: "center", mb: "16px" })}>
-        Total Supply: <span className={css({ fontWeight: "700", fontFamily: "monospace" })}>1,000,000,000,000</span> $Pecky
+        {t('totalSupply')} <span className={css({ fontWeight: "700", fontFamily: "monospace" })}>1,000,000,000,000</span> $Pecky
       </div>
 
       <div className={css({ display: "grid", gap: "12px" })}>

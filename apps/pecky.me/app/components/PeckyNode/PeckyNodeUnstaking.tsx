@@ -6,6 +6,7 @@ import { formatTimestamp } from "@/app/utils/formatTimestamp";
 import type { PendingUnstake } from "@/app/utils/nodeService";
 import type { UserStakeInfo } from "@/app/utils/nodeService";
 import { RetroBox } from "@/app/components/RetroBox";
+import { useTranslations } from "next-intl";
 
 interface PeckyNodeUnstakingProps {
   pendingUnstakes: PendingUnstake[];
@@ -32,6 +33,8 @@ export function PeckyNodeUnstaking({
   handleUnstake,
   handleClaimUserReward,
 }: PeckyNodeUnstakingProps) {
+  const t = useTranslations('staking.peckyNode.unstaking');
+
   return (
     <RetroBox>
       <div className={css({ mb: "16px" })}>
@@ -51,7 +54,7 @@ export function PeckyNodeUnstaking({
               m: "0",
             })}
           >
-            Pending unstakes
+            {t('pendingUnstakes')}
           </h3>
           <button
             onClick={handleClaimUnstakes}
@@ -79,8 +82,8 @@ export function PeckyNodeUnstaking({
             })}
           >
             {isClaimingUnstakes
-              ? "Claiming..."
-              : `Claim unstaked ${pendingUnstakes.filter((u) => u.claimable).length > 0 ? `(${pendingUnstakes.filter((u) => u.claimable).length})` : ""}`}
+              ? t('claimingAll')
+              : `${t('claimUnstaked')} ${pendingUnstakes.filter((u) => u.claimable).length > 0 ? `(${pendingUnstakes.filter((u) => u.claimable).length})` : ""}`}
           </button>
         </div>
 
@@ -93,7 +96,7 @@ export function PeckyNodeUnstaking({
               color: "#888",
             })}
           >
-            No pending unstakes.
+            {t('noPending')}
           </div>
         ) : (
           <div
@@ -124,17 +127,17 @@ export function PeckyNodeUnstaking({
                       color: "#7a5a11",
                     })}
                   >
-                    Release:{" "}
+                    {t('release')}{" "}
                     <strong>
                       {unstake.claimable
-                        ? "ready"
+                        ? t('ready')
                         : formatTimestamp(unstake.release)}
                     </strong>{" "}
                     <span className={css({ opacity: 0.75 })}>
                       (
                       {unstake.claimable
-                        ? "✓ claimable"
-                        : `release in ${formatCountdownFromTimestamp(unstake.release)}`}
+                        ? t('claimable')
+                        : `${t('releaseIn')} ${formatCountdownFromTimestamp(unstake.release)}`}
                       )
                     </span>
                   </div>
@@ -144,7 +147,7 @@ export function PeckyNodeUnstaking({
                       color: "#7a5a11",
                     })}
                   >
-                    Amount:{" "}
+                    {t('amount')}{" "}
                     <strong>
                       {(
                         Number(unstake.amountMicro) / 1_000_000
@@ -160,7 +163,7 @@ export function PeckyNodeUnstaking({
                     textAlign: "right",
                   })}
                 >
-                  {unstake.claimable ? "ready" : "pending"}
+                  {unstake.claimable ? t('ready') : t('pendingStatus')}
                 </div>
               </div>
             ))}
@@ -177,7 +180,7 @@ export function PeckyNodeUnstaking({
             borderTop: "1.7px dashed #ffd36e",
           })}
         >
-          Claims become available after the unlock time.
+          {t('unlockNote')}
         </div>
       </div>
 
@@ -199,7 +202,7 @@ export function PeckyNodeUnstaking({
               mt: "0",
             })}
           >
-            Your node stakes
+            {t('stakedNodes')}
           </h3>
           <div
             className={css({
@@ -248,7 +251,7 @@ export function PeckyNodeUnstaking({
                         mt: "4px",
                       })}
                     >
-                      Staked:{" "}
+                      {t('staked')}{" "}
                       <strong>
                         {(Number(stakedAmount) / 1_000_000).toLocaleString()}{" "}
                         $Pecky
@@ -260,7 +263,7 @@ export function PeckyNodeUnstaking({
                         color: "#7a5a11",
                       })}
                     >
-                      Rewards:{" "}
+                      {t('rewards')}{" "}
                       <strong>
                         {(Number(rewardsAmount) / 1_000_000).toLocaleString(
                           "en-US",
@@ -288,7 +291,7 @@ export function PeckyNodeUnstaking({
                     >
                       <input
                         type="number"
-                        placeholder="Amount to unstake"
+                        placeholder={t('unstakeAmount')}
                         value={unstakeAmounts[node.nodeId] || ""}
                         onChange={(e) =>
                           setUnstakeAmounts({
@@ -328,7 +331,7 @@ export function PeckyNodeUnstaking({
                           cursor: "pointer",
                         })}
                       >
-                        MAX
+                        {t('max')}
                       </button>
                     </div>
                     <button
@@ -351,8 +354,8 @@ export function PeckyNodeUnstaking({
                       })}
                     >
                       {unstakingNodeId === node.nodeId
-                        ? "Unstaking..."
-                        : "Unstake"}
+                        ? t('unstaking')
+                        : t('unstakeButton')}
                     </button>
                   </div>
 
@@ -390,8 +393,8 @@ export function PeckyNodeUnstaking({
                     })}
                   >
                     {claimingUserRewardNodeId === node.nodeId
-                      ? "Claiming..."
-                      : "Claim Rewards"}
+                      ? t('claiming')
+                      : t('claimRewards')}
                   </button>
                 </div>
               );
@@ -408,8 +411,7 @@ export function PeckyNodeUnstaking({
               borderTop: "1.7px dashed #ffd36e",
             })}
           >
-            Claim rewards or unstake anytime (2 days unlock period before
-            claiming unstaked funds).
+            {t('disclaimer')}
           </div>
         </div>
       )}

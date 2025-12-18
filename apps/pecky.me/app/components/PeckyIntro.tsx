@@ -1,8 +1,11 @@
 import { css } from "@/styled-system/css";
 import Image from "next/image";
 import { RetroBox } from "./RetroBox";
+import { useTranslations } from "next-intl";
 
 export function PeckyIntro() {
+  const t = useTranslations('home.intro');
+
   return (
     <RetroBox className={css({ textAlign: "center" })}>
       <div className={css({ mb: "20px" })}>
@@ -21,7 +24,7 @@ export function PeckyIntro() {
           mb: "16px",
         })}
       >
-        Say hi to Pecky!
+        {t('greeting')}
       </h2>
       <p
         className={css({
@@ -31,10 +34,7 @@ export function PeckyIntro() {
           mb: "16px",
         })}
       >
-        Pecky was just a normal chicken… until he ate a weird Dorito behind the
-        barn. Now he thinks he has a secret mission to "uncrack the egg of
-        truth" — whatever that means. He's sure the rooster is a spy and fights
-        scarecrows like they're evil robots.
+        {t('story')}
       </p>
       <p
         className={css({
@@ -43,7 +43,7 @@ export function PeckyIntro() {
           lineHeight: "1.6",
         })}
       >
-        No teamtokens, No premine, Pecky is 100% owned by the Supra community.
+        {t('tokenInfo')}
       </p>
     </RetroBox>
   );

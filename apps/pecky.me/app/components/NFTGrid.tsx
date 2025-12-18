@@ -2,6 +2,7 @@
 
 import { css } from "@/styled-system/css";
 import { NFTCard } from "./NFTCard";
+import { useTranslations } from "next-intl";
 
 interface OwnedNFT {
   name: string;
@@ -30,12 +31,14 @@ export function NFTGrid({
   isClaimingAirdropNft = null,
   walletConnected = false,
 }: NFTGridProps) {
+  const t = useTranslations('nft');
+
   if (isLoading) {
     return (
       <div
         className={css({ textAlign: "center", py: "20px", color: "#a06500" })}
       >
-        Loading your NFTs...
+        {t('loadingNfts')}
       </div>
     );
   }
@@ -45,7 +48,7 @@ export function NFTGrid({
       <div
         className={css({ textAlign: "center", py: "20px", color: "#a06500" })}
       >
-        No NFTs found
+        {t('noNftsFound')}
       </div>
     );
   }
@@ -68,7 +71,7 @@ export function NFTGrid({
           claimStatus={
             nft.claimStatus || {
               status: "unknown",
-              text: "Loading...",
+              text: t('loading'),
             }
           }
           airdropAvailable={nft.airdropAvailable}
