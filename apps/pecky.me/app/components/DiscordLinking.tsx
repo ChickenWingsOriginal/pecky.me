@@ -7,10 +7,12 @@ import { useSupraConnect } from "@gerritsen/supra-connect";
 import { RetroBox } from "./RetroBox";
 import { toast } from "sonner";
 import { PECKY_COIN_MODULE } from "@/app/utils/constants";
+import { useTranslations } from "next-intl";
 // @ts-ignore - supra-l1-sdk doesn't have TypeScript definitions
 import { BCS } from "supra-l1-sdk";
 
 export function DiscordLinking() {
+  const t = useTranslations('home.discord');
   const { state, refreshDiscordStatus } = useWallet();
   const { connectedWallet, sendTransaction } = useSupraConnect();
   const [discordInput, setDiscordInput] = useState("");
@@ -18,19 +20,19 @@ export function DiscordLinking() {
 
   const handleLinkDiscord = async () => {
     if (!connectedWallet?.walletAddress) {
-      toast.error("Please connect your wallet first");
+      toast.error(t('pleaseConnect'));
       return;
     }
 
     const idStr = discordInput.trim();
     if (!idStr) {
-      toast.error("Please enter a Discord ID");
+      toast.error(t('enterDiscordId'));
       return;
     }
 
     // Validate Discord ID format (16-20 digits)
     if (!/^\d{16,20}$/.test(idStr)) {
-      toast.error("Please enter a valid Discord ID (16-20 digits)");
+      toast.error(t('invalidDiscordId'));
       return;
     }
 
@@ -51,11 +53,11 @@ export function DiscordLinking() {
 
       if (!result.success) {
         const errorMsg = result.error || result.reason || "Transaction failed";
-        toast.error(`Failed to link Discord: ${errorMsg}`);
+        toast.error(t('linkFailed', { error: errorMsg }));
         return;
       }
 
-      toast.success("Discord linked successfully!");
+      toast.success(t('linkSuccess'));
       setDiscordInput("");
 
       // Refresh Discord status to update UI
@@ -63,7 +65,7 @@ export function DiscordLinking() {
     } catch (error) {
       console.error("Discord linking failed:", error);
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
-      toast.error(`Failed to link Discord: ${errorMsg}`);
+      toast.error(t('linkFailed', { error: errorMsg }));
     } finally {
       setLinkingDiscord(false);
     }
@@ -71,7 +73,7 @@ export function DiscordLinking() {
 
   const handleUnlinkDiscord = async () => {
     if (!connectedWallet?.walletAddress) {
-      toast.error("Please connect your wallet first");
+      toast.error(t('pleaseConnect'));
       return;
     }
 
@@ -89,18 +91,18 @@ export function DiscordLinking() {
 
       if (!result.success) {
         const errorMsg = result.error || result.reason || "Transaction failed";
-        toast.error(`Failed to unlink Discord: ${errorMsg}`);
+        toast.error(t('unlinkFailed', { error: errorMsg }));
         return;
       }
 
-      toast.success("Discord unlinked successfully!");
+      toast.success(t('unlinkSuccess'));
 
       // Refresh Discord status to update UI
       await refreshDiscordStatus();
     } catch (error) {
       console.error("Discord unlinking failed:", error);
       const errorMsg = error instanceof Error ? error.message : "Unknown error";
-      toast.error(`Failed to unlink Discord: ${errorMsg}`);
+      toast.error(t('unlinkFailed', { error: errorMsg }));
     } finally {
       setLinkingDiscord(false);
     }
@@ -115,10 +117,10 @@ export function DiscordLinking() {
   return (
     <RetroBox>
       <div className={css({ fontSize: "18px", fontWeight: "700", color: "#4a2c00", mb: "8px", textAlign: "center" })}>
-        Link your Discord to Pecky
+        {t('heading')}
       </div>
       <div className={css({ fontSize: "14px", color: "#513d0a", mb: "16px", textAlign: "center" })}>
-        Join the leaderboard, earn Discord roles & get future perks — all tied to your wallet.
+        {t('subtitle')}
       </div>
 
       {state.isConnected && state.isDiscordLinked ? (
@@ -126,10 +128,10 @@ export function DiscordLinking() {
         <div className={css({ display: "flex", flexDir: "column", gap: "12px" })}>
           <div className={css({ bg: "#e8f5e9", p: "12px", borderRadius: "12px", border: "1.5px solid #4caf50", textAlign: "center" })}>
             <div className={css({ fontSize: "14px", color: "#2e7d32", fontWeight: "600" })}>
-              ✓ Discord Linked
+              {t('linked')}
             </div>
             <div className={css({ fontSize: "12px", color: "#2e7d32", mt: "4px" })}>
-              Linked: {state.discordId}
+              {t('linkedId', { id: state.discordId ?? '' })}
             </div>
           </div>
           <button
@@ -148,7 +150,7 @@ export function DiscordLinking() {
               _hover: linkingDiscord ? {} : { transform: "scale(1.02)" },
             })}
           >
-            {linkingDiscord ? "Unlinking..." : "Unlink Discord"}
+            {linkingDiscord ? t('unlinking') : t('unlinkButton')}
           </button>
         </div>
       ) : (
@@ -157,7 +159,7 @@ export function DiscordLinking() {
           <input
             type="text"
             inputMode="numeric"
-            placeholder="Discord ID (snowflake)"
+            placeholder={t('placeholder')}
             value={discordInput}
             onChange={(e) => setDiscordInput(e.target.value)}
             onKeyDown={handleKeyPress}
@@ -190,14 +192,14 @@ export function DiscordLinking() {
               _hover: !state.isConnected || linkingDiscord ? {} : { transform: "scale(1.02)" },
             })}
           >
-            {linkingDiscord ? "Linking..." : "Link Discord with your wallet"}
+            {linkingDiscord ? t('linking') : t('linkButton')}
           </button>
         </div>
       )}
 
       {!state.isConnected && (
         <div className={css({ fontSize: "14px", color: "#b48512", mt: "12px", textAlign: "center" })}>
-          Connect wallet to link your Discord.
+          {t('connectPrompt')}
         </div>
       )}
     </RetroBox>

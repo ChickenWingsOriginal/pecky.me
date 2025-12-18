@@ -15,6 +15,7 @@ import {
   serializeString,
 } from "@/app/utils/nodeService";
 import type { ActiveNode } from "@/app/context/WalletContext";
+import { useTranslations } from "next-intl";
 
 interface RarityNFT {
   tokenName: string;
@@ -33,6 +34,9 @@ const STAKE_MODULE =
   "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
 export function PeckyNode() {
+  const tOwned = useTranslations('staking.peckyNode.owned');
+  const tStaking = useTranslations('staking.peckyNode.staking');
+  const tUnstaking = useTranslations('staking.peckyNode.unstaking');
   const { sendTransaction } = useSupraConnect();
   const {
     state: walletState,
@@ -106,9 +110,9 @@ export function PeckyNode() {
         },
       });
       if (result.success) {
-        toast.success(`Unlinked ${tokenName} from node`);
+        toast.success(tOwned('unlinkSuccess', { tokenName }));
       } else {
-        toast.error(`Unlink failed: ${result.reason || result.error}`);
+        toast.error(`${tOwned('unlinkFailed')}: ${result.reason || result.error}`);
       }
     } catch (error: any) {
       const errorMsg = error?.message || error?.toString() || "";
@@ -118,7 +122,7 @@ export function PeckyNode() {
       ) {
         console.log("Transaction cancelled by user");
       } else {
-        toast.error("Unlink failed");
+        toast.error(tOwned('unlinkFailed'));
       }
     } finally {
       setIsUnlinking(false);
@@ -142,9 +146,9 @@ export function PeckyNode() {
         },
       });
       if (result.success) {
-        toast.success(`Linked ${tokenName} to node`);
+        toast.success(tOwned('linkSuccess', { tokenName }));
       } else {
-        toast.error(`Link failed: ${result.reason || result.error}`);
+        toast.error(`${tOwned('linkFailed')}: ${result.reason || result.error}`);
       }
     } catch (error: any) {
       const errorMsg = error?.message || error?.toString() || "";
@@ -154,7 +158,7 @@ export function PeckyNode() {
       ) {
         console.log("Transaction cancelled by user");
       } else {
-        toast.error("Link failed");
+        toast.error(tOwned('linkFailed'));
       }
     } finally {
       setIsLinking(false);
@@ -166,7 +170,7 @@ export function PeckyNode() {
       await refreshNodeOperatorData();
     } catch (error) {
       console.error("Failed to refresh node data:", error);
-      toast.error("Failed to refresh node data");
+      toast.error(tOwned('refreshFailed'));
     }
   };
 
@@ -187,7 +191,7 @@ export function PeckyNode() {
         },
       });
       if (result.success) {
-        toast.success("Operator rewards claimed successfully!");
+        toast.success(tOwned('claimSuccess'));
         try {
           await refreshBalances();
           refreshNodeOperatorData();
@@ -202,7 +206,7 @@ export function PeckyNode() {
         ) {
           console.log("Transaction cancelled by user");
         } else {
-          toast.error("Claim failed: " + errorMsg);
+          toast.error(`${tOwned('claimFailed')}: ${errorMsg}`);
         }
       }
     } catch (error: any) {
@@ -213,7 +217,7 @@ export function PeckyNode() {
       ) {
         console.log("Transaction cancelled by user");
       } else {
-        toast.error("Claim failed");
+        toast.error(tOwned('claimFailed'));
       }
     } finally {
       setIsClaimingRewards(false);
@@ -228,7 +232,7 @@ export function PeckyNode() {
     try {
       const amountNumber = parseFloat(stakeAmount);
       if (isNaN(amountNumber) || amountNumber <= 0) {
-        toast.error("Please enter a valid stake amount");
+        toast.error(tStaking('enterAmount'));
         setIsStaking(false);
         return;
       }
@@ -253,7 +257,7 @@ export function PeckyNode() {
 
       if (result.success) {
         toast.success(
-          `Staked ${amountNumber.toLocaleString()} $Pecky successfully!`,
+          tStaking('stakeSuccess', { amount: amountNumber.toLocaleString() }),
         );
         setStakeAmount("");
         setSelectedNodeId(null);
@@ -271,7 +275,7 @@ export function PeckyNode() {
         ) {
           console.log("Transaction cancelled by user");
         } else {
-          toast.error("Stake failed: " + errorMsg);
+          toast.error(`${tStaking('stakeFailed')}: ${errorMsg}`);
         }
       }
     } catch (error: any) {
@@ -282,7 +286,7 @@ export function PeckyNode() {
       ) {
         console.log("Transaction cancelled by user");
       } else {
-        toast.error("Stake failed");
+        toast.error(tStaking('stakeFailed'));
       }
     } finally {
       setIsStaking(false);
@@ -321,7 +325,7 @@ export function PeckyNode() {
 
     const amount = unstakeAmounts[nodeId];
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error("Please enter a valid amount to unstake");
+      toast.error(tUnstaking('enterValidAmount'));
       return;
     }
 
@@ -331,7 +335,9 @@ export function PeckyNode() {
 
     if (amountMicro > stakedAmount) {
       toast.error(
-        `You only have ${(Number(stakedAmount) / 1_000_000).toLocaleString()} $Pecky staked`,
+        tUnstaking('onlyHaveStaked', {
+          amount: (Number(stakedAmount) / 1_000_000).toLocaleString()
+        }),
       );
       return;
     }
@@ -358,7 +364,9 @@ export function PeckyNode() {
       if (result.success) {
         console.log("Unstaked successfully:", nodeId);
         toast.success(
-          `Unstaked ${(Number(amountMicro) / 1_000_000).toLocaleString()} $Pecky`,
+          tUnstaking('unstakeSuccess', {
+            amount: (Number(amountMicro) / 1_000_000).toLocaleString()
+          }),
         );
         setUnstakeAmounts({ ...unstakeAmounts, [nodeId]: "" });
 
@@ -371,7 +379,7 @@ export function PeckyNode() {
         ) {
           console.log("Transaction cancelled by user");
         } else {
-          toast.error("Unstake failed: " + errorMsg);
+          toast.error(`${tUnstaking('unstakeFailed')}: ${errorMsg}`);
         }
       }
     } catch (error: any) {
@@ -383,7 +391,7 @@ export function PeckyNode() {
       ) {
         console.log("Transaction cancelled by user");
       } else {
-        toast.error("Unstake failed");
+        toast.error(tUnstaking('unstakeFailed'));
       }
     } finally {
       setUnstakingNodeId(null);
@@ -409,7 +417,7 @@ export function PeckyNode() {
 
       if (result.success) {
         console.log("User reward claimed for node:", nodeId);
-        toast.success("Rewards claimed successfully!");
+        toast.success(tUnstaking('claimSuccess'));
 
         // Refresh staking data and wallet balance
         refreshStakingInfo();
@@ -422,7 +430,7 @@ export function PeckyNode() {
         ) {
           console.log("Transaction cancelled by user");
         } else {
-          toast.error("Claim failed: " + errorMsg);
+          toast.error(`${tUnstaking('claimFailed')}: ${errorMsg}`);
         }
       }
     } catch (error: any) {
@@ -434,7 +442,7 @@ export function PeckyNode() {
       ) {
         console.log("Transaction cancelled by user");
       } else {
-        toast.error("Claim failed");
+        toast.error(tUnstaking('claimFailed'));
       }
     } finally {
       setClaimingUserRewardNodeId(null);
@@ -458,7 +466,7 @@ export function PeckyNode() {
 
       if (result.success) {
         console.log("Claimed unstakes successfully");
-        toast.success("Claimed unstaked funds!");
+        toast.success(tUnstaking('claimUnstakesSuccess'));
 
         await refreshBalances();
         refreshStakingInfo();
@@ -470,7 +478,7 @@ export function PeckyNode() {
         ) {
           console.log("Transaction cancelled by user");
         } else {
-          toast.error("Claim failed: " + errorMsg);
+          toast.error(`${tUnstaking('claimUnstakesFailed')}: ${errorMsg}`);
         }
       }
     } catch (error: any) {
@@ -482,7 +490,7 @@ export function PeckyNode() {
       ) {
         console.log("Transaction cancelled by user");
       } else {
-        toast.error("Claim failed");
+        toast.error(tUnstaking('claimUnstakesFailed'));
       }
     } finally {
       setIsClaimingUnstakes(false);

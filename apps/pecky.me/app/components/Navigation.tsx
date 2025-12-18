@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
 import { css } from "@/styled-system/css";
 import { flex } from "@/styled-system/patterns";
 import Image from "next/image";
@@ -13,6 +12,7 @@ import { useGlobalData } from "@/app/context/GlobalDataContext";
 import { getRandomQuote } from "@/app/constants/quotes";
 import { formatMicroUnits, formatMillions } from "@/app/utils/format";
 import { toast } from "sonner";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const navItems = [
   { href: "/bot", label: "Bot", icon: "bot-icon.png" },
@@ -343,6 +343,7 @@ export default function Navigation() {
             textAlign: "center",
             pb: "1.5rem",
             borderBottom: "1px solid #ffae00",
+            mb: "1.5rem",
           })}
         >
           <div
@@ -370,6 +371,11 @@ export default function Navigation() {
           <div className={css({ fontSize: "0.75rem", color: "#b48512" })}>
             1 $Pecky = {peckyPrice ? peckyPrice.toFixed(6) : "–"} $SUPRA
           </div>
+        </div>
+
+        {/* Language Switcher */}
+        <div className={css({ display: "flex", justifyContent: "center" })}>
+          <LanguageSwitcher />
         </div>
       </aside>
 

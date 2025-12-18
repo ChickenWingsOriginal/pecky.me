@@ -4,20 +4,25 @@ import { RetroTabs } from "@/app/components/RetroTabs";
 import { MeridianStaking } from "@/app/components/MeridianStaking";
 import { PeckyNode } from "@/app/components/PeckyNode";
 import type { Metadata } from "next";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Staking",
-  description:
-    "Stake Supra on Meridian Node to earn 8% APY + daily Pecky rewards, or stake Pecky on Nodes for passive income. All staking rewards with zero fees.",
-  openGraph: {
-    title: "PECKY - Staking",
-    description:
-      "Earn rewards by staking Supra or Pecky tokens. Meridian Node offers 8% APY plus daily Pecky. Node staking provides passive Pecky income.",
-    type: "website",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('staking');
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: `PECKY - ${t('title')}`,
+      description: t('description'),
+      type: "website",
+    },
+  };
+}
 
 export default function StakingPage() {
+  const t = useTranslations('staking');
   return (
     <div
       className={css({
@@ -50,11 +55,11 @@ export default function StakingPage() {
         <RetroTabs
           tabs={[
             {
-              title: "Pecky Staking",
+              title: t('peckyStaking'),
               content: <PeckyNode />,
             },
             {
-              title: "Meridian Staking",
+              title: t('meridianStaking'),
               content: <MeridianStaking />,
             },
           ]}

@@ -2,6 +2,7 @@
 
 import { css } from "@/styled-system/css";
 import { RetroBox } from "@/app/components/RetroBox";
+import { useTranslations } from "next-intl";
 
 interface NodeWithData {
   nodeId: string;
@@ -38,6 +39,8 @@ export function PeckyNodeStaking({
   isStaking,
   handleStake,
 }: PeckyNodeStakingProps) {
+  const t = useTranslations('staking.peckyNode.staking');
+
   const setPercentage = (percent: number) => {
     const balance = Number(peckyBalance) / 1_000_000;
     const amount = (balance * percent) / 100;
@@ -55,7 +58,7 @@ export function PeckyNodeStaking({
             mb: "4px",
           })}
         >
-          Stake $Pecky on a Node
+          {t('title')}
         </h2>
         <p
           className={css({
@@ -64,7 +67,7 @@ export function PeckyNodeStaking({
             m: "0",
           })}
         >
-          Choose the node you'd like to stake on
+          {t('subtitle')}
         </p>
       </div>
 
@@ -86,7 +89,7 @@ export function PeckyNodeStaking({
             textAlign: "center",
           })}
         >
-          Staking – The Pecky Way
+          {t('benefitsTitle')}
         </h3>
         <ul
           className={css({
@@ -98,18 +101,18 @@ export function PeckyNodeStaking({
           })}
         >
           <li>
-            Stake your $PECKY on a node of your choice and let those golden eggs
-            grow <span className={css({ fontWeight: "700" })}>(≈ 8% APY)</span>
+            {t('benefit1')}{" "}
+            <span className={css({ fontWeight: "700" })}>{t('benefit1Apy')}</span>
           </li>
           <li>
-            You can unstake anytime — but your chicks need{" "}
-            <span className={css({ fontWeight: "700" })}>2 days to hatch</span>{" "}
-            before you can claim
+            {t('benefit2')}{" "}
+            <span className={css({ fontWeight: "700" })}>{t('benefit2Days')}</span>{" "}
+            {t('benefit2After')}
           </li>
           <li>
-            Claim your rewards regularly{" "}
-            <span className={css({ fontWeight: "700" })}>(&lt; 30 days)</span>{" "}
-            to keep Pecky's magic growing
+            {t('benefit3')}{" "}
+            <span className={css({ fontWeight: "700" })}>{t('benefit3Days')}</span>{" "}
+            {t('benefit3After')}
           </li>
         </ul>
       </div>
@@ -123,7 +126,7 @@ export function PeckyNodeStaking({
             fontSize: "13px",
           })}
         >
-          Loading active nodes...
+          {t('loadingNodes')}
         </div>
       ) : allNodes.length > 0 ? (
         <>
@@ -211,7 +214,7 @@ export function PeckyNodeStaking({
                 textAlign: "center",
               })}
             >
-              Stake $Pecky to{" "}
+              {t('stakeTo')}{" "}
               {allNodes.find((n) => n.nodeId === selectedNodeId)?.name}
             </div>
 
@@ -249,7 +252,7 @@ export function PeckyNodeStaking({
                   textAlign: "center",
                 })}
               >
-                Available:{" "}
+                {t('available')}{" "}
                 {(Number(peckyBalance) / 1_000_000).toLocaleString("en-US", {
                   maximumFractionDigits: 2,
                 })}{" "}
@@ -259,7 +262,7 @@ export function PeckyNodeStaking({
 
             <input
               type="number"
-              placeholder="Amount in $Pecky"
+              placeholder={t('amountPlaceholder2')}
               value={stakeAmount}
               onChange={(e) => setStakeAmount(e.target.value)}
               className={css({
@@ -372,7 +375,7 @@ export function PeckyNodeStaking({
                     : "pointer",
               })}
             >
-              {isStaking ? "Staking..." : "Stake"}
+              {isStaking ? t('staking') : t('stake')}
             </button>
           </div>
         </>
@@ -385,7 +388,7 @@ export function PeckyNodeStaking({
             fontSize: "13px",
           })}
         >
-          No active nodes found
+          {t('noNodes')}
         </div>
       )}
     </RetroBox>

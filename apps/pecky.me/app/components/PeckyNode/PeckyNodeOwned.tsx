@@ -2,6 +2,7 @@
 
 import { css } from "@/styled-system/css";
 import { RetroBox } from "../RetroBox";
+import { useTranslations } from "next-intl";
 
 interface RarityNFT {
   tokenName: string;
@@ -45,11 +46,13 @@ export function PeckyNodeOwned({
   handleLinkRarity,
   isLinking,
 }: PeckyNodeOwnedProps) {
+  const t = useTranslations('staking.peckyNode.owned');
+
   return (
     <>
       <RetroBox startOpen={false}>
         <RetroBox.Title showToggle>
-          Pecky Node Operator: Things to Know
+          {t('infoTitle')}
         </RetroBox.Title>
         <RetroBox.Content>
           <div
@@ -60,7 +63,7 @@ export function PeckyNodeOwned({
             })}
           >
             <div className={css({ fontWeight: "600", mb: "6px", mt: "12px" })}>
-              Activation
+              {t('activationTitle')}
             </div>
             <ul
               className={css({
@@ -70,9 +73,9 @@ export function PeckyNodeOwned({
                 fontSize: "12px",
               })}
             >
-              <li>You must own the Pecky Node Original NFT.</li>
+              <li>{t('activationReq1')}</li>
               <li>
-                You must have a minimum amount of Pecky LP tokens:
+                {t('activationReq2')}
                 <ul
                   className={css({
                     pl: "20px",
@@ -80,9 +83,9 @@ export function PeckyNodeOwned({
                     mb: "4px",
                   })}
                 >
-                  <li>Dexlyn LP tokens → 100M</li>
-                  <li>ATMOS LP tokens (50/50 weighted pool) → 1M</li>
-                  <li>Or a combination of both</li>
+                  <li>{t('activationLP1')}</li>
+                  <li>{t('activationLP2')}</li>
+                  <li>{t('activationLP3')}</li>
                 </ul>
               </li>
             </ul>
@@ -104,22 +107,20 @@ export function PeckyNodeOwned({
                   color: "#c55000",
                 })}
               >
-                ⚠️ Important:
+                {t('warningTitle')}
               </div>
               <div className={css({ color: "#8a4000" })}>
-                If your node becomes inactive (you lose the NFT or LP tokens):
+                {t('warningText')}
                 <ul className={css({ pl: "20px", m: "4px 0 0 0" })}>
-                  <li>All unclaimed operator rewards are lost immediately.</li>
-                  <li>
-                    Reward accumulation stops until you're eligible again.
-                  </li>
-                  <li>When reactivated, you start earning from zero again.</li>
+                  <li>{t('warningPoint1')}</li>
+                  <li>{t('warningPoint2')}</li>
+                  <li>{t('warningPoint3')}</li>
                 </ul>
               </div>
             </div>
 
             <div className={css({ fontWeight: "600", mb: "6px", mt: "12px" })}>
-              Boosting APY with Rarity NFTs
+              {t('boostingTitle')}
             </div>
             <ul
               className={css({
@@ -129,28 +130,23 @@ export function PeckyNodeOwned({
                 fontSize: "12px",
               })}
             >
-              <li>Attach Chicken Wings Original NFTs to increase your APY.</li>
+              <li>{t('boostingText1')}</li>
               <li>
-                Per rarity boost:
+                {t('boostingText2')}
                 <ul className={css({ pl: "20px", mt: "4px", mb: "4px" })}>
-                  <li>Common → +0.5%</li>
-                  <li>Rare → +1.0%</li>
-                  <li>Epic → +1.5%</li>
-                  <li>Legendary → +2.0%</li>
-                  <li>Mythic → +2.5%</li>
+                  <li>{t('boostCommon')}</li>
+                  <li>{t('boostRare')}</li>
+                  <li>{t('boostEpic')}</li>
+                  <li>{t('boostLegendary')}</li>
+                  <li>{t('boostMythic')}</li>
                 </ul>
               </li>
-              <li>
-                Each rarity can be linked once (cannibals can be linked extra).
-              </li>
-              <li>
-                You must hold the NFTs in your wallet — if you sell or lose
-                them, they stop counting.
-              </li>
+              <li>{t('boostingText3')}</li>
+              <li>{t('boostingText4')}</li>
             </ul>
 
             <div className={css({ fontWeight: "600", mb: "6px", mt: "12px" })}>
-              Operator Rewards
+              {t('rewardsTitle')}
             </div>
             <ul
               className={css({
@@ -161,21 +157,18 @@ export function PeckyNodeOwned({
               })}
             >
               <li>
-                You earn rewards based on:
+                {t('rewardsText1')}
                 <ul className={css({ pl: "20px", mt: "4px", mb: "4px" })}>
-                  <li>The total PECKY staked on your node, and</li>
-                  <li>Your attached rarity NFTs (which define your APY).</li>
+                  <li>{t('rewardsPoint1')}</li>
+                  <li>{t('rewardsPoint2')}</li>
                 </ul>
               </li>
-              <li>Claim regularly (&lt;30 days) to keep rewards growing.</li>
-              <li>
-                Payouts come from the global staking vault — if empty, the
-                staking period has come to an end.
-              </li>
+              <li>{t('rewardsText2')}</li>
+              <li>{t('rewardsText3')}</li>
             </ul>
 
             <div className={css({ fontWeight: "600", mb: "6px", mt: "12px" })}>
-              Good Habits
+              {t('habitsTitle')}
             </div>
             <ul
               className={css({
@@ -185,13 +178,10 @@ export function PeckyNodeOwned({
                 fontSize: "12px",
               })}
             >
-              <li>✅ Keep your Node NFT and LP tokens intact.</li>
-              <li>✅ Claim at least once every 30 days.</li>
-              <li>✅ Hold attached NFTs to maintain your boosted APY.</li>
-              <li>
-                ✅ Avoid deactivation — once inactive, you lose your unclaimed
-                rewards.
-              </li>
+              <li>{t('habit1')}</li>
+              <li>{t('habit2')}</li>
+              <li>{t('habit3')}</li>
+              <li>{t('habit4')}</li>
             </ul>
           </div>
         </RetroBox.Content>
@@ -206,7 +196,7 @@ export function PeckyNodeOwned({
               color: "#a06500",
             })}
           >
-            Your Nodes
+            {t('title')}
           </h2>
         </div>
 
@@ -219,7 +209,7 @@ export function PeckyNodeOwned({
               fontSize: "13px",
             })}
           >
-            Connect your wallet to see your owned nodes
+            {t('connectWallet')}
           </div>
         ) : isLoadingNodes ? (
           <div
@@ -230,7 +220,7 @@ export function PeckyNodeOwned({
               fontSize: "13px",
             })}
           >
-            Loading your nodes...
+            {t('loading')}
           </div>
         ) : ownedNodes.length > 0 ? (
           <div
@@ -321,7 +311,7 @@ export function PeckyNodeOwned({
                     mb: "6px",
                   })}
                 >
-                  Operator APY: <strong>{(node.apy ?? 0).toFixed(2)}%</strong>
+                  {t('operatorApy')} <strong>{(node.apy ?? 0).toFixed(2)}%</strong>
                 </div>
                 <div
                   className={css({
@@ -335,7 +325,7 @@ export function PeckyNodeOwned({
                   })}
                 >
                   <div>
-                    Operator rewards:{" "}
+                    {t('operatorRewards')}{" "}
                     <strong>
                       {(node.rewardsLive ?? 0).toLocaleString("en-US", {
                         maximumFractionDigits: 2,
@@ -372,8 +362,8 @@ export function PeckyNodeOwned({
                     })}
                   >
                     {isClaimingRewards && claimingNodeId === node.nodeId
-                      ? "Claiming..."
-                      : "Claim"}
+                      ? t('claiming')
+                      : t('claim')}
                   </button>
                 </div>
 
@@ -393,7 +383,7 @@ export function PeckyNodeOwned({
                         mb: "8px",
                       })}
                     >
-                      Unlink rarity NFT
+                      {t('unlinkRarityTitle')}
                     </div>
                     {node.linkedRarities.map((rarity) => (
                       <div
@@ -434,7 +424,7 @@ export function PeckyNodeOwned({
                             cursor: isUnlinking ? "not-allowed" : "pointer",
                           })}
                         >
-                          {isUnlinking ? "..." : "Unlink"}
+                          {isUnlinking ? t('unlinking') : t('unlink')}
                         </button>
                       </div>
                     ))}
@@ -452,7 +442,7 @@ export function PeckyNodeOwned({
                           mb: "8px",
                         })}
                       >
-                        Link rarity NFT
+                        {t('linkRarityTitle')}
                       </div>
                       {node.availableRarities.map((rarity) => (
                         <div
@@ -495,7 +485,7 @@ export function PeckyNodeOwned({
                               cursor: isLinking ? "not-allowed" : "pointer",
                             })}
                           >
-                            {isLinking ? "..." : "Link"}
+                            {isLinking ? t('linking') : t('link')}
                           </button>
                         </div>
                       ))}
@@ -513,9 +503,9 @@ export function PeckyNodeOwned({
               fontSize: "13px",
             })}
           >
-            It seems you don't own a node yet!
+            {t('noNodes')}
             <br />
-            Get your own at{" "}
+            {t('getNodeAt')}{" "}
             <a
               href="https://crystara.trade/trade/peckynode"
               target="_blank"
@@ -529,7 +519,7 @@ export function PeckyNodeOwned({
                 },
               })}
             >
-              Crystara
+              {t('crystara')}
             </a>
           </div>
         )}

@@ -12,6 +12,7 @@ import { formatSupraBalance } from "@/app/utils/formatSupraBalance";
 import { formatCountdownTime } from "@/app/utils/formatCountdownTime";
 import { calculateMaxStakeAmount } from "@/app/utils/calculateMaxStakeAmount";
 import { RetroBox } from "./RetroBox";
+import { useTranslations } from "next-intl";
 
 const SUPRA_DECIMALS = 8;
 const MERIDIAN_POOL =
@@ -20,6 +21,7 @@ const PECKY_COIN_MODULE =
   "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
 export function MeridianStaking() {
+  const t = useTranslations('staking.meridian');
   const { state, refreshBalances, refreshStakingInfo } = useWallet();
   const { sendTransaction } = useSupraConnect();
   const [stakeAmount, setStakeAmount] = useState("");
@@ -55,13 +57,13 @@ export function MeridianStaking() {
 
     if (!walletAddress) {
       console.log("No wallet address");
-      toast.error("Please connect your wallet first");
+      toast.error(t('connectWallet'));
       return;
     }
 
     if (!stakeAmount || parseFloat(stakeAmount) <= 0) {
       console.log("Invalid amount:", stakeAmount);
-      toast.error("Please enter a valid amount");
+      toast.error(t('enterAmount'));
       return;
     }
 
@@ -95,7 +97,7 @@ export function MeridianStaking() {
         throw new Error(result.error || result.reason || "Transaction failed");
       }
 
-      toast.success("Staking transaction submitted! Hash: " + result.txHash);
+      toast.success(t('stakingSuccess') + result.txHash);
       setStakeAmount("");
 
       setTimeout(() => {
@@ -103,7 +105,7 @@ export function MeridianStaking() {
       }, 2000);
     } catch (error) {
       console.error("Staking failed:", error);
-      toast.error(error instanceof Error ? error.message : "Staking failed");
+      toast.error(error instanceof Error ? error.message : t('stakingFailed'));
     } finally {
       setIsStaking(false);
     }
@@ -111,7 +113,7 @@ export function MeridianStaking() {
 
   const handleClaim = async () => {
     if (!walletAddress) {
-      toast.error("Please connect your wallet first");
+      toast.error(t('connectWallet'));
       return;
     }
 
@@ -135,7 +137,7 @@ export function MeridianStaking() {
         );
       }
 
-      toast.success("Claim transaction submitted! Hash: " + result.txHash);
+      toast.success(t('claimSuccess') + result.txHash);
 
       setTimeout(async () => {
         await refreshBalances();
@@ -143,7 +145,7 @@ export function MeridianStaking() {
       }, 2000);
     } catch (error) {
       console.error("Claim failed:", error);
-      toast.error(error instanceof Error ? error.message : "Claim failed");
+      toast.error(error instanceof Error ? error.message : t('claimFailed'));
     } finally {
       setIsClaiming(false);
     }
@@ -151,7 +153,7 @@ export function MeridianStaking() {
 
   return (
     <RetroBox startOpen={true}>
-      <RetroBox.Title>Stake $Supra on the Meridian Node</RetroBox.Title>
+      <RetroBox.Title>{t('title')}</RetroBox.Title>
       <RetroBox.Content>
         <div
           className={css({
@@ -172,21 +174,21 @@ export function MeridianStaking() {
             })}
           >
             <li>
-              Stake your Supra and earn{" "}
-              <span className={css({ fontWeight: "700" })}>8% APY</span>
+              {t('benefit1')}{" "}
+              <span className={css({ fontWeight: "700" })}>{t('benefit1Apy')}</span>
             </li>
             <li>
-              Get daily $Pecky –{" "}
+              {t('benefit2')}{" "}
               <span className={css({ fontWeight: "700" })}>
-                1 $Pecky per staked Supra, every day
+                {t('benefit2Amount')}
               </span>
             </li>
             <li>
               <span className={css({ fontWeight: "700" })}>
-                50% of the node's profit is used to buy & burn $Pecky!
+                {t('benefit3')}
               </span>
             </li>
-            <li>No chicken left behind 🐔</li>
+            <li>{t('benefit4')}</li>
           </ul>
         </div>
 
@@ -214,7 +216,7 @@ export function MeridianStaking() {
                 mb: "4px",
               })}
             >
-              SUPRA Balance
+              {t('supraBalance')}
             </div>
             <div
               className={css({
@@ -244,7 +246,7 @@ export function MeridianStaking() {
                 mb: "4px",
               })}
             >
-              Staked
+              {t('staked')}
             </div>
             <div
               className={css({
@@ -305,7 +307,7 @@ export function MeridianStaking() {
                   : {},
             })}
           >
-            MAX
+            {t('maxButton')}
           </button>
         </div>
 
@@ -341,7 +343,7 @@ export function MeridianStaking() {
                   : { transform: "scale(1.03)" },
             })}
           >
-            {isStaking ? "Staking..." : "Stake on Meridian"}
+            {isStaking ? t('staking') : t('stakingButton')}
           </button>
           <div
             className={css({
@@ -377,7 +379,7 @@ export function MeridianStaking() {
                     : { transform: "scale(1.03)" },
               })}
             >
-              {isClaiming ? "Claiming..." : "Claim Meridian Reward"}
+              {isClaiming ? t('claiming') : t('claimButton')}
             </button>
             {timeUntilClaim && (
               <div
@@ -410,7 +412,7 @@ export function MeridianStaking() {
               mb: "8px",
             })}
           >
-            Airdrop Vault
+            {t('airdropVault')}
           </div>
           <div
             className={css({
@@ -436,7 +438,7 @@ export function MeridianStaking() {
               mt: "6px",
             })}
           >
-            ~48,801,667,994 $Pecky left for grab
+            {t('peckyLeft')}
           </div>
         </div>
 
@@ -449,12 +451,12 @@ export function MeridianStaking() {
           })}
         >
           <div>
-            Each staked Supra earns{" "}
-            <span className={css({ fontWeight: "700" })}>1 $Pecky</span> per day
+            {t('earningExplain1')}{" "}
+            <span className={css({ fontWeight: "700" })}>{t('earningExplain2')}</span> {t('earningExplain3')}
           </div>
-          <div>Ex: 500,000 staked → 500,000 $Pecky / 24h</div>
+          <div>{t('earningExample')}</div>
           <div className={css({ mt: "8px", fontSize: "11px" })}>
-            As long as the airdrop vault still has $Pecky left.
+            {t('vaultDisclaimer')}
           </div>
         </div>
       </RetroBox.Content>

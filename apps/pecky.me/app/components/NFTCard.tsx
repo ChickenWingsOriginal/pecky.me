@@ -2,6 +2,7 @@
 
 import { css } from "@/styled-system/css";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface NFTCardProps {
   name: string;
@@ -46,6 +47,8 @@ export function NFTCard({
   onClaimAirdrop,
   walletConnected = false,
 }: NFTCardProps) {
+  const t = useTranslations('nft');
+
   const statusColor =
     claimStatus.status === "claimable"
       ? "#29cf41"
@@ -105,7 +108,7 @@ export function NFTCard({
         </div>
       ) : (
         <div className={css({ mb: "8px", textAlign: "center", h: "120px", bg: "#f0f0f0", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: "12px" })}>
-          No image
+          {t('noImage')}
         </div>
       )}
 
@@ -158,7 +161,7 @@ export function NFTCard({
               _hover: isClaiming || claimStatus.status === "cooldown" ? {} : { transform: "scale(1.02)" },
             })}
           >
-            {isClaiming ? "Claiming..." : "Claim"}
+            {isClaiming ? t('claiming') : t('claim')}
           </button>
 
           {airdropAvailable && (
@@ -180,7 +183,7 @@ export function NFTCard({
                 _hover: isClaimingAirdrop ? {} : { transform: "scale(1.02)" },
               })}
             >
-              {isClaimingAirdrop ? "Claiming..." : "Airdrop available"}
+              {isClaimingAirdrop ? t('claiming') : t('airdropAvailable')}
             </button>
           )}
         </div>

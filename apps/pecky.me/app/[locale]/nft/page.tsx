@@ -18,6 +18,7 @@ import { saveNftsToCache } from "@/app/utils/saveNftsToCache";
 import { getTokenClaimStatus } from "@/app/utils/getTokenClaimStatus";
 import { checkAirdropStatus } from "@/app/utils/checkAirdropStatus";
 import { formatMillions } from "@/app/utils/format";
+import { useTranslations } from "next-intl";
 
 const NFT_POOL_TOTAL = 450_000_000_000;
 
@@ -74,6 +75,7 @@ const SPIN_ANIMATION_CSS = `
 `;
 
 export default function NFTPage() {
+  const t = useTranslations('nft');
   const { nftPoolRemaining, refetch: refetchGlobalData } = useGlobalData();
   const { state, dispatch, refreshBalances, refreshNfts } = useWallet();
   const { sendTransaction, connectedWallet } = useSupraConnect();
@@ -133,7 +135,7 @@ export default function NFTPage() {
         const batchResults = await Promise.all(
           batch.map(async (token: OwnedNFT) => {
             const [claimStatus, airdropStatus] = await Promise.all([
-              getTokenClaimStatus(token.name),
+              getTokenClaimStatus(token.name, t),
               checkAirdropStatus(token.name),
             ]);
             console.log({
@@ -185,7 +187,7 @@ export default function NFTPage() {
   const refreshSpecificNft = async (tokenName: string) => {
     try {
       const [claimStatus, airdropStatus] = await Promise.all([
-        getTokenClaimStatus(tokenName),
+        getTokenClaimStatus(tokenName, t),
         checkAirdropStatus(tokenName),
       ]);
 
@@ -208,7 +210,7 @@ export default function NFTPage() {
 
   const claimNftReward = async (tokenName: string) => {
     if (!state.walletAddress) {
-      toast.error("Please connect your wallet");
+      toast.error(t('connectFirst'));
       return;
     }
 
@@ -230,7 +232,7 @@ export default function NFTPage() {
       });
 
       if (result.success) {
-        toast.success("Reward claimed successfully!");
+        toast.success(t('claimSuccess'));
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         await refreshSpecificNft(tokenName);
@@ -244,12 +246,12 @@ export default function NFTPage() {
         await refetchGlobalData();
       } else {
         toast.error(
-          `Failed to claim reward: ${result.reason || result.error || "Unknown error"}`,
+          t('claimFailed', { error: result.reason || result.error || "Unknown error" })
         );
       }
     } catch (error) {
       console.error("Claim failed:", error);
-      toast.error("Failed to claim reward");
+      toast.error(t('claimFailedGeneric'));
     } finally {
       setClaimingNftName(null);
     }
@@ -258,7 +260,7 @@ export default function NFTPage() {
   const handleCheckNftStatus = async () => {
     let tokenId = nftStatusInput.trim();
     if (!/^\d{1,3}$/.test(tokenId)) {
-      toast.error("Please enter a valid 1-3 digit Token ID.");
+      toast.error(t('invalidTokenId'));
       return;
     }
 
@@ -269,19 +271,19 @@ export default function NFTPage() {
     try {
       const [airdropAvailable, claimStatus] = await Promise.all([
         checkAirdropStatus(tokenName),
-        getTokenClaimStatus(tokenName),
+        getTokenClaimStatus(tokenName, t),
       ]);
 
       const airdropText = airdropAvailable
-        ? "Yes, still claimable! ✓"
-        : "No, it's already claimed.";
+        ? t('claimableAirdrop')
+        : t('claimedAirdrop');
 
       const claimText =
         claimStatus.status === "claimable"
-          ? "Available now! ✓"
+          ? t('availableNow')
           : claimStatus.status === "cooldown"
             ? claimStatus.text
-            : "Unknown";
+            : t('statusUnknown');
 
       toast.success(
         <div className={css({ textAlign: "left" })}>
@@ -312,7 +314,7 @@ export default function NFTPage() {
                 mb: "2px",
               })}
             >
-              Next Monthly Claim:
+              {t('nextMonthlyClaim')}
             </div>
             <div className={css({ fontSize: "13px" })}>{claimText}</div>
           </div>
@@ -320,7 +322,7 @@ export default function NFTPage() {
       );
     } catch (error) {
       console.error("Failed to check NFT status:", error);
-      toast.error("Failed to check NFT status");
+      toast.error(t('statusCheckFailed'));
     } finally {
       setCheckingStatus(false);
     }
@@ -328,7 +330,7 @@ export default function NFTPage() {
 
   const claimNftAirdropReward = async (tokenName: string) => {
     if (!state.walletAddress) {
-      toast.error("Please connect your wallet first");
+      toast.error(t('connectFirst'));
       return;
     }
 
@@ -350,7 +352,7 @@ export default function NFTPage() {
       });
 
       if (result.success) {
-        toast.success("NFT airdrop claimed successfully!");
+        toast.success(t('airdropClaimSuccess'));
         await new Promise((resolve) => setTimeout(resolve, 2000));
 
         await refreshSpecificNft(tokenName);
@@ -364,12 +366,12 @@ export default function NFTPage() {
         await refetchGlobalData();
       } else {
         toast.error(
-          `Failed to claim NFT airdrop: ${result.reason || result.error || "Unknown error"}`,
+          t('airdropClaimFailed', { error: result.reason || result.error || "Unknown error" })
         );
       }
     } catch (error) {
       console.error("Airdrop claim failed:", error);
-      toast.error("Failed to claim NFT airdrop");
+      toast.error(t('airdropClaimFailedGeneric'));
     } finally {
       setClaimingAirdropNftName(null);
     }
@@ -429,7 +431,7 @@ export default function NFTPage() {
                 color: "#a06500",
               })}
             >
-              Own a ChickenWings NFT?
+              {t('heading')}
             </h2>
           </div>
           <div
@@ -445,12 +447,9 @@ export default function NFTPage() {
                 lineHeight: "1.65",
               })}
             >
-              As an NFT holder, you're a co-owner of Pecky—think of it as
-              holding shares! There are only <b>500 ChickenWings NFTs</b> in
-              existence. Every month, you'll receive $Pecky based on your NFT's
-              rarity.
+              {t('subtitle1')} <b>{t('subtitle2')}</b> {t('subtitle3')}
               <br />
-              Buy or sell on <b>Crystara</b>.
+              {t('buyOn')} <b>Crystara</b>.
             </div>
           </div>
         </RetroBox>
@@ -465,7 +464,7 @@ export default function NFTPage() {
               textAlign: "center",
             })}
           >
-            NFT Rewards Vault
+            {t('vaultHeading')}
           </div>
           <div
             className={css({
@@ -495,8 +494,8 @@ export default function NFTPage() {
             })}
           >
             {nftPoolRemaining !== null
-              ? `${poolRemainingFormatted} $Pecky remaining`
-              : "Loading..."}
+              ? t('remaining', { amount: poolRemainingFormatted })
+              : t('loading')}
           </div>
 
           <hr
@@ -525,7 +524,7 @@ export default function NFTPage() {
                 textAlign: "center",
               })}
             >
-              Your ChickenWings NFTs
+              {t('yourNfts')}
             </div>
             <button
               onClick={handleRefreshNfts}
@@ -565,7 +564,7 @@ export default function NFTPage() {
                   py: "20px",
                 })}
               >
-                Loading NFTs...
+                {t('loadingNfts')}
               </div>
             ) : ownedNfts.length > 0 ? (
               <NFTGrid
@@ -586,7 +585,7 @@ export default function NFTPage() {
                   py: "20px",
                 })}
               >
-                You don't have any Pecky NFTs yet, get one now on{" "}
+                {t('noNfts')}{" "}
                 <a
                   href={EXTERNAL_LINKS.crystara}
                   target="_blank"
@@ -611,7 +610,7 @@ export default function NFTPage() {
                 py: "20px",
               })}
             >
-              Please connect your wallet
+              {t('connectWallet')}
             </div>
           )}
 
@@ -633,7 +632,7 @@ export default function NFTPage() {
                 textAlign: "center",
               })}
             >
-              Check NFT Status
+              {t('checkStatus')}
             </div>
             <div
               className={css({
@@ -648,7 +647,7 @@ export default function NFTPage() {
                 maxLength={3}
                 inputMode="numeric"
                 pattern="\d{1,3}"
-                placeholder="NFT ID"
+                placeholder={t('nftIdPlaceholder')}
                 value={nftStatusInput}
                 onChange={(e) => setNftStatusInput(e.target.value)}
                 className={css({
@@ -690,7 +689,7 @@ export default function NFTPage() {
                       : { transform: "scale(1.02)" },
                 })}
               >
-                {checkingStatus ? "Checking..." : "Check"}
+                {checkingStatus ? t('checking') : t('check')}
               </button>
             </div>
           </div>
