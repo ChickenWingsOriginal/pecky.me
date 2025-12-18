@@ -19,6 +19,31 @@
     "bot": "Bot",
     "info": "Información"
   },
+  "wallet": {
+    "walletBalance": "Balance de billetera",
+    "peckyLabel": "$Pecky:",
+    "loading": "Cargando...",
+    "peckyWorth": "Tu balance de Pecky vale:",
+    "connectToView": "Conecta tu billetera para ver el balance",
+    "registering": "Registrando...",
+    "registered": "✓ Registrado",
+    "register": "Registrar",
+    "requiredOnce": "(requerido solo una vez)",
+    "circulatingSupply": "Suministro Circulante:",
+    "priceLabel": "1 $Pecky ="
+  },
+  "quotes": {
+    "quote1": "Mientras dormías, Pecky compró en la caída.",
+    "quote2": "¿NFT? No, es un Pavo-No-Frito.",
+    "quote3": "Mantén la calma y deja que el pollo llegue a la luna.",
+    "quote4": "¿Staking? Pecky ha estado sentado sobre huevos de oro por semanas.",
+    "quote5": "Una billetera para incubarlos a todos.",
+    "quote6": "La única alfombra que Pecky conoce es su nido.",
+    "quote7": "En Pecky confiamos (y tal vez en los memes también).",
+    "quote8": "Las alas de Pecky no son solo para volar – son para voltear NFTs.",
+    "quote9": "Esta billetera huele a victoria y Doritos.",
+    "quote10": "Contando tus pollos antes de que nazcan..."
+  },
   "home": {
     "title": "Inicio",
     "description": "Pecky - Gana tokens apostando Supra, teniendo NFTs ChickenWings y usando nuestro bot de Discord. 100% propiedad de la comunidad sin tokens de equipo.",
