@@ -9,6 +9,7 @@ const languages = [
   { code: 'es', label: 'ES', flag: '🇪🇸' },
   { code: 'zh', label: '中文', flag: '🇨🇳' },
   { code: 'ru', label: 'RU', flag: '🇷🇺' },
+  { code: 'ha', label: 'HA', flag: '🇳🇬' },
 ];
 
 export function LanguageSwitcher() {
