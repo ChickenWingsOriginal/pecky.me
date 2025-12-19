@@ -1,11 +1,9 @@
 import { css } from "@/styled-system/css";
 import Image from "next/image";
-import { RetroTabs } from "@/app/components/RetroTabs";
-import { MeridianStaking } from "@/app/components/MeridianStaking";
-import { PeckyNode } from "@/app/components/PeckyNode";
 import type { Metadata } from "next";
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
+import { getActiveNodes } from "@/app/lib/blockchain-data";
+import { StakingPageClient } from "./StakingPageClient";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('staking');
@@ -21,8 +19,25 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function StakingPage() {
-  const t = useTranslations('staking');
+interface StakingPageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export default async function StakingPage({ searchParams }: StakingPageProps) {
+  // Fetch nodes server-side for better performance and SEO
+  const allNodes = await getActiveNodes();
+
+  // Read query params
+  const params = await searchParams;
+  const nodeParam = typeof params.node === 'string' ? params.node : undefined;
+
+  // Validate node param against available nodes
+  const initialNodeId = nodeParam && allNodes.some(n => n.nodeId === nodeParam)
+    ? nodeParam
+    : null;
+  
+  const t = await getTranslations('staking');
+
   return (
     <div
       className={css({
@@ -52,17 +67,11 @@ export default function StakingPage() {
             height={96}
           />
         </div>
-        <RetroTabs
-          tabs={[
-            {
-              title: t('peckyStaking'),
-              content: <PeckyNode />,
-            },
-            {
-              title: t('meridianStaking'),
-              content: <MeridianStaking />,
-            },
-          ]}
+        <StakingPageClient
+          initialNodes={allNodes}
+          initialNodeId={initialNodeId}
+          peckyStakingLabel={t('peckyStaking')}
+          meridianStakingLabel={t('meridianStaking')}
         />
       </main>
     </div>

@@ -33,7 +33,12 @@ interface NodeWithData extends ActiveNode {
 const STAKE_MODULE =
   "0xe54b95920ef1cf9483705a32eab8526f270bc2f936dfb4112fd6ef971509d85d";
 
-export function PeckyNode() {
+interface PeckyNodeProps {
+  initialNodes?: ActiveNode[];
+  initialNodeId?: string | null;
+}
+
+export function PeckyNode({ initialNodes, initialNodeId }: PeckyNodeProps = {}) {
   const tOwned = useTranslations('staking.peckyNode.owned');
   const tStaking = useTranslations('staking.peckyNode.staking');
   const tUnstaking = useTranslations('staking.peckyNode.unstaking');
@@ -45,12 +50,12 @@ export function PeckyNode() {
     refreshNodeOperatorData,
   } = useWallet();
   const [allNodes, setAllNodes] = useState<NodeWithData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!initialNodes);
   const [isUnlinking, setIsUnlinking] = useState(false);
   const [isLinking, setIsLinking] = useState(false);
   const [isClaimingRewards, setIsClaimingRewards] = useState(false);
   const [claimingNodeId, setClaimingNodeId] = useState<string | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(initialNodeId ?? null);
   const [stakeAmount, setStakeAmount] = useState("");
   const [isStaking, setIsStaking] = useState(false);
   const [unstakeAmounts, setUnstakeAmounts] = useState<Record<string, string>>(
@@ -294,6 +299,18 @@ export function PeckyNode() {
   };
 
   useEffect(() => {
+    // If initialNodes were provided (SSR), use them immediately
+    if (initialNodes) {
+      const nodesWithData: NodeWithData[] = initialNodes.map((node) => ({
+        nodeId: node.nodeId,
+        name: node.name,
+      }));
+      setAllNodes(nodesWithData);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise, fetch nodes client-side
     (async () => {
       setIsLoading(true);
       try {
@@ -318,7 +335,7 @@ export function PeckyNode() {
         setIsLoading(false);
       }
     })();
-  }, [walletState.allNodes]); // Only depends on allNodes from WalletContext, not wallet connection
+  }, [initialNodes, walletState.allNodes]); // Only depends on allNodes from WalletContext, not wallet connection
 
   const handleUnstake = async (nodeId: string) => {
     if (!walletAddress) return;
