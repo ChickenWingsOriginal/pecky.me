@@ -7,33 +7,37 @@ const imagesDir = path.join(__dirname, '../public/images');
 // Image optimization config: filename -> max width (2x for retina)
 // Based on actual display sizes found in the codebase
 const imageConfig = {
-  // Large icons - displayed at 100px
-  'bot-icon.png': { width: 200, quality: 80 },      // 100x108px display
-  'info-icon.png': { width: 200, quality: 80 },     // 100x100px display
-  'nft-icon.png': { width: 200, quality: 80 },      // 100x100px display
+  // Large icons - displayed at 100px (already optimized)
+  // 'bot-icon.png': { width: 200, quality: 80 },      // 100x108px display
+  // 'info-icon.png': { width: 200, quality: 80 },     // 100x100px display
+  // 'nft-icon.png': { width: 200, quality: 80 },      // 100x100px display
 
-  // Medium icons - displayed at 96px
-  'node-icon.png': { width: 200, quality: 80 },     // 96x96px display
-  'staking-icon.png': { width: 200, quality: 80 },  // 96x96px display
-  'pecky-logo.png': { width: 200, quality: 80 },    // 96px max (also 32px in nav)
+  // Medium icons - displayed at 96px (already optimized)
+  // 'node-icon.png': { width: 200, quality: 80 },     // 96x96px display
+  // 'staking-icon.png': { width: 200, quality: 80 },  // 96x96px display
+  // 'pecky-logo.png': { width: 200, quality: 80 },    // 96px max (also 32px in nav)
 
-  // Small icons - displayed at 50px (QuickLinks)
-  'chickenwingsnft.png': { width: 100, quality: 80 }, // 50x50px display
-  'discord-pecky.png': { width: 100, quality: 80 },   // 50x50px display
-  'xchickenwings.png': { width: 100, quality: 80 },   // 50x50px display
+  // NEW: Pecky emoji images (need optimization)
+  'pecky_cry.png': { width: 200, quality: 80 },     // Pecky emoji - crying
+  'pecky_happy.png': { width: 200, quality: 80 },   // Pecky emoji - happy
 
-  // Navigation icon - displayed at 28px
-  'home-icon.png': { width: 80, quality: 80 },      // 28px display
+  // Small icons - displayed at 50px (QuickLinks) (already optimized)
+  // 'chickenwingsnft.png': { width: 100, quality: 80 }, // 50x50px display
+  // 'discord-pecky.png': { width: 100, quality: 80 },   // 50x50px display
+  // 'xchickenwings.png': { width: 100, quality: 80 },   // 50x50px display
 
-  // Partner logos - varying sizes
-  'crystara.png': { width: 250, quality: 80 },      // 122x36px display (largest)
-  'meridian.png': { width: 80, quality: 80 },       // 36x36px display
-  'dexlyn.png': { width: 80, quality: 80 },         // 34x36px display
-  'supra-icon.png': { width: 80, quality: 80 },     // 37x36px display
-  'ribbitwallet.png': { width: 200, quality: 80 },  // 95x36px display
+  // Navigation icon - displayed at 28px (already optimized)
+  // 'home-icon.png': { width: 80, quality: 80 },      // 28px display
 
-  // Burning section
-  'peckyburning.png': { width: 150, quality: 80 },  // 75px display
+  // Partner logos - varying sizes (already optimized)
+  // 'crystara.png': { width: 250, quality: 80 },      // 122x36px display (largest)
+  // 'meridian.png': { width: 80, quality: 80 },       // 36x36px display
+  // 'dexlyn.png': { width: 80, quality: 80 },         // 34x36px display
+  // 'supra-icon.png': { width: 80, quality: 80 },     // 37x36px display
+  // 'ribbitwallet.png': { width: 200, quality: 80 },  // 95x36px display
+
+  // Burning section (already optimized)
+  // 'peckyburning.png': { width: 150, quality: 80 },  // 75px display
 };
 
 async function optimizeImage(filename, config) {
