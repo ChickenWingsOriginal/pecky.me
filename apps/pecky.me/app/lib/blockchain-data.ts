@@ -114,3 +114,31 @@ export async function getActiveNodes(): Promise<ActiveNode[]> {
     return [];
   }
 }
+
+/**
+ * Fetch remaining NFT pool amount
+ * NFT pool is distributed monthly to NFT holders based on rarity
+ */
+export async function getNftPoolRemaining(): Promise<bigint> {
+  try {
+    const VAULT_NFT_URL = `${RPC_BASE}/rpc/v1/accounts/${PECKY_COIN_MODULE}/resources/${PECKY_COIN_MODULE}::ClaimNFT::VaultNFT`;
+
+    const response = await fetch(VAULT_NFT_URL, {
+      next: { revalidate: 300 }, // ISR: Cache for 5 minutes (pool changes monthly)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data?.result?.[0]?.vault?.value) {
+      return BigInt(data.result[0].vault.value);
+    }
+    return BigInt(0);
+  } catch (error) {
+    console.error("Failed to fetch NFT pool remaining:", error);
+    return BigInt(0);
+  }
+}
