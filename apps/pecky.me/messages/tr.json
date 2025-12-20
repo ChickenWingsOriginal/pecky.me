@@ -357,5 +357,12 @@
     },
     "partnersHeading": "Ortaklarımız:",
     "questionsText": "Sorularınız mı var? Discord'umuza katılın veya X'te bizi inceleyin!"
+
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "heading": "Oops! Pecky got lost...",
+    "message": "The page you're looking for doesn't exist. Maybe it flew the coop?",
+    "homeButton": "Back to Home"
   }
 }
