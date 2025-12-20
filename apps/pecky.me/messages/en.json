@@ -357,5 +357,11 @@
     },
     "partnersHeading": "Our partners:",
     "questionsText": "Have questions? Join our Discord or check us out on X!"
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "heading": "Oops! Pecky got lost...",
+    "message": "The page you're looking for doesn't exist. Maybe it flew the coop?",
+    "homeButton": "Back to Home"
   }
 }

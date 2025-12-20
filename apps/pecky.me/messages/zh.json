@@ -357,5 +357,12 @@
     },
     "partnersHeading": "我们的合作伙伴：",
     "questionsText": "有问题？加入我们的Discord或在X上查看我们！"
+
+  },
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "heading": "Oops! Pecky got lost...",
+    "message": "The page you're looking for doesn't exist. Maybe it flew the coop?",
+    "homeButton": "Back to Home"
   }
 }
