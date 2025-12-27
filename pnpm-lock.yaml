@@ -18,8 +18,8 @@ importers:
   apps/pecky.me:
     dependencies:
       '@gerritsen/supra-connect':
-        specifier: 0.0.8
-        version: 0.0.8(react@19.2.3)
+        specifier: 0.0.10
+        version: 0.0.10(react@19.2.3)
       next:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -376,8 +376,8 @@ packages:
   '@formatjs/intl-localematcher@0.6.2':
     resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
 
-  '@gerritsen/supra-connect@0.0.8':
-    resolution: {integrity: sha512-kg5iA9rRguiMEsMxsMYcQqNdCmOJB4HnmrR86ETYUyJEcgB7MOGvxLVVLJcQlKEpBsDHo/t+Hk69eBX4eOzqRg==}
+  '@gerritsen/supra-connect@0.0.10':
+    resolution: {integrity: sha512-wwemevcV780axnk+7CqdcJD+2N8VmcKPQN/Gaan815m3esYeRccoeid6vY7sAwJivr+QxBdVu+74oK6kjDyQVQ==}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
 
@@ -2974,7 +2974,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@gerritsen/supra-connect@0.0.8(react@19.2.3)':
+  '@gerritsen/supra-connect@0.0.10(react@19.2.3)':
     dependencies:
       '@noble/ed25519': 3.0.0
       react: 19.2.3
