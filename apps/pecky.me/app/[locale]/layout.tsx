@@ -3,10 +3,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import Navigation from "@/app/components/Navigation";
 import { Providers } from "./providers";
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { notFound } from 'next/navigation';
-import { routing } from '@/i18n/routing';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +24,8 @@ export const metadata: Metadata = {
     template: "PECKY - %s",
     default: "PECKY - ChickenWings dApp",
   },
-  description: "Earn Pecky tokens by staking Supra, holding NFTs, and using our Discord bot",
+  description:
+    "Earn Pecky tokens by staking Supra, holding NFTs, and using our Discord bot",
   icons: {
     icon: "/images/pecky-icon.png",
   },
@@ -62,6 +64,7 @@ export default async function RootLayout({
             {children}
           </Providers>
         </NextIntlClientProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
