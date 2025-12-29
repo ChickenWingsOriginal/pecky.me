@@ -3,11 +3,14 @@ import type { Metadata } from "next";
 import { css } from "@/styled-system/css";
 import Image from "next/image";
 import { RetroBox } from "@/app/components/RetroBox";
-import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('bot');
+// Bot page has client interactivity, so we use revalidate instead of force-static
+export const revalidate = 3600; // 1 hour
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: 'bot'});
 
   return {
     title: t('pageTitle'),
@@ -20,8 +23,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function BotPage() {
-  const t = useTranslations('bot');
+export default async function BotPage({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations('bot');
   return (
     <div
       className={css({

@@ -1,0 +1,23 @@
+{
+  "title": "Bilgi",
+  "description": "Sıfır takım tokeni ile Supra üzerindeki topluluk odaklı token Pecky hakkında bilgi edinin. Staking, NFT royalty'leri ve PeckyBot aracılığıyla Pecky'yi nasıl yaktığımızı keşfedin.",
+  "ogDescription": "Sıfır takım tokeni ile Supra üzerindeki topluluk odaklı token Pecky hakkında bilgi edinin.",
+  "pageHeading": "Bilgi Sayfasına Hoş Geldiniz",
+  "introText": "Pecky, ChickenWings NFT koleksiyonundan çıktı. <br />Pecky <b>sıfır takım tokeni</b> ile gerçek bir <b>topluluk tokeni</b>dir. Pecky'lerinizi sıkıca tutun, çünkü kanatlarımıza aldığımız her şeyi yakıyoruz!",
+  "totalBurned": "🔥 Toplam Yakılan Pecky",
+  "burningRitualHeading": "Yakma ritüelimiz nasıl çalışır?",
+  "staking": {
+    "title": "STAKING",
+    "description": "$SUPRA'nızı <b>Meridian node</b>'da stake edin ve her yerde olduğu gibi aynı %8 node ödüllerini alın,<br>ama aynı zamanda günlük stake edilmiş $SUPRA'nız kadar $Pecky de alırsınız! <br>Daha da iyisi: <b>node ödüllerinin %50'si</b> topluluk için $Pecky satın almak ve yakmak için kullanılır!"
+  },
+  "nfts": {
+    "title": "NFT'ler",
+    "description": "Crystara pazar yerinde satılan tüm NFT'lerin %5 royalty'si vardır.<br>Bu ücretleri tutmak yerine, <b>her kuruşu Pecky satın almak ve yakmak için kullanıyoruz!</b>"
+  },
+  "peckybot": {
+    "title": "PECKYBOT",
+    "description": "Discord'da, botumuz NFT tüccarlarına şu durumlarda anında uyarılar göndererek yardımcı olur:<br>• biri NFT'nize teklif verdiğinde<br>• bir üst koleksiyon NFT'si belirlediğiniz fiyatın altında listelendiğinde<br>Bot için gas olarak kullanılan tüm Pecky <b>hemen yakma yığınına gönderilir!</b>"
+  },
+  "partnersHeading": "Ortaklarımız:",
+  "questionsText": "Sorularınız mı var? Discord'umuza katılın veya X'te bizi inceleyin!"
+}

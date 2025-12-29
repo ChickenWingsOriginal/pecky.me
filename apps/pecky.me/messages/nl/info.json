@@ -1,0 +1,23 @@
+{
+  "title": "Info",
+  "description": "Leer over Pecky, de community-gedreven token op Supra met nul team tokens. Ontdek hoe we Pecky verbranden via staking, NFT royalties en PeckyBot.",
+  "ogDescription": "Leer over Pecky, de community-gedreven token op Supra met nul team tokens.",
+  "pageHeading": "Welkom op de Info Pagina",
+  "introText": "Pecky is uitgebroed uit de ChickenWings NFT collectie. <br />Pecky is een echte <b>community token</b> met <b>nul team tokens</b>. Houd je Peckys stevig vast, want we verbranden alles wat we in onze vleugels kunnen krijgen!",
+  "totalBurned": "🔥 Totaal Pecky Verbrand",
+  "burningRitualHeading": "Hoe werkt ons verbrandritueel?",
+  "staking": {
+    "title": "STAKING",
+    "description": "Stake je $SUPRA op de <b>Meridian node</b> en krijg dezelfde 8% node beloningen als elders,<br>maar je krijgt ook evenveel $Pecky als je dagelijks gestakete $SUPRA! <br>Nog beter: <b>50% van de node beloningen</b> wordt gebruikt om $Pecky te kopen en verbranden voor de gemeenschap!"
+  },
+  "nfts": {
+    "title": "NFTs",
+    "description": "Alle NFTs verkocht op de Crystara marktplaats hebben een 5% royalty.<br>In plaats van deze kosten te behouden, <b>gebruiken we elke cent om Pecky te kopen en verbranden!</b>"
+  },
+  "peckybot": {
+    "title": "PECKYBOT",
+    "description": "Op Discord helpt onze bot NFT handelaren door directe alerts te sturen wanneer:<br>• iemand biedt op je NFT<br>• een top collectie NFT wordt aangeboden onder je ingestelde prijs<br>Alle Pecky gebruikt als gas voor de bot <b>wordt direct naar de verbrandstapel gestuurd!</b>"
+  },
+  "partnersHeading": "Onze partners:",
+  "questionsText": "Vragen? Sluit je aan bij onze Discord of bekijk ons op X!"
+}

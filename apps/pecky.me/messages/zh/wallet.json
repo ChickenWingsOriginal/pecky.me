@@ -1,0 +1,13 @@
+{
+  "walletBalance": "钱包余额",
+  "peckyLabel": "$Pecky：",
+  "loading": "加载中...",
+  "peckyWorth": "您的Pecky余额价值：",
+  "connectToView": "连接钱包查看余额",
+  "registering": "注册中...",
+  "registered": "✓ 已注册",
+  "register": "注册",
+  "requiredOnce": "（仅需一次）",
+  "circulatingSupply": "流通供应量：",
+  "priceLabel": "1 $Pecky ="
+}

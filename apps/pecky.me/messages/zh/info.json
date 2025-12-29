@@ -1,0 +1,23 @@
+{
+  "title": "信息",
+  "description": "了解Pecky，Supra上的社区驱动代币，零团队代币。了解我们如何通过质押、NFT版税和PeckyBot销毁Pecky。",
+  "ogDescription": "了解Pecky，Supra上的社区驱动代币，零团队代币。",
+  "pageHeading": "欢迎来到信息页面",
+  "introText": "Pecky从ChickenWings NFT系列中孵化。<br />Pecky是真正的<b>社区代币</b>，<b>零团队代币</b>。紧紧抓住您的Pecky，因为我们会销毁所有我们能拿到的！",
+  "totalBurned": "🔥 总销毁Pecky",
+  "burningRitualHeading": "我们的销毁仪式如何运作？",
+  "staking": {
+    "title": "质押",
+    "description": "在<b>Meridian节点</b>上质押您的$SUPRA，并获得与其他地方相同的8%节点奖励，<br>但您还可以获得与您每日质押的$SUPRA相同数量的$Pecky！<br>更好的是：<b>节点奖励的50%</b>用于为社区购买和销毁$Pecky！"
+  },
+  "nfts": {
+    "title": "NFT",
+    "description": "在Crystara市场上出售的所有NFT都有5%的版税。<br>我们不是保留这些费用，<b>而是用每一分钱购买和销毁Pecky！</b>"
+  },
+  "peckybot": {
+    "title": "PECKYBOT",
+    "description": "在Discord上，我们的机器人通过发送即时警报帮助NFT交易者：<br>• 有人对您的NFT出价时<br>• 顶级收藏NFT以低于您设定价格上架时<br>所有用作机器人燃料的Pecky <b>都会立即送往销毁堆！</b>"
+  },
+  "partnersHeading": "我们的合作伙伴：",
+  "questionsText": "有问题？加入我们的Discord或在X上查看我们！"
+}

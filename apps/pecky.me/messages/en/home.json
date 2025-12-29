@@ -1,0 +1,45 @@
+{
+  "title": "Home",
+  "description": "Pecky - Earn tokens by staking Supra, holding ChickenWings NFTs, and using our Discord bot. 100% community-owned with zero team tokens.",
+  "dappTitle": "ChickenWings dApp",
+  "intro": {
+    "greeting": "Say hi to Pecky!",
+    "story": "Pecky was just a normal chicken… until he ate a weird Dorito behind the barn. Now he thinks he has a secret mission to \"uncrack the egg of truth\" — whatever that means. He's sure the rooster is a spy and fights scarecrows like they're evil robots.",
+    "tokenInfo": "No teamtokens, No premine, Pecky is 100% owned by the Supra community."
+  },
+  "discord": {
+    "heading": "Link your Discord to Pecky",
+    "subtitle": "Join the leaderboard, earn Discord roles & get future perks — all tied to your wallet.",
+    "linked": "✓ Discord Linked",
+    "linkedId": "Linked: {id}",
+    "unlinkButton": "Unlink Discord",
+    "unlinking": "Unlinking...",
+    "placeholder": "Discord ID (snowflake)",
+    "linkButton": "Link Discord with your wallet",
+    "linking": "Linking...",
+    "connectPrompt": "Connect wallet to link your Discord.",
+    "pleaseConnect": "Please connect your wallet first",
+    "enterDiscordId": "Please enter a Discord ID",
+    "invalidDiscordId": "Please enter a valid Discord ID (16-20 digits)",
+    "linkSuccess": "Discord linked successfully!",
+    "unlinkSuccess": "Discord unlinked successfully!",
+    "linkFailed": "Failed to link Discord: {error}",
+    "unlinkFailed": "Failed to unlink Discord: {error}"
+  },
+  "earn": {
+    "heading": "Earn Pecky Coin – Daily or Monthly!",
+    "subtitle": "Want to get free Pecky Coins?",
+    "howTo": "It's easy. Just Own an NFT or Stake SUPRA."
+  },
+  "tokenomics": {
+    "heading": "$Pecky Tokenomics",
+    "totalSupply": "Total Supply:",
+    "nftHolders": "NFT Holders",
+    "airdrop": "Airdrop",
+    "liquidityPool": "Liquidity Pool",
+    "lpBurned": "(LP tokens are burned)",
+    "stakingRewards": "Staking rewards",
+    "marketing": "Marketing & Community",
+    "team": "Team & Founders"
+  }
+}

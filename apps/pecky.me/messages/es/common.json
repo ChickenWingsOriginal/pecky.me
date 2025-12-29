@@ -1,0 +1,13 @@
+{
+  "loading": "Cargando...",
+  "error": "Error",
+  "success": "Éxito",
+  "close": "Cerrar",
+  "connect": "Conectar",
+  "disconnect": "Desconectar",
+  "claim": "Reclamar",
+  "stake": "Apostar",
+  "unstake": "Retirar",
+  "balance": "Balance",
+  "rewards": "Recompensas"
+}

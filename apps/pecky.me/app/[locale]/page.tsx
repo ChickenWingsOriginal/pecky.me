@@ -5,11 +5,14 @@ import { DiscordLinking } from "@/app/components/DiscordLinking";
 import { EarnSection } from "@/app/components/EarnSection";
 import { Tokenomics } from "@/app/components/Tokenomics";
 import type { Metadata } from "next";
-import { getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('home');
+// Enable ISR with 1 hour revalidation (allows client components)
+export const revalidate = 3600;
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: 'home'});
 
   return {
     title: t('title'),
@@ -17,8 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Home() {
-  const t = useTranslations('home');
+export default async function Home({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations('home');
 
   return (
     <div className={css({ minH: "100vh", bg: "#fff3da", display: "flex", flexDir: "column", alignItems: "center", pb: "100px" })}>

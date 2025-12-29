@@ -1,0 +1,13 @@
+{
+  "walletBalance": "Balance de billetera",
+  "peckyLabel": "$Pecky:",
+  "loading": "Cargando...",
+  "peckyWorth": "Tu balance de Pecky vale:",
+  "connectToView": "Conecta tu billetera para ver el balance",
+  "registering": "Registrando...",
+  "registered": "✓ Registrado",
+  "register": "Registrar",
+  "requiredOnce": "(requerido solo una vez)",
+  "circulatingSupply": "Suministro Circulante:",
+  "priceLabel": "1 $Pecky ="
+}
