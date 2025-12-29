@@ -1,0 +1,45 @@
+{
+  "title": "Главная",
+  "description": "Pecky - Зарабатывайте токены, стейкая Supra, держа ChickenWings NFT и используя наш Discord бот. 100% принадлежит сообществу, ноль токенов команды.",
+  "dappTitle": "ChickenWings dApp",
+  "intro": {
+    "greeting": "Скажи привет Pecky!",
+    "story": "Pecky был обычным цыпленком... пока не съел странный чипс Doritos за сараем. Теперь он думает, что у него есть секретная миссия 'расколоть яйцо истины' — что бы это ни значило. Он уверен, что петух — шпион, и сражается с пугалами, как будто они злые роботы.",
+    "tokenInfo": "Нет токенов команды, нет премайна, Pecky на 100% принадлежит сообществу Supra."
+  },
+  "discord": {
+    "heading": "Привяжите свой Discord к Pecky",
+    "subtitle": "Присоединяйтесь к таблице лидеров, зарабатывайте Discord роли и получайте будущие привилегии — всё привязано к вашему кошельку.",
+    "linked": "✓ Discord привязан",
+    "linkedId": "Привязан: {id}",
+    "unlinkButton": "Отвязать Discord",
+    "unlinking": "Отвязка...",
+    "placeholder": "Discord ID (snowflake)",
+    "linkButton": "Привязать Discord к кошельку",
+    "linking": "Привязка...",
+    "connectPrompt": "Подключите кошелек для привязки Discord.",
+    "pleaseConnect": "Пожалуйста, сначала подключите кошелек",
+    "enterDiscordId": "Пожалуйста, введите Discord ID",
+    "invalidDiscordId": "Пожалуйста, введите действительный Discord ID (16-20 цифр)",
+    "linkSuccess": "Discord успешно привязан!",
+    "unlinkSuccess": "Discord успешно отвязан!",
+    "linkFailed": "Не удалось привязать Discord: {error}",
+    "unlinkFailed": "Не удалось отвязать Discord: {error}"
+  },
+  "earn": {
+    "heading": "Зарабатывайте Pecky Coin — Ежедневно или Ежемесячно!",
+    "subtitle": "Хотите получить бесплатные Pecky Coins?",
+    "howTo": "Это просто. Просто владейте NFT или стейкайте SUPRA."
+  },
+  "tokenomics": {
+    "heading": "Токеномика $Pecky",
+    "totalSupply": "Общее предложение:",
+    "nftHolders": "Держатели NFT",
+    "airdrop": "Airdrop",
+    "liquidityPool": "Пул ликвидности",
+    "lpBurned": "(LP токены сожжены)",
+    "stakingRewards": "Награды за стейкинг",
+    "marketing": "Маркетинг и Сообщество",
+    "team": "Команда и Основатели"
+  }
+}

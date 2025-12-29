@@ -1,0 +1,45 @@
+{
+  "title": "Home",
+  "description": "Pecky - Verdien tokens door Supra te staken, ChickenWings NFTs te houden en onze Discord bot te gebruiken. 100% gemeenschapseigendom zonder team tokens.",
+  "dappTitle": "ChickenWings dApp",
+  "intro": {
+    "greeting": "Zeg hallo tegen Pecky!",
+    "story": "Pecky was gewoon een normale kip... totdat hij een vreemde Dorito achter de schuur at. Nu denkt hij dat hij een geheime missie heeft om \"het ei van de waarheid te kraken\" — wat dat ook mag betekenen. Hij is er zeker van dat de haan een spion is en vecht tegen vogelverschrikkers alsof het kwade robots zijn.",
+    "tokenInfo": "Geen team tokens, Geen premine, Pecky is 100% eigendom van de Supra gemeenschap."
+  },
+  "discord": {
+    "heading": "Koppel je Discord aan Pecky",
+    "subtitle": "Sluit je aan bij het leaderboard, verdien Discord rollen & krijg toekomstige voordelen — allemaal gekoppeld aan je wallet.",
+    "linked": "✓ Discord Gekoppeld",
+    "linkedId": "Gekoppeld: {id}",
+    "unlinkButton": "Discord Ontkoppelen",
+    "unlinking": "Ontkoppelen...",
+    "placeholder": "Discord ID (snowflake)",
+    "linkButton": "Koppel Discord aan je wallet",
+    "linking": "Koppelen...",
+    "connectPrompt": "Verbind wallet om je Discord te koppelen.",
+    "pleaseConnect": "Verbind eerst je wallet",
+    "enterDiscordId": "Voer een Discord ID in",
+    "invalidDiscordId": "Voer een geldig Discord ID in (16-20 cijfers)",
+    "linkSuccess": "Discord succesvol gekoppeld!",
+    "unlinkSuccess": "Discord succesvol ontkoppeld!",
+    "linkFailed": "Discord koppelen mislukt: {error}",
+    "unlinkFailed": "Discord ontkoppelen mislukt: {error}"
+  },
+  "earn": {
+    "heading": "Verdien Pecky Coin – Dagelijks of Maandelijks!",
+    "subtitle": "Wil je gratis Pecky Coins verdienen?",
+    "howTo": "Het is makkelijk. Bezit gewoon een NFT of Stake SUPRA."
+  },
+  "tokenomics": {
+    "heading": "$Pecky Tokenomics",
+    "totalSupply": "Totale Voorraad:",
+    "nftHolders": "NFT Houders",
+    "airdrop": "Airdrop",
+    "liquidityPool": "Liquiditeitspool",
+    "lpBurned": "(LP tokens zijn verbrand)",
+    "stakingRewards": "Staking beloningen",
+    "marketing": "Marketing & Gemeenschap",
+    "team": "Team & Oprichters"
+  }
+}

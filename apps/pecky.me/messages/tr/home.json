@@ -1,0 +1,45 @@
+{
+  "title": "Ana Sayfa",
+  "description": "Pecky - Supra stake ederek, ChickenWings NFT'leri tutarak ve Discord botumuzu kullanarak token kazanın. Sıfır takım tokeni ile %100 topluluk sahipliği.",
+  "dappTitle": "ChickenWings dApp",
+  "intro": {
+    "greeting": "Pecky'ye merhaba deyin!",
+    "story": "Pecky normal bir tavuktu... ta ki ahırın arkasında garip bir Dorito yiyene kadar. Şimdi \"gerçeğin yumurtasını kırmak\" için gizli bir görevi olduğunu düşünüyor — bunun ne anlama geldiğini kim bilir. Horozun casus olduğundan emin ve korkuluklarla sanki kötü robotlarmış gibi savaşıyor.",
+    "tokenInfo": "Takım tokeni yok, Ön madencilik yok, Pecky %100 Supra topluluğuna aittir."
+  },
+  "discord": {
+    "heading": "Discord'unuzu Pecky'ye bağlayın",
+    "subtitle": "Lider tablosuna katılın, Discord rolleri kazanın ve gelecekteki avantajları elde edin — hepsi cüzdanınıza bağlı.",
+    "linked": "✓ Discord Bağlandı",
+    "linkedId": "Bağlı: {id}",
+    "unlinkButton": "Discord Bağlantısını Kes",
+    "unlinking": "Bağlantı kesiliyor...",
+    "placeholder": "Discord ID (snowflake)",
+    "linkButton": "Discord'u cüzdanınıza bağlayın",
+    "linking": "Bağlanıyor...",
+    "connectPrompt": "Discord'unuzu bağlamak için cüzdan bağlayın.",
+    "pleaseConnect": "Lütfen önce cüzdanınızı bağlayın",
+    "enterDiscordId": "Lütfen bir Discord ID girin",
+    "invalidDiscordId": "Lütfen geçerli bir Discord ID girin (16-20 rakam)",
+    "linkSuccess": "Discord başarıyla bağlandı!",
+    "unlinkSuccess": "Discord bağlantısı başarıyla kesildi!",
+    "linkFailed": "Discord bağlama başarısız: {error}",
+    "unlinkFailed": "Discord bağlantısını kesme başarısız: {error}"
+  },
+  "earn": {
+    "heading": "Pecky Coin Kazanın – Günlük veya Aylık!",
+    "subtitle": "Ücretsiz Pecky Coin kazanmak ister misiniz?",
+    "howTo": "Çok kolay. Sadece bir NFT'ye sahip olun veya SUPRA stake edin."
+  },
+  "tokenomics": {
+    "heading": "$Pecky Tokenomics",
+    "totalSupply": "Toplam Arz:",
+    "nftHolders": "NFT Sahipleri",
+    "airdrop": "Airdrop",
+    "liquidityPool": "Likidite Havuzu",
+    "lpBurned": "(LP tokenleri yakıldı)",
+    "stakingRewards": "Staking ödülleri",
+    "marketing": "Pazarlama & Topluluk",
+    "team": "Takım & Kurucular"
+  }
+}

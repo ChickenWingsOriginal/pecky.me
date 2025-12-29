@@ -1,11 +1,14 @@
 import { css } from "@/styled-system/css";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getNftPoolRemaining } from "@/app/lib/blockchain-data";
 import { RetroBox } from "@/app/components/RetroBox";
 import { formatMillions } from "@/app/utils/format";
 import { NFTPageClient } from "./NFTPageClient";
+
+// Enable ISR with 1 hour revalidation (allows client components)
+export const revalidate = 3600;
 
 const NFT_POOL_TOTAL = 450_000_000_000;
 
@@ -47,8 +50,9 @@ const rarities = [
   },
 ];
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('nft');
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: 'nft'});
 
   return {
     title: t('title'),
@@ -61,7 +65,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function NFTPage() {
+export default async function NFTPage({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  setRequestLocale(locale);
+
   // Fetch NFT pool data server-side for better SEO and performance
   const nftPoolRemaining = await getNftPoolRemaining();
   const t = await getTranslations('nft');

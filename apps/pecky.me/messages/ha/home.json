@@ -1,0 +1,45 @@
+{
+  "title": "Gida",
+  "description": "zaka Iya Samun Pecky token ta hanyar ajiye Supra, riƙe ChickenWings NFTs, da amfani da Discord bot. Wanda pecky Mallakin al'umma ne 100% babu token na team Ko kadan.",
+  "dappTitle": "ChickenWings dApp",
+  "intro": {
+    "greeting": "Brk da zuwa   ka Fara gaisawa da pecky!",
+    "story": "Pecky kaji ne na yau da kullum… har sai da suka ci wani Dorito mai ban mamaki a bayan rumbu. Yanzu yana ganin yana da wani abin Al,ajabi na sirri dayake Saka shi \"buɗe ƙwai na gaskiya\". Yana zargin zakaran gida ɗan leƙen asiri ne, yana kuma yaƙar tsuntsayen Dake bashi tsoro, Yana musu kallon kamar wasu robots ne masu halin shaidanu.",
+    "tokenInfo": "Babu team tokens, babu premine, Pecky mallakin al'ummar Supra ne 100%."
+  },
+  "discord": {
+    "heading": "Haɗa Discord ɗinka da Pecky",
+    "subtitle": "Shiga leaderboard, samu Discord roles, da wayannan zaka Samu wasu fa'idodi dazasu Zo nan gaba, sannan  duka wayannan abubuwan dazaka Samu an hadasu da wallet ɗinka.",
+    "linked": "✓ An haɗa Discord",
+    "linkedId": "An haɗa: {id}",
+    "unlinkButton": "Cire haɗin Discord",
+    "unlinking": "Ana cirewa...",
+    "placeholder": "Discord ID (snowflake)",
+    "linkButton": "Haɗa Discord da wallet ɗinka",
+    "linking": "Ana haɗawa...",
+    "connectPrompt": "Haɗa wallet don haɗa Discord.",
+    "pleaseConnect": "Da fatan ka haɗa wallet ɗinka da farko",
+    "enterDiscordId": "Da fatan ka saka Discord ID",
+    "invalidDiscordId": "Da fatan ka saka sahihin Discord ID (lambobi guda  16 zuwa 20)",
+    "linkSuccess": "An haɗa Discord cikin nasara!",
+    "unlinkSuccess": "An cire haɗin Discord cikin nasara!",
+    "linkFailed": "An kasa haɗa Discord: {error}",
+    "unlinkFailed": "An kasa cire haɗin Discord: {error}"
+  },
+  "earn": {
+    "heading": "Samu Pecky Coin  Kullum kokuma Duk wata!",
+    "subtitle": "Kana son samun Pecky Coins kyauta?",
+    "howTo": "Abu ne mai sauƙi. Ka mallaki chickenwings NFT, kokuma ka ajiye SUPRA."
+  },
+  "tokenomics": {
+    "heading": "$Pecky Tokenomics",
+    "totalSupply": "Jimillar adadi:",
+    "nftHolders": "Masu rike da NFT",
+    "airdrop": "Airdrop",
+    "liquidityPool": "Liquidity Pool",
+    "lpBurned": "(an ƙone LP tokens)",
+    "stakingRewards": "Ladan ajiya",
+    "marketing": "Tallatawa da Al'umma",
+    "team": "Team da Masu Hannun jari"
+  }
+}

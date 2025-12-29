@@ -1,0 +1,45 @@
+{
+  "title": "首页",
+  "description": "Pecky - 通过质押Supra、持有ChickenWings NFT和使用我们的Discord机器人来赚取代币。100%社区拥有，零团队代币。",
+  "dappTitle": "ChickenWings dApp",
+  "intro": {
+    "greeting": "向Pecky打招呼！",
+    "story": "Pecky原本只是一只普通的鸡...直到它在谷仓后面吃了一个奇怪的多力多滋。现在它认为自己有一个秘密使命去'破解真理之蛋'——不管那是什么意思。它确信公鸡是间谍，并像对抗邪恶机器人一样与稻草人战斗。",
+    "tokenInfo": "没有团队代币，没有预挖，Pecky100%由Supra社区拥有。"
+  },
+  "discord": {
+    "heading": "将您的Discord链接到Pecky",
+    "subtitle": "加入排行榜，赚取Discord角色并获得未来福利——全部绑定到您的钱包。",
+    "linked": "✓ Discord已链接",
+    "linkedId": "已链接：{id}",
+    "unlinkButton": "取消链接Discord",
+    "unlinking": "取消链接中...",
+    "placeholder": "Discord ID（雪花ID）",
+    "linkButton": "将Discord链接到您的钱包",
+    "linking": "链接中...",
+    "connectPrompt": "连接钱包以链接您的Discord。",
+    "pleaseConnect": "请先连接您的钱包",
+    "enterDiscordId": "请输入Discord ID",
+    "invalidDiscordId": "请输入有效的Discord ID（16-20位数字）",
+    "linkSuccess": "Discord链接成功！",
+    "unlinkSuccess": "Discord取消链接成功！",
+    "linkFailed": "Discord链接失败：{error}",
+    "unlinkFailed": "Discord取消链接失败：{error}"
+  },
+  "earn": {
+    "heading": "赚取Pecky币——每日或每月！",
+    "subtitle": "想要获得免费的Pecky币吗？",
+    "howTo": "很简单。只需拥有NFT或质押SUPRA。"
+  },
+  "tokenomics": {
+    "heading": "$Pecky代币经济学",
+    "totalSupply": "总供应量：",
+    "nftHolders": "NFT持有者",
+    "airdrop": "空投",
+    "liquidityPool": "流动性池",
+    "lpBurned": "（LP代币已销毁）",
+    "stakingRewards": "质押奖励",
+    "marketing": "营销与社区",
+    "team": "团队与创始人"
+  }
+}

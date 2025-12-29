@@ -1,0 +1,13 @@
+{
+  "loading": "Loading...",
+  "error": "Error",
+  "success": "Success",
+  "close": "Close",
+  "connect": "Connect",
+  "disconnect": "Disconnect",
+  "claim": "Claim",
+  "stake": "Stake",
+  "unstake": "Unstake",
+  "balance": "Balance",
+  "rewards": "Rewards"
+}

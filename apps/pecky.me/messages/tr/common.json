@@ -1,0 +1,13 @@
+{
+  "loading": "Yükleniyor...",
+  "error": "Hata",
+  "success": "Başarılı",
+  "close": "Kapat",
+  "connect": "Bağlan",
+  "disconnect": "Bağlantıyı Kes",
+  "claim": "Talep Et",
+  "stake": "Stake Et",
+  "unstake": "Stake'i Kaldır",
+  "balance": "Bakiye",
+  "rewards": "Ödüller"
+}

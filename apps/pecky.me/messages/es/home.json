@@ -1,0 +1,45 @@
+{
+  "title": "Inicio",
+  "description": "Pecky - Gana tokens apostando Supra, teniendo NFTs ChickenWings y usando nuestro bot de Discord. 100% propiedad de la comunidad sin tokens de equipo.",
+  "dappTitle": "ChickenWings dApp",
+  "intro": {
+    "greeting": "¡Saluda a Pecky!",
+    "story": "Pecky era solo un pollo normal... hasta que comió un Dorito raro detrás del granero. Ahora cree que tiene una misión secreta para \"descifrar el huevo de la verdad\" — lo que sea que eso signifique. Está seguro de que el gallo es un espía y lucha contra los espantapájaros como si fueran robots malvados.",
+    "tokenInfo": "Sin tokens de equipo, sin preventa, Pecky es 100% propiedad de la comunidad Supra."
+  },
+  "discord": {
+    "heading": "Vincula tu Discord a Pecky",
+    "subtitle": "Únete a la clasificación, gana roles de Discord y obtén ventajas futuras, todo vinculado a tu billetera.",
+    "linked": "✓ Discord Vinculado",
+    "linkedId": "Vinculado: {id}",
+    "unlinkButton": "Desvincular Discord",
+    "unlinking": "Desvinculando...",
+    "placeholder": "ID de Discord (snowflake)",
+    "linkButton": "Vincular Discord con tu billetera",
+    "linking": "Vinculando...",
+    "connectPrompt": "Conecta tu billetera para vincular Discord.",
+    "pleaseConnect": "Por favor conecta tu billetera primero",
+    "enterDiscordId": "Por favor ingresa un ID de Discord",
+    "invalidDiscordId": "Por favor ingresa un ID de Discord válido (16-20 dígitos)",
+    "linkSuccess": "¡Discord vinculado exitosamente!",
+    "unlinkSuccess": "¡Discord desvinculado exitosamente!",
+    "linkFailed": "Error al vincular Discord: {error}",
+    "unlinkFailed": "Error al desvincular Discord: {error}"
+  },
+  "earn": {
+    "heading": "¡Gana Pecky Coin – Diaria o Mensualmente!",
+    "subtitle": "¿Quieres obtener Pecky Coins gratis?",
+    "howTo": "Es fácil. Solo Posee un NFT o Apuesta SUPRA."
+  },
+  "tokenomics": {
+    "heading": "Tokenomics de $Pecky",
+    "totalSupply": "Suministro Total:",
+    "nftHolders": "Poseedores de NFT",
+    "airdrop": "Airdrop",
+    "liquidityPool": "Pool de Liquidez",
+    "lpBurned": "(Los tokens LP son quemados)",
+    "stakingRewards": "Recompensas de staking",
+    "marketing": "Marketing y Comunidad",
+    "team": "Equipo y Fundadores"
+  }
+}

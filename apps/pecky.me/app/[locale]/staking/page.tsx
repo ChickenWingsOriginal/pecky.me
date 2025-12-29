@@ -1,12 +1,16 @@
 import { css } from "@/styled-system/css";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getActiveNodes } from "@/app/lib/blockchain-data";
 import { StakingPageClient } from "./StakingPageClient";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('staking');
+// Revalidate every hour (staking data can change)
+export const revalidate = 3600;
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: 'staking'});
 
   return {
     title: t('title'),
@@ -20,16 +24,19 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface StakingPageProps {
+  params: Promise<{locale: string}>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function StakingPage({ searchParams }: StakingPageProps) {
+export default async function StakingPage({ params, searchParams }: StakingPageProps) {
+  const {locale} = await params;
+  setRequestLocale(locale);
   // Fetch nodes server-side for better performance and SEO
   const allNodes = await getActiveNodes();
 
   // Read query params
-  const params = await searchParams;
-  const nodeParam = typeof params.node === 'string' ? params.node : undefined;
+  const searchParamsResolved = await searchParams;
+  const nodeParam = typeof searchParamsResolved.node === 'string' ? searchParamsResolved.node : undefined;
 
   // Validate node param against available nodes
   const initialNodeId = nodeParam && allNodes.some(n => n.nodeId === nodeParam)

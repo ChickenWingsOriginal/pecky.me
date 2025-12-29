@@ -1,0 +1,23 @@
+{
+  "title": "Info",
+  "description": "Learn about Pecky, the community-driven token on Supra with zero team tokens. Discover how we burn Pecky through staking, NFT royalties, and PeckyBot.",
+  "ogDescription": "Learn about Pecky, the community-driven token on Supra with zero team tokens.",
+  "pageHeading": "Welcome to the Info Page",
+  "introText": "Pecky was hatched from the ChickenWings NFT collection. <br />Pecky is a true <b>community token</b> with <b>zero team tokens</b>. Hold your Peckys tight, because we burn everything we can get our wings on!",
+  "totalBurned": "🔥 Total Pecky Burned",
+  "burningRitualHeading": "How does our burning ritual work?",
+  "staking": {
+    "title": "STAKING",
+    "description": "Stake your $SUPRA on the <b>Meridian node</b> and get the same 8% node rewards as anywhere else,<br>but you also get the same amount of $Pecky as your daily staked $SUPRA! <br>Even better: <b>50% of the node rewards</b> are used to buy up and burn $Pecky for the community!"
+  },
+  "nfts": {
+    "title": "NFTs",
+    "description": "All NFTs sold on the Crystara marketplace have a 5% royalty.<br>Instead of keeping these fees, <b>we use every penny to buy and burn Pecky!</b>"
+  },
+  "peckybot": {
+    "title": "PECKYBOT",
+    "description": "On Discord, our bot helps NFT traders by sending instant alerts when:<br>• someone bids on your NFT<br>• a top collection NFT is listed below your set price<br>All Pecky used as gas for the bot <b>is instantly sent to the burn pile!</b>"
+  },
+  "partnersHeading": "Our partners:",
+  "questionsText": "Have questions? Join our Discord or check us out on X!"
+}

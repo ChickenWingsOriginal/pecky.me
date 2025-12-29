@@ -1,0 +1,13 @@
+{
+  "loading": "Laden...",
+  "error": "Error",
+  "success": "Succesvol",
+  "close": "Sluiten",
+  "connect": "Verbinden",
+  "disconnect": "Verbreken",
+  "claim": "Claimen",
+  "stake": "Staken",
+  "unstake": "Unstaken",
+  "balance": "Saldo",
+  "rewards": "Beloningen"
+}

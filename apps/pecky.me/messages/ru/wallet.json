@@ -1,0 +1,13 @@
+{
+  "walletBalance": "Баланс кошелька",
+  "peckyLabel": "$Pecky:",
+  "loading": "Загрузка...",
+  "peckyWorth": "Ваш баланс Pecky стоит:",
+  "connectToView": "Подключите кошелек для просмотра баланса",
+  "registering": "Регистрация...",
+  "registered": "✓ Зарегистрирован",
+  "register": "Регистрация",
+  "requiredOnce": "(требуется только один раз)",
+  "circulatingSupply": "Циркулирующее предложение:",
+  "priceLabel": "1 $Pecky ="
+}
