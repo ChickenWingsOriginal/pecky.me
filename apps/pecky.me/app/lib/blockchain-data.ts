@@ -27,7 +27,7 @@ export async function getBurnedPecky(): Promise<bigint> {
     const response = await fetch(
       `${RPC_BASE}/rpc/v1/accounts/${BURN_ADDRESS}/resources/${encoded}`,
       {
-        next: { revalidate: 300 }, // ISR: Cache for 5 minutes (burns happen monthly)
+        next: { revalidate: 3600 }, // ISR: Cache for 1 hour (burns happen monthly on 1st)
       }
     );
 
@@ -67,7 +67,7 @@ export async function getActiveNodes(): Promise<ActiveNode[]> {
           arguments: [],
           type_arguments: [],
         }),
-        next: { revalidate: 300 }, // ISR: Cache for 5 minutes (nodes don't change frequently)
+        next: { revalidate: 3600 }, // ISR: Cache for 1 hour (nodes update once daily at midnight CET)
       }
     );
 
@@ -124,7 +124,7 @@ export async function getNftPoolRemaining(): Promise<bigint> {
     const VAULT_NFT_URL = `${RPC_BASE}/rpc/v1/accounts/${PECKY_COIN_MODULE}/resources/${PECKY_COIN_MODULE}::ClaimNFT::VaultNFT`;
 
     const response = await fetch(VAULT_NFT_URL, {
-      next: { revalidate: 300 }, // ISR: Cache for 5 minutes (pool changes monthly)
+      next: { revalidate: 3600 }, // ISR: Cache for 1 hour
     });
 
     if (!response.ok) {
