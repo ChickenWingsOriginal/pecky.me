@@ -1,0 +1,13 @@
+{
+  "loading": "加载中...",
+  "error": "错误",
+  "success": "成功",
+  "close": "关闭",
+  "connect": "连接",
+  "disconnect": "断开",
+  "claim": "领取",
+  "stake": "质押",
+  "unstake": "解除质押",
+  "balance": "余额",
+  "rewards": "奖励"
+}

@@ -1,0 +1,13 @@
+{
+  "walletBalance": "Wallet saldo",
+  "peckyLabel": "$Pecky:",
+  "loading": "Laden...",
+  "peckyWorth": "Je Pecky saldo is waard:",
+  "connectToView": "Verbind wallet om saldo te bekijken",
+  "registering": "Registreren...",
+  "registered": "✓ Geregistreerd",
+  "register": "Registreer",
+  "requiredOnce": "(slechts eenmaal vereist)",
+  "circulatingSupply": "Circulerende Voorraad:",
+  "priceLabel": "1 $Pecky ="
+}

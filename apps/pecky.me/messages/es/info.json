@@ -1,0 +1,23 @@
+{
+  "title": "Información",
+  "description": "Aprende sobre Pecky, el token impulsado por la comunidad en Supra sin tokens de equipo. Descubre cómo quemamos Pecky a través de staking, regalías de NFT y PeckyBot.",
+  "ogDescription": "Aprende sobre Pecky, el token impulsado por la comunidad en Supra sin tokens de equipo.",
+  "pageHeading": "Bienvenido a la Página de Información",
+  "introText": "Pecky nació de la colección de NFT ChickenWings. <br />Pecky es un verdadero <b>token de la comunidad</b> con <b>cero tokens de equipo</b>. ¡Mantén tus Peckys cerca, porque quemamos todo lo que podamos conseguir!",
+  "totalBurned": "🔥 Total de Pecky Quemado",
+  "burningRitualHeading": "¿Cómo funciona nuestro ritual de quema?",
+  "staking": {
+    "title": "STAKING",
+    "description": "Apuesta tu $SUPRA en el <b>nodo Meridian</b> y obtén las mismas recompensas del nodo del 8% que en cualquier otro lugar,<br>¡pero también obtienes la misma cantidad de $Pecky que tu $SUPRA apostado diariamente! <br>Aún mejor: <b>¡el 50% de las recompensas del nodo</b> se usan para comprar y quemar $Pecky para la comunidad!"
+  },
+  "nfts": {
+    "title": "NFTs",
+    "description": "Todos los NFTs vendidos en el mercado Crystara tienen una regalía del 5%.<br>En lugar de quedarnos con estas tarifas, <b>¡usamos cada centavo para comprar y quemar Pecky!</b>"
+  },
+  "peckybot": {
+    "title": "PECKYBOT",
+    "description": "En Discord, nuestro bot ayuda a los comerciantes de NFT enviando alertas instantáneas cuando:<br>• alguien hace una oferta en tu NFT<br>• un NFT de colección principal se lista por debajo de tu precio establecido<br>¡Todo el Pecky usado como gas para el bot <b>se envía instantáneamente a la pila de quema!</b>"
+  },
+  "partnersHeading": "Nuestros socios:",
+  "questionsText": "¿Tienes preguntas? ¡Únete a nuestro Discord o visítanos en X!"
+}

@@ -3,10 +3,14 @@ import Image from "next/image";
 import { BurnedPeckyDisplay } from "@/app/components/BurnedPeckyDisplay";
 import { getBurnedPecky } from "@/app/lib/blockchain-data";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('info');
+// Revalidate every hour (burned pecky data changes)
+export const revalidate = 3600;
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: 'info'});
 
   return {
     title: t('title'),
@@ -19,7 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function InfoPage() {
+export default async function InfoPage({params}: {params: Promise<{locale: string}>}) {
+  const {locale} = await params;
+  setRequestLocale(locale);
   const burnedPecky = await getBurnedPecky();
   const t = await getTranslations('info');
 

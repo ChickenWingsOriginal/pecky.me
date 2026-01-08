@@ -10,8 +10,21 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = routing.defaultLocale;
   }
 
+  // Load all namespaces from the new structure
+  // This runs server-side only, not sent to client
   return {
     locale,
-    messages: (await import(`../messages/${locale}.json`)).default
+    messages: {
+      common: (await import(`../messages/${locale}/common.json`)).default,
+      nav: (await import(`../messages/${locale}/nav.json`)).default,
+      wallet: (await import(`../messages/${locale}/wallet.json`)).default,
+      quotes: (await import(`../messages/${locale}/quotes.json`)).default,
+      home: (await import(`../messages/${locale}/home.json`)).default,
+      nft: (await import(`../messages/${locale}/nft.json`)).default,
+      staking: (await import(`../messages/${locale}/staking.json`)).default,
+      bot: (await import(`../messages/${locale}/bot.json`)).default,
+      info: (await import(`../messages/${locale}/info.json`)).default,
+      notFound: (await import(`../messages/${locale}/notFound.json`)).default,
+    }
   };
 });

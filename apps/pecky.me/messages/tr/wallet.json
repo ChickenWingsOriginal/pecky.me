@@ -1,0 +1,13 @@
+{
+  "walletBalance": "Cüzdan bakiyesi",
+  "peckyLabel": "$Pecky:",
+  "loading": "Yükleniyor...",
+  "peckyWorth": "Pecky bakiyenizin değeri:",
+  "connectToView": "Bakiyeyi görmek için cüzdan bağlayın",
+  "registering": "Kayıt yapılıyor...",
+  "registered": "✓ Kayıtlı",
+  "register": "Kayıt Ol",
+  "requiredOnce": "(sadece bir kez gerekli)",
+  "circulatingSupply": "Dolaşımdaki Arz:",
+  "priceLabel": "1 $Pecky ="
+}

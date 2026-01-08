@@ -1,0 +1,23 @@
+{
+  "title": "Bayani",
+  "description": "Ka koyi yadda  Pecky yake aiki,  Pecky token ne na al'umma a Supra ba tare da team tokens ba. Ka fahimci yadda muke ƙona Pecky ta hanyar ajiya, NFT royalties, da PeckyBot.",
+  "ogDescription": "Koyan yadda pecky ke aiki, token na al'umma 100%  a Supra ba tare da team tokens ba.",
+  "pageHeading": "Barka da zuwa shafin Bayani",
+  "introText": "Pecky ya fito ne daga tarin ChickenWings NFT. <br />Pecky token ne na gaskiya mallakin al'umma <b>100%</b> ba tare da <b>team tokens</b> ba. Riƙe Peckys ɗinka da ƙarfi, domin muna ƙona duk abin da muka samu!",
+  "totalBurned": "🔥 Jimillar Pecky da aka ƙona",
+  "burningRitualHeading": "Ta yaya tsarin ƙonawa yake aiki?",
+  "staking": {
+    "title": "AJIYA",
+    "description": "Yi ajiya da $SUPRA a <b>Meridian node</b> ka samu ladan 8% kamar ko'ina,<br>amma kuma za ka samu adadin $Pecky iri ɗaya da SUPRA ɗinka kowace rana! <br>Mafi kyau ma: <b>50% na ladan node</b> ana amfani da su don saya da ƙona $Pecky!"
+  },
+  "nfts": {
+    "title": "NFTs",
+    "description": "Dukkan NFTs da aka sayar a kasuwar Crystara suna da kudin royalty 5%.<br>Maimakon mu riƙe su, <b>muna amfani da kowane kuɗi don sayan pecky da kuma ƙona Pecky din!</b>"
+  },
+  "peckybot": {
+    "title": "PECKYBOT",
+    "description": "A Discord, bot ɗinmu yana taimaka wa masu cinikin NFT da aika sanarwa nan take idan:<br>• wani yayi tayin NFT ɗinka<br>• an saka NFT daga manyan tarin ƙasa da farashin da ka saita<br>Dukkan Pecky da aka yi amfani da su a bot <b>ana aika su kai tsaye zuwa wuta inda Ake ƙonawa!</b>"
+  },
+  "partnersHeading": "Abokan hulɗarmu:",
+  "questionsText": "Kana da tambaya? Shiga Discord ɗinmu ko ka same mu a X!"
+}
