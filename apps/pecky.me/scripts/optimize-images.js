@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const imagesDir = path.join(__dirname, '../public/images');
+const imagesDir = path.join(__dirname, '../public');
 
 // Image optimization config: filename -> max width (2x for retina)
 // Based on actual display sizes found in the codebase
@@ -17,9 +17,13 @@ const imageConfig = {
   // 'staking-icon.png': { width: 200, quality: 80 },  // 96x96px display
   // 'pecky-logo.png': { width: 200, quality: 80 },    // 96px max (also 32px in nav)
 
-  // NEW: Pecky emoji images (need optimization)
-  'pecky_cry.png': { width: 200, quality: 80 },     // Pecky emoji - crying
-  'pecky_happy.png': { width: 200, quality: 80 },   // Pecky emoji - happy
+  // Gem images (need optimization)
+  'gem_green.png': { width: 200, quality: 80 },     // Green gem
+  'gem_red.png': { width: 200, quality: 80 },       // Red gem
+
+  // Pecky emoji images (already optimized)
+  // 'pecky_cry.png': { width: 200, quality: 80 },     // Pecky emoji - crying
+  // 'pecky_happy.png': { width: 200, quality: 80 },   // Pecky emoji - happy
 
   // Small icons - displayed at 50px (QuickLinks) (already optimized)
   // 'chickenwingsnft.png': { width: 100, quality: 80 }, // 50x50px display
@@ -121,7 +125,7 @@ async function main() {
   console.log('✨ Image optimization complete!');
   console.log(`📊 Total: ${(totalOriginal / 1024 / 1024).toFixed(2)}MB → ${(totalNew / 1024 / 1024).toFixed(2)}MB (saved ${totalSavings}%)`);
   console.log('\n💡 Backups saved with .backup extension');
-  console.log('💡 To restore originals: cd public/images && for f in *.backup; do mv "$f" "${f%.backup}"; done');
+  console.log('💡 To restore originals: cd public && for f in *.backup; do mv "$f" "${f%.backup}"; done');
 }
 
 main().catch(console.error);
