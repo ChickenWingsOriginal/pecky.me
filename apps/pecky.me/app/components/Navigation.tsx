@@ -6,10 +6,11 @@ import { css } from "@/styled-system/css";
 import { flex } from "@/styled-system/patterns";
 import Image from "next/image";
 import HamburgerIcon from "./HamburgerIcon";
-import { SupraConnectButton } from "@gerritsen/supra-connect";
+import { SupraConnectButton, useSupraConnect } from "@gerritsen/supra-connect";
 import { useWallet } from "@/app/context/WalletContext";
 import { useGlobalData } from "@/app/context/GlobalDataContext";
 import { formatMicroUnits, formatMillions } from "@/app/utils/format";
+import { checkRegistrationStatus } from "@/app/utils/walletService";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useTranslations } from "next-intl";
@@ -25,8 +26,9 @@ const navItems = [
 export default function Navigation() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { state } = useWallet();
+  const { state, dispatch } = useWallet();
   const { peckyPrice, circulatingSupply } = useGlobalData();
+  const { sendTransaction } = useSupraConnect();
   const [registerLoading, setRegisterLoading] = useState(false);
   const [randomQuoteKey, setRandomQuoteKey] = useState("quote1");
   const t = useTranslations("wallet");
@@ -57,35 +59,25 @@ export default function Navigation() {
 
     setRegisterLoading(true);
     try {
-      // Get the Supra provider from the window
-      const provider = (window as any).supraProvider;
-      if (!provider) {
-        toast.error("Supra wallet not available");
-        setRegisterLoading(false);
-        return;
-      }
-
-      const payload = [
-        state.walletAddress,
-        0,
-        PECKY_COIN_MODULE,
-        "Coin",
-        "register",
-        [],
-        [],
-        {},
-      ];
-
-      const txData = await provider.createRawTransactionData(payload);
-      await provider.sendTransaction({
-        data: txData,
-        from: state.walletAddress,
-        to: PECKY_COIN_MODULE,
-        chainId: "8",
-        value: "",
+      const result = await sendTransaction({
+        payload: {
+          moduleAddress: PECKY_COIN_MODULE,
+          moduleName: "Coin",
+          functionName: "register",
+          typeArguments: [],
+          arguments: [], // register() takes no arguments
+        },
       });
 
-      toast.success("Registration complete!");
+      if (result.success) {
+        toast.success("Registration complete!");
+
+        // Refresh registration status to update the button
+        const isRegistered = await checkRegistrationStatus(state.walletAddress);
+        dispatch({ type: "SET_REGISTRATION_STATUS", payload: isRegistered });
+      } else {
+        toast.error(result.error || "Registration failed. You may already be registered.");
+      }
     } catch (error) {
       console.error("Registration failed:", error);
       toast.error("Registration failed. You may already be registered.");
